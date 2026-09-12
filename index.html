@@ -149,6 +149,7 @@
   .field input.flash{ border-color:var(--accent); background:rgba(230,126,51,0.16); transition:background 0.5s ease, border-color 0.5s ease; }
   .field.no-prefix input{padding-left:10px; text-align:right;}
   .field.suffix input{padding:11px 30px 11px 10px; text-align:right;}
+  .field.suffix.wide input{padding-right:42px;}
   .field .unit-suffix{position:absolute; right:11px; top:50%; transform:translateY(-50%); font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-dim); pointer-events:none;}
 
   .field-inline{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 0; border-top:1px solid var(--grid-line); font-size:14px;}
@@ -376,9 +377,9 @@
       <label>Quantidade no lote<span class="hint">peças impressas juntas</span></label>
       <div class="input-box"><input type="number" id="qtd" value="1" step="1" min="1"></div>
     </div>
-    <div class="field no-prefix">
+    <div class="field no-prefix suffix">
       <label>Desperdício / falha<span class="hint">sobra, purga, reimpressões</span></label>
-      <div class="input-box"><input type="number" id="desperdicio" value="5" step="1"></div>
+      <div class="input-box"><input type="number" id="desperdicio" value="5" step="1"><span class="unit-suffix">%</span></div>
     </div>
   </div>
 
@@ -391,9 +392,9 @@
         <div class="input-box"><input type="number" id="tempoMinutos" value="0" min="0" max="59" step="5"><span class="unit-suffix">min</span></div>
       </div>
     </div>
-    <div class="field no-prefix">
+    <div class="field no-prefix suffix">
       <label>Potência da impressora<span class="hint">consumo médio, não o pico</span></label>
-      <div class="input-box"><input type="number" id="potencia" value="200" step="10"></div>
+      <div class="input-box"><input type="number" id="potencia" value="200" step="10"><span class="unit-suffix">W</span></div>
     </div>
 
     <div class="picker-wrap" id="printerWrap">
@@ -418,9 +419,9 @@
       <label>Valor da impressora<span class="hint">investimento inicial</span></label>
       <div class="input-box"><span class="unit">R$</span><input type="number" id="valorImpressora" value="2500" step="50"></div>
     </div>
-    <div class="field no-prefix">
+    <div class="field no-prefix suffix">
       <label>Vida útil estimada<span class="hint">horas de uso até troca</span></label>
-      <div class="input-box"><input type="number" id="vidaUtil" value="5000" step="100"></div>
+      <div class="input-box"><input type="number" id="vidaUtil" value="5000" step="100"><span class="unit-suffix">h</span></div>
     </div>
   </div>
 
@@ -471,17 +472,21 @@
       <label for="mpNome">Nome</label>
       <input type="text" id="mpNome" placeholder="ex: Minha Ender 3 V3 SE">
     </div>
-    <div class="field">
+    <div class="field suffix">
       <label>Potência<span class="hint">consumo médio da sua impressora</span></label>
-      <div class="input-box"><input type="number" id="mpPotencia" step="10"></div>
+      <div class="input-box"><input type="number" id="mpPotencia" step="10"><span class="unit-suffix">W</span></div>
     </div>
     <div class="field">
       <label>Preço de compra<span class="hint">quanto você pagou</span></label>
       <div class="input-box"><span class="unit">R$</span><input type="number" id="mpPreco" step="50"></div>
     </div>
-    <div class="field no-prefix">
+    <div class="field no-prefix suffix">
+      <label>Vida útil estimada<span class="hint">horas de uso até troca</span></label>
+      <div class="input-box"><input type="number" id="mpVidaUtil" value="5000" step="100"><span class="unit-suffix">h</span></div>
+    </div>
+    <div class="field no-prefix suffix wide">
       <label>Intervalo de manutenção<span class="hint">a cada quantos dias revisar</span></label>
-      <div class="input-box"><input type="number" id="mpIntervalo" value="90" step="10"></div>
+      <div class="input-box"><input type="number" id="mpIntervalo" value="90" step="10"><span class="unit-suffix">dias</span></div>
     </div>
     <button type="button" class="save-btn" id="mpAddBtn">Adicionar impressora</button>
     <div id="mpLista"></div>
@@ -1172,6 +1177,7 @@
   const mpNome = document.getElementById('mpNome');
   const mpPotencia = document.getElementById('mpPotencia');
   const mpPreco = document.getElementById('mpPreco');
+  const mpVidaUtil = document.getElementById('mpVidaUtil');
   const mpIntervalo = document.getElementById('mpIntervalo');
   const mpLista = document.getElementById('mpLista');
 
@@ -1193,7 +1199,7 @@
       return `
         <div class="saved-item" data-id="${item.id}">
           <div class="nome">${escapeHtml(item.nome)} <span class="badge ${st.cls}">${st.label}</span></div>
-          <div class="info">${item.potencia || 0} W · R$ ${Number(item.precoCompra || 0).toLocaleString('pt-BR')} · última manutenção: ${ultima}</div>
+          <div class="info">${item.potencia || 0} W · R$ ${Number(item.precoCompra || 0).toLocaleString('pt-BR')} · vida útil ${item.vidaUtil || 0}h · última manutenção: ${ultima}</div>
           <div class="actions">
             <button type="button" data-use="${item.id}">Usar na calculadora</button>
             <button type="button" data-maint="${item.id}">Manutenção feita hoje</button>
@@ -1213,11 +1219,12 @@
       nome,
       potencia: parseFloat(mpPotencia.value) || 0,
       precoCompra: parseFloat(mpPreco.value) || 0,
+      vidaUtil: parseFloat(mpVidaUtil.value) || 5000,
       intervaloDias: parseFloat(mpIntervalo.value) || 90,
       ultimaManutencao: null,
     });
     lsSet(LS_MEUS, list);
-    mpNome.value = ''; mpPotencia.value = ''; mpPreco.value = ''; mpIntervalo.value = '90';
+    mpNome.value = ''; mpPotencia.value = ''; mpPreco.value = ''; mpVidaUtil.value = '5000'; mpIntervalo.value = '90';
     renderMinhasImpressoras();
   });
 
@@ -1232,6 +1239,7 @@
       if (item){
         if (item.potencia) el.potencia.value = item.potencia;
         if (item.precoCompra) el.valorImpressora.value = item.precoCompra;
+        if (item.vidaUtil) el.vidaUtil.value = item.vidaUtil;
         calc();
         saveFieldsToStorage();
         document.getElementById('printerCard').scrollIntoView({ behavior:'smooth', block:'start' });
