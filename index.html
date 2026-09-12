@@ -143,6 +143,7 @@
     text-align:right;
   }
   .field input:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(230,126,51,0.15); }
+  .field input.flash{ border-color:var(--accent); background:rgba(230,126,51,0.16); transition:background 0.5s ease, border-color 0.5s ease; }
   .field.no-prefix input{padding-left:10px; text-align:right;}
 
   .field-inline{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 0; border-top:1px solid var(--grid-line); font-size:14px;}
@@ -173,8 +174,6 @@
   .slider-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:11px;}
   .slider-head label{font-size:14px; color:var(--text);}
   .slider-value{font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--accent); font-weight:600;}
-  .slider-track-wrap{position:relative; display:flex; align-items:center;}
-  .slider-center-tick{position:absolute; left:50%; top:50%; width:2px; height:12px; background:var(--text-dim); transform:translate(-50%,-50%); pointer-events:none; opacity:0.7; border-radius:1px;}
 
   input[type=range]{
     -webkit-appearance:none; appearance:none;
@@ -303,16 +302,14 @@
     </label>
     <div id="stlStatus" class="stl-status" hidden></div>
     <div id="stlResult" class="stl-result" hidden>
-      <div class="line"><span>Dimensões</span><span id="stlDims">—</span></div>
-      <div class="line"><span>Volume sólido</span><span id="stlVolume">—</span></div>
+      <div class="line"><span>Dimensões do arquivo</span><span id="stlDimsOriginais">—</span></div>
 
       <div class="slider-row">
-        <div class="slider-head"><label>Escala do modelo</label><span class="slider-value" id="stlScaleValue">100%</span></div>
-        <div class="slider-track-wrap">
-          <input type="range" id="stlScale" min="0" max="200" value="100" step="5">
-          <div class="slider-center-tick"></div>
-        </div>
+        <div class="slider-head"><label id="stlDimLabel">Maior dimensão</label><span class="slider-value" id="stlDimValue">— mm</span></div>
+        <input type="range" id="stlDimSlider" min="1" max="300" value="100" step="1">
       </div>
+      <div class="line"><span>Dimensões finais</span><span id="stlDims">—</span></div>
+      <div class="line"><span>Volume</span><span id="stlVolume">—</span></div>
 
       <div class="field-inline">
         <label>Material</label>
@@ -330,9 +327,7 @@
 
       <div class="line"><span>Peso (100% sólido)</span><span id="stlPesoSolido">—</span></div>
       <div class="line total"><span>Peso estimado (com preenchimento)</span><span id="stlPesoInfill">—</span></div>
-      <div class="line"><span>Custo de material estimado</span><span id="stlCustoMaterial">—</span></div>
-      <p class="stl-note">Aproximação: considera uma casca equivalente a ~20% do volume fora do preenchimento e presume malha fechada (manifold). A escala altera o volume ao cubo (2x de escala = 8x de volume). Não estima tempo de impressão — isso depende do fatiador. O preço usa o R$/kg do bloco Material abaixo.</p>
-      <button type="button" class="save-btn" id="stlUsarBtn">Usar este peso na calculadora completa ↓</button>
+      <p class="stl-note">O peso acima preenche sozinho o campo "Peso da peça" no bloco Material logo abaixo (o custo de material já sai de lá, sem calcular duas vezes) — pode editar na mão se quiser ajustar. Aproximação: considera uma casca equivalente a ~20% do volume fora do preenchimento e presume malha fechada (manifold). STL não guarda unidade — se o tamanho não bater com a peça real, arraste o slider até a medida certa que você conhece.</p>
     </div>
   </div>
 
@@ -344,7 +339,7 @@
     </div>
     <div class="field">
       <label>Peso da peça<span class="hint">por unidade, sem suporte</span></label>
-      <div class="input-box"><span class="unit">g</span><input type="number" id="pesoPeca" value="50" step="1"></div>
+      <div class="input-box"><span class="unit">g</span><input type="number" id="pesoPeca" placeholder="ex: 50" step="1"></div>
     </div>
     <div class="field no-prefix">
       <label>Quantidade no lote<span class="hint">peças impressas juntas</span></label>
@@ -796,29 +791,32 @@
     }
   });
 
-  // ============ LEITOR DE STL (volume, peso e custo de material) ============
+  // ============ LEITOR DE STL (volume, peso — preenche o peso da peça ao vivo) ============
   const stlInput = document.getElementById('stlInput');
   const stlDrop = document.getElementById('stlDrop');
   const stlDropText = document.getElementById('stlDropText');
   const stlStatus = document.getElementById('stlStatus');
   const stlResult = document.getElementById('stlResult');
+  const stlDimsOriginais = document.getElementById('stlDimsOriginais');
+  const stlDimLabel = document.getElementById('stlDimLabel');
+  const stlDimSlider = document.getElementById('stlDimSlider');
+  const stlDimValue = document.getElementById('stlDimValue');
   const stlDims = document.getElementById('stlDims');
   const stlVolumeEl = document.getElementById('stlVolume');
   const stlPesoSolido = document.getElementById('stlPesoSolido');
   const stlPesoInfill = document.getElementById('stlPesoInfill');
-  const stlCustoMaterial = document.getElementById('stlCustoMaterial');
   const stlInfill = document.getElementById('stlInfill');
   const stlInfillValue = document.getElementById('stlInfillValue');
-  const stlScale = document.getElementById('stlScale');
-  const stlScaleValue = document.getElementById('stlScaleValue');
   const SHELL_FACTOR = 0.20; // fração aproximada de "casca" fora do preenchimento
+  const EIXOS = ['X', 'Y', 'Z'];
 
-  // Dados BRUTOS do arquivo (nunca mudam depois do parse) — tudo que a escala
-  // afeta é recalculado a partir daqui, nunca em cima de um valor já escalado.
+  // Dados BRUTOS do arquivo (nunca mudam depois do parse) — tudo que o
+  // redimensionamento afeta é recalculado a partir daqui.
   let stlVolumeCm3Original = 0;
-  let stlDimsOriginal = null; // [x, y, z] em mm
+  let stlDimsOriginal = null;   // [x, y, z] em mm, como veio do arquivo
+  let stlMaiorDimOriginal = 0;  // valor da maior dimensão original
+  let stlEixoMaior = 0;         // índice (0=X,1=Y,2=Z) do eixo com a maior dimensão
   let stlDensity = 1.24;
-  let stlPesoInfillAtual = 0;
 
   function isBinarySTL(buffer){
     if (buffer.byteLength < 84) return false;
@@ -866,35 +864,38 @@
     return { volume: Math.abs(volume), min, max };
   }
 
-  // Recalcula TUDO (dimensões, volume, peso, custo) a partir dos dados originais
-  // + escala atual do slider. A escala é linear por eixo, então o volume varia
-  // ao cubo: 50% de escala = 1/8 do volume; 200% de escala = 8x o volume.
+  // Sobe/desce o modelo pela MAIOR dimensão (em mm reais, até 300mm) — as outras
+  // duas dimensões acompanham na mesma proporção. Como o redimensionamento é
+  // uniforme nos 3 eixos, o volume varia ao CUBO do fator de escala.
   function updateStlDerived(){
     if (!stlVolumeCm3Original || !stlDimsOriginal) return;
 
-    const scalePct = parseFloat(stlScale.value) || 100;
-    const scaleFactor = scalePct / 100;
-    stlScaleValue.textContent = `${scalePct}%`;
+    const alvoMm = parseFloat(stlDimSlider.value) || stlMaiorDimOriginal;
+    const fator = alvoMm / stlMaiorDimOriginal;
+    stlDimValue.textContent = `${alvoMm.toFixed(0)} mm`;
 
-    const dimsEscaladas = stlDimsOriginal.map(d => d * scaleFactor);
-    stlDims.textContent = `${dimsEscaladas[0].toFixed(1)} × ${dimsEscaladas[1].toFixed(1)} × ${dimsEscaladas[2].toFixed(1)} mm`;
+    const dimsFinais = stlDimsOriginal.map(d => d * fator);
+    stlDims.textContent = `${dimsFinais[0].toFixed(1)} × ${dimsFinais[1].toFixed(1)} × ${dimsFinais[2].toFixed(1)} mm`;
 
-    const volumeEscalado = stlVolumeCm3Original * Math.pow(scaleFactor, 3);
-    stlVolumeEl.textContent = `${volumeEscalado.toFixed(2)} cm³`;
+    const volumeFinal = stlVolumeCm3Original * Math.pow(fator, 3);
+    stlVolumeEl.textContent = `${volumeFinal.toFixed(2)} cm³`;
 
     const infillPct = parseFloat(stlInfill.value) || 0;
     stlInfillValue.textContent = `${infillPct}%`;
     const infillFrac = Math.max(0, Math.min(100, infillPct)) / 100;
 
-    const pesoSolido = volumeEscalado * stlDensity;
+    const pesoSolido = volumeFinal * stlDensity;
     const pesoInfill = pesoSolido * (infillFrac + (1 - infillFrac) * SHELL_FACTOR);
-    const precoKg = num('precoKg');
-    const custoMaterial = (pesoInfill / 1000) * precoKg;
 
     stlPesoSolido.textContent = `${pesoSolido.toFixed(1)} g`;
     stlPesoInfill.textContent = `${pesoInfill.toFixed(1)} g`;
-    stlCustoMaterial.textContent = fmt(custoMaterial);
-    stlPesoInfillAtual = pesoInfill;
+
+    // Preenche direto o campo da calculadora principal — continua editável.
+    el.pesoPeca.value = pesoInfill.toFixed(1);
+    el.pesoPeca.classList.add('flash');
+    setTimeout(() => el.pesoPeca.classList.remove('flash'), 500);
+    calc();
+    saveFieldsToStorage();
   }
 
   document.querySelectorAll('#materialChips .chip').forEach(btn => {
@@ -906,7 +907,7 @@
     });
   });
   stlInfill.addEventListener('input', updateStlDerived);
-  stlScale.addEventListener('input', updateStlDerived);
+  stlDimSlider.addEventListener('input', updateStlDerived);
 
   function handleStlFile(file){
     if (!file) return;
@@ -925,8 +926,14 @@
           const stats = computeMeshStats(triangles);
           stlVolumeCm3Original = stats.volume / 1000;
           stlDimsOriginal = [stats.max[0] - stats.min[0], stats.max[1] - stats.min[1], stats.max[2] - stats.min[2]];
-          stlScale.value = 100;
+          stlEixoMaior = stlDimsOriginal.indexOf(Math.max(...stlDimsOriginal));
+          stlMaiorDimOriginal = stlDimsOriginal[stlEixoMaior];
+
+          stlDimsOriginais.textContent = `${stlDimsOriginal[0].toFixed(1)} × ${stlDimsOriginal[1].toFixed(1)} × ${stlDimsOriginal[2].toFixed(1)} mm`;
+          stlDimLabel.textContent = `Maior dimensão (eixo ${EIXOS[stlEixoMaior]})`;
+          stlDimSlider.value = Math.min(Math.max(stlMaiorDimOriginal, 1), 300).toFixed(0);
           stlInfill.value = 15;
+
           stlStatus.hidden = true;
           stlResult.hidden = false;
           updateStlDerived();
@@ -947,15 +954,6 @@
     e.preventDefault();
     stlDrop.classList.remove('drag');
     if (e.dataTransfer.files && e.dataTransfer.files[0]) handleStlFile(e.dataTransfer.files[0]);
-  });
-
-  document.getElementById('stlUsarBtn').addEventListener('click', () => {
-    if (stlPesoInfillAtual > 0){
-      el.pesoPeca.value = stlPesoInfillAtual.toFixed(1);
-      calc();
-      saveFieldsToStorage();
-      document.getElementById('materialCard').scrollIntoView({ behavior:'smooth', block:'start' });
-    }
   });
 
   // ============ MINHAS IMPRESSORAS (potência, preço, manutenção) ============
