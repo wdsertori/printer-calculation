@@ -30,6 +30,8 @@
     --accent-soft: rgba(230,126,51,0.14);
     --teal: #4FAE93;
     --teal-soft: rgba(79,174,147,0.14);
+    --axis-y: #6FA8DC;
+    --axis-y-soft: rgba(111,168,220,0.14);
     --danger: #E0685C;
   }
 
@@ -172,7 +174,12 @@
   .preview-controls{display:flex; gap:6px; margin-bottom:8px;}
   .preview-controls button{flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); border-radius:4px; padding:10px 4px; font-family:'IBM Plex Mono',monospace; font-size:12px; cursor:pointer;}
   .preview-controls button:hover{color:var(--text); border-color:var(--accent);}
-  .preview-controls button:active{background:var(--accent-soft); color:var(--accent); border-color:var(--accent);}
+  .preview-controls button.axis-x{border-color:rgba(79,174,147,0.45); color:var(--teal);}
+  .preview-controls button.axis-x:hover, .preview-controls button.axis-x:active{background:var(--teal-soft); border-color:var(--teal);}
+  .preview-controls button.axis-y{border-color:rgba(111,168,220,0.45); color:var(--axis-y);}
+  .preview-controls button.axis-y:hover, .preview-controls button.axis-y:active{background:var(--axis-y-soft); border-color:var(--axis-y);}
+  .preview-controls button.axis-z{border-color:rgba(230,126,51,0.45); color:var(--accent);}
+  .preview-controls button.axis-z:hover, .preview-controls button.axis-z:active{background:var(--accent-soft); border-color:var(--accent);}
   .preview-reset{width:100%; background:transparent; border:none; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:6px 0 14px; cursor:pointer; text-decoration:underline; text-underline-offset:2px;}
   .preview-reset:hover{color:var(--accent);}
   .stl-note{font-size:11.5px; color:var(--text-dim); line-height:1.6; margin:12px 0 16px;}
@@ -311,9 +318,9 @@
     <div id="stlResult" class="stl-result" hidden>
       <canvas id="stlPreview" class="stl-preview"></canvas>
       <div class="preview-controls">
-        <button type="button" id="stlRotateRight">Girar →</button>
-        <button type="button" id="stlRotateUp">Girar ↑</button>
-        <button type="button" id="stlRotateRoll">Girar ↻</button>
+        <button type="button" class="axis-x" id="stlRotateX">Girar X</button>
+        <button type="button" class="axis-y" id="stlRotateY">Girar Y</button>
+        <button type="button" class="axis-z" id="stlRotateZ">Girar Z</button>
       </div>
       <button type="button" class="preview-reset" id="stlResetView">↺ Voltar à posição original</button>
       <div class="line"><span>Dimensões do arquivo</span><span id="stlDimsOriginais">—</span></div>
@@ -892,9 +899,13 @@
   let stlTrianglesAtual = null;
   let stlBboxAtual = null;
   let stlRotMatrix = [[1,0,0],[0,1,0],[0,0,1]];
-  const ROT_DIREITA = [[0,-1,0],[1,0,0],[0,0,1]]; // 90° em torno do eixo vertical da tela
-  const ROT_CIMA    = [[1,0,0],[0,0,-1],[0,1,0]]; // 90° em torno do eixo horizontal da tela
-  const ROT_ROLL    = [[0,0,1],[0,1,0],[-1,0,0]]; // 90° em torno do eixo de profundidade (o que faltava)
+  // Cada clique gira 30° (12 posições por eixo, em vez das 4 de antes) —
+  // dá controle bem mais fino pra afinar o ângulo exato que você quer.
+  const ANG = Math.PI / 6; // 30°
+  const COSA = Math.cos(ANG), SINA = Math.sin(ANG);
+  const ROT_X = [[1,0,0],[0,COSA,-SINA],[0,SINA,COSA]]; // 30° em torno do eixo X da tela
+  const ROT_Y = [[COSA,0,SINA],[0,1,0],[-SINA,0,COSA]]; // 30° em torno do eixo Y da tela
+  const ROT_Z = [[COSA,-SINA,0],[SINA,COSA,0],[0,0,1]]; // 30° em torno do eixo Z da tela (vertical)
 
   function matMul(A, B){
     const R = [[0,0,0],[0,0,0],[0,0,0]];
@@ -977,6 +988,54 @@
       ctx.fillStyle = `rgb(${Math.round(R*f.shade)}, ${Math.round(G*f.shade)}, ${Math.round(B*f.shade)})`;
       ctx.fill();
     });
+
+    drawAxisGizmo(ctx, cssWidth, COS30, SIN30);
+  }
+
+  // Mini eixo no canto mostrando pra onde X (verde-água), Y (azul) e Z (laranja)
+  // apontam AGORA — gira junto com o modelo, mesma projeção isométrica. Eixo
+  // apontando "pra fora da tela" (mais perto de você) fica sólido e mais grosso;
+  // apontando "pra dentro" fica fino e apagado, pra dar noção de profundidade.
+  function drawAxisGizmo(ctx, cssWidth, COS30, SIN30){
+    const gx = cssWidth - 40, gy = 38, r = 24;
+    const axes = [
+      { v:[1,0,0], color:'#4FAE93', label:'X' },
+      { v:[0,1,0], color:'#6FA8DC', label:'Y' },
+      { v:[0,0,1], color:'#E67E33', label:'Z' },
+    ];
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(gx, gy, r + 13, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(19,52,89,0.6)';
+    ctx.fill();
+
+    const projetados = axes.map(ax => {
+      const rv = rotateVec(ax.v[0], ax.v[1], ax.v[2]);
+      const sx = (rv[0] - rv[1]) * COS30;
+      const sy = -((rv[0] + rv[1]) * SIN30 - rv[2]);
+      const len = Math.hypot(sx, sy) || 0.0001;
+      const depth = rv[0] + rv[1] + rv[2];
+      return { ...ax, nx: sx/len, ny: sy/len, depth };
+    });
+
+    projetados.forEach(ax => {
+      const front = ax.depth > 0;
+      const endX = gx + ax.nx * r, endY = gy + ax.ny * r;
+      ctx.strokeStyle = ax.color;
+      ctx.lineWidth = front ? 2.5 : 1.3;
+      ctx.globalAlpha = front ? 1 : 0.4;
+      ctx.beginPath();
+      ctx.moveTo(gx, gy);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = ax.color;
+      ctx.font = 'bold 11px "IBM Plex Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ax.label, gx + ax.nx * (r + 11), gy + ax.ny * (r + 11));
+    });
+    ctx.restore();
   }
 
   // Sobe/desce o modelo pela MAIOR dimensão (em mm reais, até 300mm) — as outras
@@ -1075,16 +1134,16 @@
     if (e.dataTransfer.files && e.dataTransfer.files[0]) handleStlFile(e.dataTransfer.files[0]);
   });
 
-  document.getElementById('stlRotateRight').addEventListener('click', () => {
-    stlRotMatrix = matMul(ROT_DIREITA, stlRotMatrix);
+  document.getElementById('stlRotateX').addEventListener('click', () => {
+    stlRotMatrix = matMul(ROT_X, stlRotMatrix);
     renderStlPreview();
   });
-  document.getElementById('stlRotateUp').addEventListener('click', () => {
-    stlRotMatrix = matMul(ROT_CIMA, stlRotMatrix);
+  document.getElementById('stlRotateY').addEventListener('click', () => {
+    stlRotMatrix = matMul(ROT_Y, stlRotMatrix);
     renderStlPreview();
   });
-  document.getElementById('stlRotateRoll').addEventListener('click', () => {
-    stlRotMatrix = matMul(ROT_ROLL, stlRotMatrix);
+  document.getElementById('stlRotateZ').addEventListener('click', () => {
+    stlRotMatrix = matMul(ROT_Z, stlRotMatrix);
     renderStlPreview();
   });
   document.getElementById('stlResetView').addEventListener('click', () => {
