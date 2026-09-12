@@ -168,6 +168,7 @@
   .stl-status{margin-top:10px; font-size:12.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace;}
   .stl-status.error{color:var(--danger);}
   .stl-result{margin-top:8px;}
+  .stl-preview{width:100%; height:200px; display:block; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; margin-bottom:14px;}
   .stl-note{font-size:11.5px; color:var(--text-dim); line-height:1.6; margin:12px 0 16px;}
 
   .slider-row{padding:13px 0; border-top:1px solid var(--grid-line);}
@@ -302,6 +303,7 @@
     </label>
     <div id="stlStatus" class="stl-status" hidden></div>
     <div id="stlResult" class="stl-result" hidden>
+      <canvas id="stlPreview" class="stl-preview"></canvas>
       <div class="line"><span>Dimensões do arquivo</span><span id="stlDimsOriginais">—</span></div>
 
       <div class="slider-row">
@@ -798,6 +800,7 @@
   const stlStatus = document.getElementById('stlStatus');
   const stlResult = document.getElementById('stlResult');
   const stlDimsOriginais = document.getElementById('stlDimsOriginais');
+  const stlPreview = document.getElementById('stlPreview');
   const stlDimLabel = document.getElementById('stlDimLabel');
   const stlDimSlider = document.getElementById('stlDimSlider');
   const stlDimValue = document.getElementById('stlDimValue');
@@ -862,6 +865,69 @@
       for (const v of [a, b, c]) for (let k = 0; k < 3; k++){ if (v[k] < min[k]) min[k] = v[k]; if (v[k] > max[k]) max[k] = v[k]; }
     }
     return { volume: Math.abs(volume), min, max };
+  }
+
+  // Desenha uma miniatura isométrica sombreada dos triângulos, só pra
+  // representação visual — não interativa, não precisa de biblioteca 3D.
+  function renderStlPreview(triangles, bbox){
+    if (!triangles || !triangles.length) return;
+    const ctx = stlPreview.getContext('2d');
+    const cssWidth = stlPreview.clientWidth || 280;
+    const cssHeight = 200;
+    const dpr = window.devicePixelRatio || 1;
+    stlPreview.width = cssWidth * dpr;
+    stlPreview.height = cssHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    const COS30 = Math.cos(Math.PI / 6);
+    const SIN30 = Math.sin(Math.PI / 6);
+    const cx = (bbox.min[0] + bbox.max[0]) / 2;
+    const cy = (bbox.min[1] + bbox.max[1]) / 2;
+    const cz = (bbox.min[2] + bbox.max[2]) / 2;
+
+    function project(p){
+      const x = p[0] - cx, y = p[1] - cy, z = p[2] - cz;
+      const sx = (x - y) * COS30;
+      const sy = -((x + y) * SIN30 - z);
+      return [sx, sy];
+    }
+
+    const lightDir = [0.45, -0.35, 0.82];
+    const faces = triangles.map(([a, b, c]) => {
+      const u = [b[0]-a[0], b[1]-a[1], b[2]-a[2]];
+      const v = [c[0]-a[0], c[1]-a[1], c[2]-a[2]];
+      let n = [u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]];
+      const len = Math.hypot(n[0], n[1], n[2]) || 1;
+      n = [n[0]/len, n[1]/len, n[2]/len];
+      let shade = n[0]*lightDir[0] + n[1]*lightDir[1] + n[2]*lightDir[2];
+      shade = Math.max(0.35, Math.min(1, Math.abs(shade)));
+      const depth = (a[0]+a[1]+a[2] + b[0]+b[1]+b[2] + c[0]+c[1]+c[2]) / 3;
+      return { pa: project(a), pb: project(b), pc: project(c), depth, shade };
+    });
+    faces.sort((f1, f2) => f1.depth - f2.depth);
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    faces.forEach(f => { [f.pa, f.pb, f.pc].forEach(p => {
+      if (p[0] < minX) minX = p[0]; if (p[0] > maxX) maxX = p[0];
+      if (p[1] < minY) minY = p[1]; if (p[1] > maxY) maxY = p[1];
+    }); });
+    const modelW = (maxX - minX) || 1, modelH = (maxY - minY) || 1;
+    const pad = 22;
+    const scale = Math.min((cssWidth - pad*2) / modelW, (cssHeight - pad*2) / modelH);
+    const offX = cssWidth / 2 - (minX + maxX) / 2 * scale;
+    const offY = cssHeight / 2 - (minY + maxY) / 2 * scale;
+
+    const R = 230, G = 126, B = 51; // laranja de acento do site
+    faces.forEach(f => {
+      ctx.beginPath();
+      ctx.moveTo(f.pa[0]*scale + offX, f.pa[1]*scale + offY);
+      ctx.lineTo(f.pb[0]*scale + offX, f.pb[1]*scale + offY);
+      ctx.lineTo(f.pc[0]*scale + offX, f.pc[1]*scale + offY);
+      ctx.closePath();
+      ctx.fillStyle = `rgb(${Math.round(R*f.shade)}, ${Math.round(G*f.shade)}, ${Math.round(B*f.shade)})`;
+      ctx.fill();
+    });
   }
 
   // Sobe/desce o modelo pela MAIOR dimensão (em mm reais, até 300mm) — as outras
@@ -936,6 +1002,7 @@
 
           stlStatus.hidden = true;
           stlResult.hidden = false;
+          renderStlPreview(triangles, stats); // só depois de visível, senão clientWidth vem 0
           updateStlDerived();
         } catch(err){
           stlStatus.className = 'stl-status error';
