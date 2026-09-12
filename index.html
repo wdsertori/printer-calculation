@@ -148,6 +148,8 @@
   .field input:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(230,126,51,0.15); }
   .field input.flash{ border-color:var(--accent); background:rgba(230,126,51,0.16); transition:background 0.5s ease, border-color 0.5s ease; }
   .field.no-prefix input{padding-left:10px; text-align:right;}
+  .field.suffix input{padding:11px 30px 11px 10px; text-align:right;}
+  .field .unit-suffix{position:absolute; right:11px; top:50%; transform:translateY(-50%); font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-dim); pointer-events:none;}
 
   .field-inline{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 0; border-top:1px solid var(--grid-line); font-size:14px;}
   .field-inline .input-box{width:92px; position:relative;}
@@ -424,17 +426,20 @@
 
   <div class="card">
     <h2><span class="n">04</span> Mão de obra &amp; margem</h2>
-    <div class="field no-prefix">
+    <div class="field no-prefix time-field">
       <label>Trabalho manual<span class="hint">setup + pós-processamento, lote</span></label>
-      <div class="input-box"><input type="number" id="tempoManual" value="0.5" step="0.1"></div>
+      <div class="time-inputs">
+        <div class="input-box"><input type="number" id="tempoManualHoras" value="0" min="0" step="1"><span class="unit-suffix">h</span></div>
+        <div class="input-box"><input type="number" id="tempoManualMinutos" value="30" min="0" max="59" step="5"><span class="unit-suffix">min</span></div>
+      </div>
     </div>
     <div class="field">
       <label>Valor da sua hora<span class="hint">zere se for uso pessoal</span></label>
       <div class="input-box"><span class="unit">R$</span><input type="number" id="valorHora" value="30" step="1"></div>
     </div>
-    <div class="field no-prefix">
+    <div class="field no-prefix suffix">
       <label>Margem de lucro<span class="hint">markup sobre o custo</span></label>
-      <div class="input-box"><input type="number" id="markup" value="40" step="5"></div>
+      <div class="input-box"><input type="number" id="markup" value="40" step="5"><span class="unit-suffix">%</span></div>
     </div>
   </div>
 
@@ -517,7 +522,7 @@
 
 <script>
   // ============ CAMPOS PRINCIPAIS ============
-  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','potencia','precoKwh','valorImpressora','vidaUtil','tempoManual','valorHora','markup'];
+  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','potencia','precoKwh','valorImpressora','vidaUtil','tempoManualHoras','tempoManualMinutos','valorHora','markup'];
   const el = {};
   ids.forEach(id => {
     el[id] = document.getElementById(id);
@@ -549,7 +554,7 @@
     const precoKwh = num('precoKwh');
     const valorImpressora = num('valorImpressora');
     const vidaUtil = Math.max(1, num('vidaUtil'));
-    const tempoManual = num('tempoManual');
+    const tempoManual = (parseFloat(el.tempoManualHoras.value) || 0) + (parseFloat(el.tempoManualMinutos.value) || 0) / 60;
     const valorHora = num('valorHora');
     const markup = num('markup');
 
