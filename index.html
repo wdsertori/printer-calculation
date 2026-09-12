@@ -154,6 +154,13 @@
   .field-inline .input-box input{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:15px; padding:10px 24px 10px 10px; text-align:right;}
   .field-inline .input-box input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(230,126,51,0.15);}
   .field-inline .unit-suffix{position:absolute; right:9px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; pointer-events:none;}
+
+  .time-field{grid-template-columns:1fr 158px;}
+  .time-inputs{display:flex; gap:6px;}
+  .time-inputs .input-box{position:relative; flex:1;}
+  .time-inputs input{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:16px; padding:11px 30px 11px 8px; text-align:right;}
+  .time-inputs input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(230,126,51,0.15);}
+  .time-inputs .unit-suffix{position:absolute; right:9px; top:50%; transform:translateY(-50%); font-size:12.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; pointer-events:none;}
   .chip-group{display:flex; gap:6px;}
   .chip{padding:9px 14px; border:1px solid var(--border); border-radius:4px; background:var(--surface-2); color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:12.5px; cursor:pointer;}
   .chip.active{border-color:var(--accent); color:var(--accent); background:var(--accent-soft);}
@@ -375,9 +382,12 @@
 
   <div class="card" id="printerCard">
     <h2><span class="n">02</span> Impressão &amp; energia</h2>
-    <div class="field no-prefix">
+    <div class="field no-prefix time-field">
       <label>Tempo de impressão<span class="hint">duração total do lote</span></label>
-      <div class="input-box"><input type="number" id="tempoImpressao" value="3" step="0.1"></div>
+      <div class="time-inputs">
+        <div class="input-box"><input type="number" id="tempoHoras" value="3" min="0" step="1"><span class="unit-suffix">h</span></div>
+        <div class="input-box"><input type="number" id="tempoMinutos" value="0" min="0" max="59" step="5"><span class="unit-suffix">min</span></div>
+      </div>
     </div>
     <div class="field no-prefix">
       <label>Potência da impressora<span class="hint">consumo médio, não o pico</span></label>
@@ -507,7 +517,7 @@
 
 <script>
   // ============ CAMPOS PRINCIPAIS ============
-  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoImpressao','potencia','precoKwh','valorImpressora','vidaUtil','tempoManual','valorHora','markup'];
+  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','potencia','precoKwh','valorImpressora','vidaUtil','tempoManual','valorHora','markup'];
   const el = {};
   ids.forEach(id => {
     el[id] = document.getElementById(id);
@@ -534,7 +544,7 @@
     const pesoPeca = num('pesoPeca');
     const qtd = Math.max(1, num('qtd'));
     const desperdicio = num('desperdicio');
-    const tempoImpressao = num('tempoImpressao');
+    const tempoImpressao = (parseFloat(el.tempoHoras.value) || 0) + (parseFloat(el.tempoMinutos.value) || 0) / 60;
     const potencia = num('potencia');
     const precoKwh = num('precoKwh');
     const valorImpressora = num('valorImpressora');
