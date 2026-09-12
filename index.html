@@ -877,24 +877,36 @@
 
   // Desenha uma miniatura isométrica sombreada dos triângulos, só pra
   // representação visual — não interativa, não precisa de biblioteca 3D.
-  // stlRotY = giros de 90° pra direita (em torno do eixo vertical Z)
-  // stlRotX = giros de 90° pra cima (em torno do eixo horizontal X)
+  //
+  // A rotação é acumulada numa matriz 3x3 e cada clique MULTIPLICA a matriz
+  // atual por um giro de 90° fixo — ou seja, sempre gira o que está sendo
+  // visto na tela naquele momento, e não os eixos originais do arquivo.
+  // Isso importa: girar em eixo fixo do arquivo pode "travar" visualmente
+  // depois do primeiro clique (o próximo giro passa a agir num eixo que já
+  // não é mais o que aparece na tela); girando em cima da visão atual,
+  // qualquer combinação de cliques continua previsível e alcança as 6 faces.
   let stlTrianglesAtual = null;
   let stlBboxAtual = null;
-  let stlRotY = 0;
-  let stlRotX = 0;
-  const COS90 = [1, 0, -1, 0];
-  const SIN90 = [0, 1, 0, -1];
+  let stlRotMatrix = [[1,0,0],[0,1,0],[0,0,1]];
+  const ROT_DIREITA = [[0,-1,0],[1,0,0],[0,0,1]]; // 90° em torno do eixo vertical da tela
+  const ROT_CIMA    = [[1,0,0],[0,0,-1],[0,1,0]]; // 90° em torno do eixo horizontal da tela
 
+  function matMul(A, B){
+    const R = [[0,0,0],[0,0,0],[0,0,0]];
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++){
+      let s = 0;
+      for (let k = 0; k < 3; k++) s += A[i][k] * B[k][j];
+      R[i][j] = s;
+    }
+    return R;
+  }
   function rotateVec(x, y, z){
-    const cy = COS90[stlRotY], sy = SIN90[stlRotY];
-    const rx = x * cy - y * sy;
-    const ry = x * sy + y * cy;
-    const rz = z;
-    const cx2 = COS90[stlRotX], sx2 = SIN90[stlRotX];
-    const fy = ry * cx2 - rz * sx2;
-    const fz = ry * sx2 + rz * cx2;
-    return [rx, fy, fz];
+    const M = stlRotMatrix;
+    return [
+      M[0][0]*x + M[0][1]*y + M[0][2]*z,
+      M[1][0]*x + M[1][1]*y + M[1][2]*z,
+      M[2][0]*x + M[2][1]*y + M[2][2]*z,
+    ];
   }
 
   function renderStlPreview(){
@@ -1024,8 +1036,7 @@
           const stats = computeMeshStats(triangles);
           stlTrianglesAtual = triangles;
           stlBboxAtual = stats;
-          stlRotY = 0;
-          stlRotX = 0;
+          stlRotMatrix = [[1,0,0],[0,1,0],[0,0,1]];
           stlVolumeCm3Original = stats.volume / 1000;
           stlDimsOriginal = [stats.max[0] - stats.min[0], stats.max[1] - stats.min[1], stats.max[2] - stats.min[2]];
           stlEixoMaior = stlDimsOriginal.indexOf(Math.max(...stlDimsOriginal));
@@ -1060,11 +1071,11 @@
   });
 
   document.getElementById('stlRotateRight').addEventListener('click', () => {
-    stlRotY = (stlRotY + 1) % 4;
+    stlRotMatrix = matMul(ROT_DIREITA, stlRotMatrix);
     renderStlPreview();
   });
   document.getElementById('stlRotateUp').addEventListener('click', () => {
-    stlRotX = (stlRotX + 1) % 4;
+    stlRotMatrix = matMul(ROT_CIMA, stlRotMatrix);
     renderStlPreview();
   });
 
