@@ -109,6 +109,28 @@
   .opt-tag{font-size:10px; color:var(--text-dim); background:var(--surface-2); border:1px solid var(--border); border-radius:2px; padding:2px 6px; font-weight:400; letter-spacing:0; text-transform:none;}
   .card-desc{font-size:13px; color:var(--text-dim); margin:-8px 0 14px; line-height:1.55;}
 
+  .subsection{margin-top:2px; border-top:1px solid var(--grid-line);}
+  .subsection summary{cursor:pointer; padding:13px 0; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-dim); letter-spacing:.02em; list-style:none; display:flex; align-items:center; gap:7px; user-select:none;}
+  .subsection summary::-webkit-details-marker{display:none;}
+  .subsection summary::before{content:'▸'; font-size:10px; display:inline-block; transition:transform .15s ease;}
+  .subsection[open] summary::before{transform:rotate(90deg);}
+  .subsection summary:hover{color:var(--accent);}
+  .subsection[open]{padding-bottom:2px;}
+
+  details.card{cursor:default;}
+  details.card > summary{
+    font-size:12px; font-family:'IBM Plex Mono', monospace; font-weight:500; color:var(--text-dim);
+    letter-spacing:0.04em; margin:0 0 16px; display:flex; align-items:center; gap:8px;
+    cursor:pointer; list-style:none; user-select:none;
+  }
+  details.card > summary::-webkit-details-marker{display:none;}
+  details.card > summary .n{color:var(--accent);}
+  details.card > summary .summary-chevron{margin-left:auto; color:var(--text-dim); font-size:10px; transition:transform .15s ease;}
+  details.card[open] > summary .summary-chevron{transform:rotate(180deg);}
+  details.card:not([open]) > summary{margin-bottom:0;}
+  details.card > summary:hover{color:var(--accent);}
+  details.card > summary:hover .summary-chevron{color:var(--accent);}
+
   .field{
     display:grid;
     grid-template-columns:1fr 112px;
@@ -366,10 +388,6 @@
   <div class="card" id="materialCard">
     <h2><span class="n">01</span> Material</h2>
     <div class="field">
-      <label>Preço do filamento<span class="hint">por quilo</span></label>
-      <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
-    </div>
-    <div class="field">
       <label>Peso da peça<span class="hint">por unidade, sem suporte</span></label>
       <div class="input-box"><span class="unit">g</span><input type="number" id="pesoPeca" placeholder="ex: 50" step="1"></div>
     </div>
@@ -377,10 +395,17 @@
       <label>Quantidade no lote<span class="hint">peças impressas juntas</span></label>
       <div class="input-box"><input type="number" id="qtd" value="1" step="1" min="1"></div>
     </div>
-    <div class="field no-prefix suffix">
-      <label>Desperdício / falha<span class="hint">sobra, purga, reimpressões</span></label>
-      <div class="input-box"><input type="number" id="desperdicio" value="5" step="1"><span class="unit-suffix">%</span></div>
-    </div>
+    <details class="subsection">
+      <summary>Configurações de material</summary>
+      <div class="field">
+        <label>Preço do filamento<span class="hint">por quilo</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
+      </div>
+      <div class="field no-prefix suffix">
+        <label>Desperdício / falha<span class="hint">sobra, purga, reimpressões</span></label>
+        <div class="input-box"><input type="number" id="desperdicio" value="5" step="1"><span class="unit-suffix">%</span></div>
+      </div>
+    </details>
   </div>
 
   <div class="card" id="printerCard">
@@ -392,29 +417,35 @@
         <div class="input-box"><input type="number" id="tempoMinutos" value="0" min="0" max="59" step="5"><span class="unit-suffix">min</span></div>
       </div>
     </div>
-    <div class="field no-prefix suffix">
-      <label>Potência da impressora<span class="hint">consumo médio, não o pico</span></label>
-      <div class="input-box"><input type="number" id="potencia" value="200" step="10"><span class="unit-suffix">W</span></div>
-    </div>
+    <details class="subsection">
+      <summary>Configurações da impressora</summary>
+      <div class="field no-prefix suffix">
+        <label>Potência da impressora<span class="hint">consumo médio, não o pico</span></label>
+        <div class="input-box"><input type="number" id="potencia" value="200" step="10"><span class="unit-suffix">W</span></div>
+      </div>
 
-    <div class="picker-wrap" id="printerWrap">
-      <div class="picker-caption">Ou selecione um modelo comum para preencher automaticamente</div>
-      <button type="button" class="picker-trigger" id="printerTrigger" aria-haspopup="listbox" aria-expanded="false">
-        <span class="picker-icon" id="printerIcon"></span>
-        <span class="picker-label" id="printerLabel">Personalizado</span>
-        <span class="picker-chevron">▾</span>
-      </button>
-      <div class="picker-panel" id="printerPanel" hidden></div>
-    </div>
+      <div class="picker-wrap" id="printerWrap">
+        <div class="picker-caption">Ou selecione um modelo comum para preencher automaticamente</div>
+        <button type="button" class="picker-trigger" id="printerTrigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="picker-icon" id="printerIcon"></span>
+          <span class="picker-label" id="printerLabel">Personalizado</span>
+          <span class="picker-chevron">▾</span>
+        </button>
+        <div class="picker-panel" id="printerPanel" hidden></div>
+      </div>
 
-    <div class="field">
-      <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
-      <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01"></div>
-    </div>
+      <div class="field">
+        <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01"></div>
+      </div>
+    </details>
   </div>
 
-  <div class="card">
-    <h2><span class="n">03</span> Depreciação da máquina</h2>
+  <details class="card">
+    <summary>
+      <span class="n">03</span> Depreciação da máquina
+      <span class="summary-chevron">▾</span>
+    </summary>
     <div class="field">
       <label>Valor da impressora<span class="hint">investimento inicial</span></label>
       <div class="input-box"><span class="unit">R$</span><input type="number" id="valorImpressora" value="2500" step="50"></div>
@@ -423,7 +454,7 @@
       <label>Vida útil estimada<span class="hint">horas de uso até troca</span></label>
       <div class="input-box"><input type="number" id="vidaUtil" value="5000" step="100"><span class="unit-suffix">h</span></div>
     </div>
-  </div>
+  </details>
 
   <div class="card">
     <h2><span class="n">04</span> Mão de obra &amp; margem</h2>
@@ -434,14 +465,17 @@
         <div class="input-box"><input type="number" id="tempoManualMinutos" value="30" min="0" max="59" step="5"><span class="unit-suffix">min</span></div>
       </div>
     </div>
-    <div class="field">
-      <label>Valor da sua hora<span class="hint">zere se for uso pessoal</span></label>
-      <div class="input-box"><span class="unit">R$</span><input type="number" id="valorHora" value="30" step="1"></div>
-    </div>
-    <div class="field no-prefix suffix">
-      <label>Margem de lucro<span class="hint">markup sobre o custo</span></label>
-      <div class="input-box"><input type="number" id="markup" value="40" step="5"><span class="unit-suffix">%</span></div>
-    </div>
+    <details class="subsection">
+      <summary>Configurações de mão de obra</summary>
+      <div class="field">
+        <label>Valor da sua hora<span class="hint">zere se for uso pessoal</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="valorHora" value="30" step="1"></div>
+      </div>
+      <div class="field no-prefix suffix">
+        <label>Margem de lucro<span class="hint">markup sobre o custo</span></label>
+        <div class="input-box"><input type="number" id="markup" value="40" step="5"><span class="unit-suffix">%</span></div>
+      </div>
+    </details>
   </div>
 
   <div class="results">
