@@ -168,7 +168,11 @@
   .stl-status{margin-top:10px; font-size:12.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace;}
   .stl-status.error{color:var(--danger);}
   .stl-result{margin-top:8px;}
-  .stl-preview{width:100%; height:200px; display:block; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; margin-bottom:14px;}
+  .stl-preview{width:100%; height:200px; display:block; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; margin-bottom:10px;}
+  .preview-controls{display:flex; gap:8px; margin-bottom:14px;}
+  .preview-controls button{flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); border-radius:4px; padding:10px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; cursor:pointer;}
+  .preview-controls button:hover{color:var(--text); border-color:var(--accent);}
+  .preview-controls button:active{background:var(--accent-soft); color:var(--accent); border-color:var(--accent);}
   .stl-note{font-size:11.5px; color:var(--text-dim); line-height:1.6; margin:12px 0 16px;}
 
   .slider-row{padding:13px 0; border-top:1px solid var(--grid-line);}
@@ -304,6 +308,10 @@
     <div id="stlStatus" class="stl-status" hidden></div>
     <div id="stlResult" class="stl-result" hidden>
       <canvas id="stlPreview" class="stl-preview"></canvas>
+      <div class="preview-controls">
+        <button type="button" id="stlRotateRight">Girar →</button>
+        <button type="button" id="stlRotateUp">Girar ↑</button>
+      </div>
       <div class="line"><span>Dimensões do arquivo</span><span id="stlDimsOriginais">—</span></div>
 
       <div class="slider-row">
@@ -869,7 +877,28 @@
 
   // Desenha uma miniatura isométrica sombreada dos triângulos, só pra
   // representação visual — não interativa, não precisa de biblioteca 3D.
-  function renderStlPreview(triangles, bbox){
+  // stlRotY = giros de 90° pra direita (em torno do eixo vertical Z)
+  // stlRotX = giros de 90° pra cima (em torno do eixo horizontal X)
+  let stlTrianglesAtual = null;
+  let stlBboxAtual = null;
+  let stlRotY = 0;
+  let stlRotX = 0;
+  const COS90 = [1, 0, -1, 0];
+  const SIN90 = [0, 1, 0, -1];
+
+  function rotateVec(x, y, z){
+    const cy = COS90[stlRotY], sy = SIN90[stlRotY];
+    const rx = x * cy - y * sy;
+    const ry = x * sy + y * cy;
+    const rz = z;
+    const cx2 = COS90[stlRotX], sx2 = SIN90[stlRotX];
+    const fy = ry * cx2 - rz * sx2;
+    const fz = ry * sx2 + rz * cx2;
+    return [rx, fy, fz];
+  }
+
+  function renderStlPreview(){
+    const triangles = stlTrianglesAtual, bbox = stlBboxAtual;
     if (!triangles || !triangles.length) return;
     const ctx = stlPreview.getContext('2d');
     const cssWidth = stlPreview.clientWidth || 280;
@@ -886,24 +915,27 @@
     const cy = (bbox.min[1] + bbox.max[1]) / 2;
     const cz = (bbox.min[2] + bbox.max[2]) / 2;
 
-    function project(p){
-      const x = p[0] - cx, y = p[1] - cy, z = p[2] - cz;
-      const sx = (x - y) * COS30;
-      const sy = -((x + y) * SIN30 - z);
+    function transform(p){
+      return rotateVec(p[0] - cx, p[1] - cy, p[2] - cz);
+    }
+    function toScreen(r){
+      const sx = (r[0] - r[1]) * COS30;
+      const sy = -((r[0] + r[1]) * SIN30 - r[2]);
       return [sx, sy];
     }
 
     const lightDir = [0.45, -0.35, 0.82];
     const faces = triangles.map(([a, b, c]) => {
-      const u = [b[0]-a[0], b[1]-a[1], b[2]-a[2]];
-      const v = [c[0]-a[0], c[1]-a[1], c[2]-a[2]];
+      const ra = transform(a), rb = transform(b), rc = transform(c);
+      const u = [rb[0]-ra[0], rb[1]-ra[1], rb[2]-ra[2]];
+      const v = [rc[0]-ra[0], rc[1]-ra[1], rc[2]-ra[2]];
       let n = [u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]];
       const len = Math.hypot(n[0], n[1], n[2]) || 1;
       n = [n[0]/len, n[1]/len, n[2]/len];
       let shade = n[0]*lightDir[0] + n[1]*lightDir[1] + n[2]*lightDir[2];
       shade = Math.max(0.35, Math.min(1, Math.abs(shade)));
-      const depth = (a[0]+a[1]+a[2] + b[0]+b[1]+b[2] + c[0]+c[1]+c[2]) / 3;
-      return { pa: project(a), pb: project(b), pc: project(c), depth, shade };
+      const depth = (ra[0]+ra[1]+ra[2] + rb[0]+rb[1]+rb[2] + rc[0]+rc[1]+rc[2]) / 3;
+      return { pa: toScreen(ra), pb: toScreen(rb), pc: toScreen(rc), depth, shade };
     });
     faces.sort((f1, f2) => f1.depth - f2.depth);
 
@@ -990,6 +1022,10 @@
           const triangles = isBinarySTL(buffer) ? parseBinarySTL(buffer) : parseAsciiSTL(new TextDecoder().decode(buffer));
           if (!triangles.length) throw new Error('nenhum triângulo encontrado');
           const stats = computeMeshStats(triangles);
+          stlTrianglesAtual = triangles;
+          stlBboxAtual = stats;
+          stlRotY = 0;
+          stlRotX = 0;
           stlVolumeCm3Original = stats.volume / 1000;
           stlDimsOriginal = [stats.max[0] - stats.min[0], stats.max[1] - stats.min[1], stats.max[2] - stats.min[2]];
           stlEixoMaior = stlDimsOriginal.indexOf(Math.max(...stlDimsOriginal));
@@ -1002,7 +1038,7 @@
 
           stlStatus.hidden = true;
           stlResult.hidden = false;
-          renderStlPreview(triangles, stats); // só depois de visível, senão clientWidth vem 0
+          renderStlPreview(); // só depois de visível, senão clientWidth vem 0
           updateStlDerived();
         } catch(err){
           stlStatus.className = 'stl-status error';
@@ -1021,6 +1057,15 @@
     e.preventDefault();
     stlDrop.classList.remove('drag');
     if (e.dataTransfer.files && e.dataTransfer.files[0]) handleStlFile(e.dataTransfer.files[0]);
+  });
+
+  document.getElementById('stlRotateRight').addEventListener('click', () => {
+    stlRotY = (stlRotY + 1) % 4;
+    renderStlPreview();
+  });
+  document.getElementById('stlRotateUp').addEventListener('click', () => {
+    stlRotX = (stlRotX + 1) % 4;
+    renderStlPreview();
   });
 
   // ============ MINHAS IMPRESSORAS (potência, preço, manutenção) ============
