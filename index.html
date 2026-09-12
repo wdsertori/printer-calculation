@@ -169,6 +169,47 @@
   .stl-result{margin-top:8px;}
   .stl-note{font-size:11.5px; color:var(--text-dim); line-height:1.6; margin:12px 0 16px;}
 
+  .slider-row{padding:13px 0; border-top:1px solid var(--grid-line);}
+  .slider-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:11px;}
+  .slider-head label{font-size:14px; color:var(--text);}
+  .slider-value{font-family:'IBM Plex Mono',monospace; font-size:13.5px; color:var(--accent); font-weight:600;}
+  .slider-track-wrap{position:relative; display:flex; align-items:center;}
+  .slider-center-tick{position:absolute; left:50%; top:50%; width:2px; height:12px; background:var(--text-dim); transform:translate(-50%,-50%); pointer-events:none; opacity:0.7; border-radius:1px;}
+
+  input[type=range]{
+    -webkit-appearance:none; appearance:none;
+    width:100%; height:4px;
+    background:var(--surface-2);
+    border-radius:2px;
+    border:1px solid var(--border);
+    outline:none;
+    margin:8px 0;
+    cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:22px; height:22px;
+    border-radius:50%;
+    background:var(--accent);
+    border:3px solid var(--bg);
+    box-shadow:0 0 0 1px var(--accent);
+    cursor:pointer;
+    margin-top:0;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:22px; height:22px;
+    border-radius:50%;
+    background:var(--accent);
+    border:3px solid var(--bg);
+    box-shadow:0 0 0 1px var(--accent);
+    cursor:pointer;
+  }
+  input[type=range]::-moz-range-track{
+    height:4px; background:var(--surface-2); border-radius:2px; border:1px solid var(--border);
+  }
+  input[type=range]:focus::-webkit-slider-thumb{ box-shadow:0 0 0 4px rgba(230,126,51,0.25); }
+  input[type=range]:focus::-moz-range-thumb{ box-shadow:0 0 0 4px rgba(230,126,51,0.25); }
+
   .picker-wrap{position:relative; margin-top:2px; padding:14px 0 16px; border-top:1px solid var(--grid-line);}
   .picker-wrap .picker-caption{font-size:12px; color:var(--text-dim); margin-bottom:9px;}
   .picker-trigger{
@@ -264,6 +305,15 @@
     <div id="stlResult" class="stl-result" hidden>
       <div class="line"><span>Dimensões</span><span id="stlDims">—</span></div>
       <div class="line"><span>Volume sólido</span><span id="stlVolume">—</span></div>
+
+      <div class="slider-row">
+        <div class="slider-head"><label>Escala do modelo</label><span class="slider-value" id="stlScaleValue">100%</span></div>
+        <div class="slider-track-wrap">
+          <input type="range" id="stlScale" min="0" max="200" value="100" step="5">
+          <div class="slider-center-tick"></div>
+        </div>
+      </div>
+
       <div class="field-inline">
         <label>Material</label>
         <div class="chip-group" id="materialChips">
@@ -272,14 +322,16 @@
           <button type="button" class="chip" data-density="1.27">PETG</button>
         </div>
       </div>
-      <div class="field-inline">
-        <label>Preenchimento</label>
-        <div class="input-box"><input type="number" id="stlInfill" value="15" step="5"><span class="unit-suffix">%</span></div>
+
+      <div class="slider-row">
+        <div class="slider-head"><label>Preenchimento (infill)</label><span class="slider-value" id="stlInfillValue">15%</span></div>
+        <input type="range" id="stlInfill" min="0" max="100" value="15" step="5">
       </div>
+
       <div class="line"><span>Peso (100% sólido)</span><span id="stlPesoSolido">—</span></div>
       <div class="line total"><span>Peso estimado (com preenchimento)</span><span id="stlPesoInfill">—</span></div>
       <div class="line"><span>Custo de material estimado</span><span id="stlCustoMaterial">—</span></div>
-      <p class="stl-note">Aproximação: considera uma casca equivalente a ~20% do volume fora do preenchimento e presume malha fechada (manifold). Não estima tempo de impressão — isso depende do fatiador. O preço usa o R$/kg do bloco Material abaixo.</p>
+      <p class="stl-note">Aproximação: considera uma casca equivalente a ~20% do volume fora do preenchimento e presume malha fechada (manifold). A escala altera o volume ao cubo (2x de escala = 8x de volume). Não estima tempo de impressão — isso depende do fatiador. O preço usa o R$/kg do bloco Material abaixo.</p>
       <button type="button" class="save-btn" id="stlUsarBtn">Usar este peso na calculadora completa ↓</button>
     </div>
   </div>
@@ -756,8 +808,15 @@
   const stlPesoInfill = document.getElementById('stlPesoInfill');
   const stlCustoMaterial = document.getElementById('stlCustoMaterial');
   const stlInfill = document.getElementById('stlInfill');
+  const stlInfillValue = document.getElementById('stlInfillValue');
+  const stlScale = document.getElementById('stlScale');
+  const stlScaleValue = document.getElementById('stlScaleValue');
   const SHELL_FACTOR = 0.20; // fração aproximada de "casca" fora do preenchimento
-  let stlVolumeCm3 = 0;
+
+  // Dados BRUTOS do arquivo (nunca mudam depois do parse) — tudo que a escala
+  // afeta é recalculado a partir daqui, nunca em cima de um valor já escalado.
+  let stlVolumeCm3Original = 0;
+  let stlDimsOriginal = null; // [x, y, z] em mm
   let stlDensity = 1.24;
   let stlPesoInfillAtual = 0;
 
@@ -807,13 +866,31 @@
     return { volume: Math.abs(volume), min, max };
   }
 
-  function updateStlWeights(){
-    if (!stlVolumeCm3) return;
-    const pesoSolido = stlVolumeCm3 * stlDensity;
-    const infillFrac = Math.max(0, Math.min(100, parseFloat(stlInfill.value) || 0)) / 100;
+  // Recalcula TUDO (dimensões, volume, peso, custo) a partir dos dados originais
+  // + escala atual do slider. A escala é linear por eixo, então o volume varia
+  // ao cubo: 50% de escala = 1/8 do volume; 200% de escala = 8x o volume.
+  function updateStlDerived(){
+    if (!stlVolumeCm3Original || !stlDimsOriginal) return;
+
+    const scalePct = parseFloat(stlScale.value) || 100;
+    const scaleFactor = scalePct / 100;
+    stlScaleValue.textContent = `${scalePct}%`;
+
+    const dimsEscaladas = stlDimsOriginal.map(d => d * scaleFactor);
+    stlDims.textContent = `${dimsEscaladas[0].toFixed(1)} × ${dimsEscaladas[1].toFixed(1)} × ${dimsEscaladas[2].toFixed(1)} mm`;
+
+    const volumeEscalado = stlVolumeCm3Original * Math.pow(scaleFactor, 3);
+    stlVolumeEl.textContent = `${volumeEscalado.toFixed(2)} cm³`;
+
+    const infillPct = parseFloat(stlInfill.value) || 0;
+    stlInfillValue.textContent = `${infillPct}%`;
+    const infillFrac = Math.max(0, Math.min(100, infillPct)) / 100;
+
+    const pesoSolido = volumeEscalado * stlDensity;
     const pesoInfill = pesoSolido * (infillFrac + (1 - infillFrac) * SHELL_FACTOR);
     const precoKg = num('precoKg');
     const custoMaterial = (pesoInfill / 1000) * precoKg;
+
     stlPesoSolido.textContent = `${pesoSolido.toFixed(1)} g`;
     stlPesoInfill.textContent = `${pesoInfill.toFixed(1)} g`;
     stlCustoMaterial.textContent = fmt(custoMaterial);
@@ -825,10 +902,11 @@
       document.querySelectorAll('#materialChips .chip').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       stlDensity = parseFloat(btn.dataset.density);
-      updateStlWeights();
+      updateStlDerived();
     });
   });
-  stlInfill.addEventListener('input', updateStlWeights);
+  stlInfill.addEventListener('input', updateStlDerived);
+  stlScale.addEventListener('input', updateStlDerived);
 
   function handleStlFile(file){
     if (!file) return;
@@ -845,15 +923,13 @@
           const triangles = isBinarySTL(buffer) ? parseBinarySTL(buffer) : parseAsciiSTL(new TextDecoder().decode(buffer));
           if (!triangles.length) throw new Error('nenhum triângulo encontrado');
           const stats = computeMeshStats(triangles);
-          stlVolumeCm3 = stats.volume / 1000;
-          const dimX = (stats.max[0] - stats.min[0]).toFixed(1);
-          const dimY = (stats.max[1] - stats.min[1]).toFixed(1);
-          const dimZ = (stats.max[2] - stats.min[2]).toFixed(1);
-          stlDims.textContent = `${dimX} × ${dimY} × ${dimZ} mm`;
-          stlVolumeEl.textContent = `${stlVolumeCm3.toFixed(2)} cm³`;
+          stlVolumeCm3Original = stats.volume / 1000;
+          stlDimsOriginal = [stats.max[0] - stats.min[0], stats.max[1] - stats.min[1], stats.max[2] - stats.min[2]];
+          stlScale.value = 100;
+          stlInfill.value = 15;
           stlStatus.hidden = true;
           stlResult.hidden = false;
-          updateStlWeights();
+          updateStlDerived();
         } catch(err){
           stlStatus.className = 'stl-status error';
           stlStatus.textContent = 'Não consegui ler este arquivo (' + err.message + ').';
