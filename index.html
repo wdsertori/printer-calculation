@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Impressão 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E2A47;
+    --surface: #143459;
+    --surface-2: #1B3F6B;
+    --grid-line: rgba(150,196,235,0.10);
+    --border: rgba(150,196,235,0.22);
+    --text: #EDF3F8;
+    --text-dim: #93AEC7;
+    --accent: #E67E33;
+    --accent-soft: rgba(230,126,51,0.14);
+    --teal: #4FAE93;
+    --teal-soft: rgba(79,174,147,0.14);
+    --danger: #E0685C;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
+      var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans', sans-serif;
+    padding:28px 16px 64px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:520px; margin:0 auto;}
+
+  header{margin-bottom:22px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--accent);
+    letter-spacing:0.04em;
+  }
+  h1{
+    font-size:23px;
+    font-weight:600;
+    margin:6px 0 4px;
+    line-height:1.25;
+  }
+  header p{
+    color:var(--text-dim);
+    font-size:14px;
+    margin:0;
+    line-height:1.5;
+  }
+
+  .card{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:3px;
+    padding:18px 18px 6px;
+    margin-bottom:16px;
+  }
+  .card::before, .card::after, .card .tick-br, .card .tick-bl{
+    content:"";
+    position:absolute;
+    width:9px; height:9px;
+    border:1px solid var(--border);
+    opacity:0.9;
+  }
+  .card::before{top:-1px; left:-1px; border-right:none; border-bottom:none;}
+  .card::after{top:-1px; right:-1px; border-left:none; border-bottom:none;}
+  .tick-bl{bottom:-1px; left:-1px; border-right:none; border-top:none;}
+  .tick-br{bottom:-1px; right:-1px; border-left:none; border-top:none;}
+
+  .card h2{
+    font-size:12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:500;
+    color:var(--text-dim);
+    letter-spacing:0.03em;
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card h2 .n{color:var(--accent);}
+  .opt-tag{font-size:10px; color:var(--text-dim); background:var(--surface-2); border:1px solid var(--border); border-radius:2px; padding:2px 6px; font-weight:400; letter-spacing:0; text-transform:none;}
+  .card-desc{font-size:12.5px; color:var(--text-dim); margin:-6px 0 12px; line-height:1.5;}
+
+  .field{
+    display:grid;
+    grid-template-columns:1fr 108px;
+    align-items:center;
+    gap:10px;
+    padding:11px 0;
+    border-top:1px solid var(--grid-line);
+  }
+  .field:first-of-type{border-top:none;}
+  .field label{font-size:13.5px; line-height:1.35; color:var(--text);}
+  .field .hint{display:block; font-size:11.5px; color:var(--text-dim); margin-top:1px;}
+
+  .field .input-box{
+    position:relative;
+    display:flex;
+    align-items:center;
+  }
+  .field .unit{
+    position:absolute;
+    left:10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--text-dim);
+    pointer-events:none;
+  }
+  .field input{
+    width:100%;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:3px;
+    color:var(--text);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13.5px;
+    padding:8px 8px 8px 30px;
+    text-align:right;
+  }
+  .field input:focus{ outline:none; border-color:var(--accent); }
+  .field.no-prefix input{padding-left:8px; text-align:right;}
+
+  .field-inline{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-top:1px solid var(--grid-line); font-size:13px;}
+  .field-inline .input-box{width:88px; position:relative;}
+  .field-inline .input-box input{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:3px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:13px; padding:7px 22px 7px 8px; text-align:right;}
+  .field-inline .input-box input:focus{outline:none; border-color:var(--accent);}
+  .field-inline .unit-suffix{position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:11.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; pointer-events:none;}
+  .chip-group{display:flex; gap:6px;}
+  .chip{padding:6px 12px; border:1px solid var(--border); border-radius:3px; background:var(--surface-2); color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:12px; cursor:pointer;}
+  .chip.active{border-color:var(--accent); color:var(--accent); background:var(--accent-soft);}
+
+  .text-field{padding:11px 0; border-top:1px solid var(--grid-line);}
+  .text-field label{display:block; font-size:13.5px; margin-bottom:6px;}
+  .text-field input[type=text]{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:3px; color:var(--text); font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; padding:9px 10px;}
+  .text-field input[type=text]:focus{outline:none; border-color:var(--accent);}
+
+  .save-btn{width:100%; margin:12px 0 16px; padding:10px; background:var(--accent-soft); border:1px solid rgba(230,126,51,0.4); color:var(--accent); font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.02em; border-radius:3px; cursor:pointer;}
+  .save-btn:hover{background:rgba(230,126,51,0.22);}
+
+  .file-drop{display:flex; align-items:center; justify-content:center; text-align:center; padding:22px 14px; border:1.5px dashed var(--border); border-radius:3px; background:var(--surface-2); color:var(--text-dim); font-size:13px; cursor:pointer;}
+  .file-drop:hover, .file-drop.drag{border-color:var(--accent); color:var(--text);}
+  .stl-status{margin-top:10px; font-size:12px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace;}
+  .stl-status.error{color:var(--danger);}
+  .stl-result{margin-top:8px;}
+  .stl-note{font-size:11px; color:var(--text-dim); line-height:1.55; margin:10px 0 14px;}
+
+  .picker-wrap{position:relative; margin-top:2px; padding:11px 0 13px; border-top:1px solid var(--grid-line);}
+  .picker-wrap .picker-caption{font-size:11.5px; color:var(--text-dim); margin-bottom:8px;}
+  .picker-trigger{
+    width:100%; display:flex; align-items:center; gap:10px;
+    background:var(--surface-2); border:1px solid var(--border); border-radius:3px;
+    padding:8px 11px; color:var(--text); font-family:'IBM Plex Sans', sans-serif; font-size:13px; cursor:pointer;
+  }
+  .picker-trigger:focus, .picker-trigger:hover{outline:none; border-color:var(--accent);}
+  .picker-trigger .picker-icon{width:24px; height:24px; color:var(--accent); flex-shrink:0; overflow:hidden; border-radius:3px;}
+  .picker-icon svg{width:100%; height:100%; display:block;}
+  .picker-icon img{width:100%; height:100%; object-fit:cover; display:block; border-radius:3px;}
+  .picker-trigger .picker-label{flex:1; text-align:left; color:var(--text);}
+  .picker-trigger .picker-chevron{color:var(--text-dim); font-size:10px; transition:transform .15s ease;}
+  .picker-trigger[aria-expanded="true"] .picker-chevron{transform:rotate(180deg);}
+
+  .picker-panel{
+    position:absolute; left:0; right:0; top:calc(100% + 6px);
+    background:var(--surface-2); border:1px solid var(--border); border-radius:3px;
+    z-index:30; max-height:320px; overflow-y:auto;
+    box-shadow:0 14px 30px rgba(4,14,28,0.45);
+  }
+  .printer-opt{display:flex; align-items:stretch; border-bottom:1px solid var(--grid-line);}
+  .printer-opt:last-child{border-bottom:none;}
+  .printer-opt.selected{background:rgba(230,126,51,0.08);}
+  .printer-opt-main{flex:1; min-width:0; display:flex; align-items:center; gap:10px; padding:9px 6px 9px 11px; background:transparent; border:none; color:var(--text); text-align:left; cursor:pointer; font-family:'IBM Plex Sans', sans-serif;}
+  .printer-opt-main:hover, .printer-opt-main:focus{background:rgba(230,126,51,0.10); outline:none;}
+  .printer-opt .picker-icon{width:28px; height:28px; color:var(--text-dim); flex-shrink:0; overflow:hidden; border-radius:3px;}
+  .printer-opt.selected .picker-icon{color:var(--accent);}
+  .printer-opt .meta{flex:1; min-width:0;}
+  .printer-opt .name{font-size:12.5px; line-height:1.3;}
+  .printer-opt .spec{font-size:10.5px; color:var(--text-dim); font-family:'IBM Plex Mono', monospace; margin-top:1px;}
+  .printer-opt .watts{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--accent); flex-shrink:0; white-space:nowrap; margin-left:6px;}
+  .fav-btn{width:36px; flex-shrink:0; border:none; background:transparent; color:var(--text-dim); font-size:16px; cursor:pointer;}
+  .fav-btn.active{color:var(--accent);}
+  .fav-btn:hover{color:var(--accent);}
+
+  .results{ background:var(--surface); border:1px solid var(--border); border-radius:3px; padding:18px; margin-top:22px; position:relative; }
+  .results h2{ font-size:12px; font-family:'IBM Plex Mono', monospace; color:var(--text-dim); letter-spacing:0.03em; margin:0 0 14px; }
+  .line{ display:flex; justify-content:space-between; align-items:baseline; font-family:'IBM Plex Mono', monospace; font-size:13px; padding:7px 0; color:var(--text-dim); border-bottom:1px dashed var(--grid-line); }
+  .line span:last-child{color:var(--text);}
+  .line.total{ border-bottom:none; border-top:1px solid var(--border); margin-top:6px; padding-top:12px; font-size:14px; color:var(--text); }
+  .line.total span:last-child{font-weight:600;}
+
+  .headline{ margin-top:16px; padding:16px; border-radius:3px; background:var(--accent-soft); border:1px solid rgba(230,126,51,0.35); }
+  .headline .label{ font-size:12px; font-family:'IBM Plex Mono', monospace; color:var(--accent); letter-spacing:0.02em; }
+  .headline .value{ font-size:26px; font-weight:600; font-family:'IBM Plex Mono', monospace; margin-top:4px; }
+  .headline .sub{font-size:12px; color:var(--text-dim); margin-top:4px;}
+
+  .profit{ margin-top:10px; padding:12px 16px; border-radius:3px; background:var(--teal-soft); border:1px solid rgba(79,174,147,0.35); display:flex; justify-content:space-between; align-items:center; font-family:'IBM Plex Mono', monospace; font-size:13.5px; }
+  .profit .value{color:var(--teal); font-weight:600;}
+
+  .orcamento-item{display:flex; align-items:center; gap:10px; padding:10px 0; border-top:1px dashed var(--grid-line);}
+  .orcamento-item .meta{flex:1; min-width:0;}
+  .orcamento-item .nome{font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .orcamento-item .info{font-size:10.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin-top:2px;}
+  .orcamento-item .actions{display:flex; gap:6px; flex-shrink:0;}
+  .orcamento-item button{background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); border-radius:3px; padding:6px 9px; font-size:11px; font-family:'IBM Plex Mono',monospace; cursor:pointer;}
+  .orcamento-item button:hover{color:var(--text); border-color:var(--accent);}
+  .orcamento-item button.danger:hover{color:var(--danger); border-color:var(--danger);}
+  .empty-hint{font-size:12px; color:var(--text-dim); padding:10px 0; font-style:italic;}
+
+  .howto{margin-top:20px; border:1px solid var(--border); border-radius:3px; background:var(--surface); padding:2px 16px;}
+  .howto summary{cursor:pointer; padding:12px 0; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-dim); letter-spacing:.02em;}
+  .howto summary:hover{color:var(--accent);}
+  .howto-body{padding-bottom:16px; font-size:12.5px; line-height:1.6; color:var(--text-dim);}
+  .howto-body code{background:var(--surface-2); padding:1px 5px; border-radius:2px; font-family:'IBM Plex Mono',monospace; color:var(--text); font-size:11.5px;}
+  .howto-body ul{margin:8px 0; padding-left:18px;}
+  .howto-body li{margin:3px 0;}
+
+  footer{ text-align:center; color:var(--text-dim); font-size:11.5px; margin-top:24px; font-family:'IBM Plex Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">FICHA TÉCNICA · CUSTO DE IMPRESSÃO</div>
+    <h1>Calculadora de Impressão 3D</h1>
+    <p>Preencha os campos abaixo. O resultado é recalculado em tempo real e fica salvo neste navegador.</p>
+  </header>
+
+  <div class="card">
+    <h2><span class="n">00</span> Estimativa rápida por STL <span class="opt-tag">opcional</span></h2>
+    <p class="card-desc">Suba o arquivo antes de fatiar pra ter uma noção de peso e custo de material.</p>
+    <label class="file-drop" id="stlDrop">
+      <input type="file" id="stlInput" accept=".stl" hidden>
+      <span id="stlDropText">Toque para escolher um arquivo .STL</span>
+    </label>
+    <div id="stlStatus" class="stl-status" hidden></div>
+    <div id="stlResult" class="stl-result" hidden>
+      <div class="line"><span>Dimensões</span><span id="stlDims">—</span></div>
+      <div class="line"><span>Volume sólido</span><span id="stlVolume">—</span></div>
+      <div class="field-inline">
+        <label>Material</label>
+        <div class="chip-group" id="materialChips">
+          <button type="button" class="chip active" data-density="1.24">PLA</button>
+          <button type="button" class="chip" data-density="1.04">ABS</button>
+          <button type="button" class="chip" data-density="1.27">PETG</button>
+        </div>
+      </div>
+      <div class="field-inline">
+        <label>Preenchimento</label>
+        <div class="input-box"><input type="number" id="stlInfill" value="15" step="5"><span class="unit-suffix">%</span></div>
+      </div>
+      <div class="line"><span>Peso (100% sólido)</span><span id="stlPesoSolido">—</span></div>
+      <div class="line total"><span>Peso estimado (com preenchimento)</span><span id="stlPesoInfill">—</span></div>
+      <div class="line"><span>Custo de material estimado</span><span id="stlCustoMaterial">—</span></div>
+      <p class="stl-note">Aproximação: considera uma casca equivalente a ~20% do volume fora do preenchimento e presume malha fechada (manifold). Não estima tempo de impressão — isso depende do fatiador. O preço usa o R$/kg do bloco Material abaixo.</p>
+      <button type="button" class="save-btn" id="stlUsarBtn">Usar este peso na calculadora completa ↓</button>
+    </div>
+  </div>
+
+  <div class="card" id="materialCard">
+    <h2><span class="n">01</span> Material</h2>
+    <div class="field">
+      <label>Preço do filamento<span class="hint">por quilo</span></label>
+      <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
+    </div>
+    <div class="field">
+      <label>Peso da peça<span class="hint">por unidade, sem suporte</span></label>
+      <div class="input-box"><span class="unit">g</span><input type="number" id="pesoPeca" value="50" step="1"></div>
+    </div>
+    <div class="field no-prefix">
+      <label>Quantidade no lote<span class="hint">peças impressas juntas</span></label>
+      <div class="input-box"><input type="number" id="qtd" value="1" step="1" min="1"></div>
+    </div>
+    <div class="field no-prefix">
+      <label>Desperdício / falha<span class="hint">sobra, purga, reimpressões</span></label>
+      <div class="input-box"><input type="number" id="desperdicio" value="5" step="1"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">02</span> Impressão &amp; energia</h2>
+    <div class="field no-prefix">
+      <label>Tempo de impressão<span class="hint">duração total do lote</span></label>
+      <div class="input-box"><input type="number" id="tempoImpressao" value="3" step="0.1"></div>
+    </div>
+    <div class="field no-prefix">
+      <label>Potência da impressora<span class="hint">consumo médio, não o pico</span></label>
+      <div class="input-box"><input type="number" id="potencia" value="200" step="10"></div>
+    </div>
+
+    <div class="picker-wrap" id="printerWrap">
+      <div class="picker-caption">Ou selecione um modelo comum para preencher automaticamente</div>
+      <button type="button" class="picker-trigger" id="printerTrigger" aria-haspopup="listbox" aria-expanded="false">
+        <span class="picker-icon" id="printerIcon"></span>
+        <span class="picker-label" id="printerLabel">Personalizado</span>
+        <span class="picker-chevron">▾</span>
+      </button>
+      <div class="picker-panel" id="printerPanel" hidden></div>
+    </div>
+
+    <div class="field">
+      <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
+      <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">03</span> Depreciação da máquina</h2>
+    <div class="field">
+      <label>Valor da impressora<span class="hint">investimento inicial</span></label>
+      <div class="input-box"><span class="unit">R$</span><input type="number" id="valorImpressora" value="2500" step="50"></div>
+    </div>
+    <div class="field no-prefix">
+      <label>Vida útil estimada<span class="hint">horas de uso até troca</span></label>
+      <div class="input-box"><input type="number" id="vidaUtil" value="5000" step="100"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">04</span> Mão de obra &amp; margem</h2>
+    <div class="field no-prefix">
+      <label>Trabalho manual<span class="hint">setup + pós-processamento, lote</span></label>
+      <div class="input-box"><input type="number" id="tempoManual" value="0.5" step="0.1"></div>
+    </div>
+    <div class="field">
+      <label>Valor da sua hora<span class="hint">zere se for uso pessoal</span></label>
+      <div class="input-box"><span class="unit">R$</span><input type="number" id="valorHora" value="30" step="1"></div>
+    </div>
+    <div class="field no-prefix">
+      <label>Margem de lucro<span class="hint">markup sobre o custo</span></label>
+      <div class="input-box"><input type="number" id="markup" value="40" step="5"></div>
+    </div>
+  </div>
+
+  <div class="results">
+    <h2>Resultado do lote</h2>
+    <div class="line"><span>Material</span><span id="rMaterial">—</span></div>
+    <div class="line"><span>Energia</span><span id="rEnergia">—</span></div>
+    <div class="line"><span>Depreciação</span><span id="rDeprec">—</span></div>
+    <div class="line"><span>Mão de obra</span><span id="rMaoObra">—</span></div>
+    <div class="line total"><span>Custo total do lote</span><span id="rCustoLote">—</span></div>
+    <div class="line total"><span>Custo por peça</span><span id="rCustoPeca">—</span></div>
+
+    <div class="headline">
+      <div class="label">PREÇO SUGERIDO POR PEÇA</div>
+      <div class="value" id="rPrecoPeca">—</div>
+      <div class="sub" id="rPrecoLote">—</div>
+    </div>
+
+    <div class="profit">
+      <span>Lucro por peça</span>
+      <span class="value" id="rLucro">—</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">05</span> Orçamentos salvos</h2>
+    <div class="text-field">
+      <label for="orcamentoNome">Nome deste orçamento</label>
+      <input type="text" id="orcamentoNome" placeholder="ex: Suporte de celular">
+    </div>
+    <button type="button" class="save-btn" id="salvarOrcamentoBtn">Salvar orçamento atual</button>
+    <div id="orcamentosLista"></div>
+  </div>
+
+  <details class="howto">
+    <summary>Como usar fotos reais das impressoras</summary>
+    <div class="howto-body">
+      <p><strong>Opção 1 — arquivo local (mais simples):</strong> crie uma pasta <code>images/printers/</code> ao lado deste HTML e salve uma imagem quadrada (300×300px+, fundo neutro) com o nome exato do modelo:</p>
+      <ul>
+        <li><code>ender3v3se.jpg</code> — Creality Ender 3 V3 SE</li>
+        <li><code>kobra3.jpg</code> — Anycubic Kobra 3</li>
+        <li><code>mk4s.jpg</code> — Prusa MK4S</li>
+        <li><code>a1mini.jpg</code> — Bambu Lab A1 mini</li>
+        <li><code>a1.jpg</code> — Bambu Lab A1</li>
+        <li><code>p1s.jpg</code> — Bambu Lab P1S</li>
+        <li><code>x1c.jpg</code> — Bambu Lab X1 Carbon</li>
+      </ul>
+      <p>Aceita <code>.jpg</code>, <code>.png</code> ou <code>.webp</code> — o site testa sozinho, nessa ordem. Sem o arquivo, continua mostrando o ícone.</p>
+      <p><strong>Opção 2 — URL externa:</strong> no código-fonte, procure <code>PRINTER_IMAGE_OVERRIDES</code> perto do início da tag <code>&lt;script&gt;</code> e cole a URL da imagem no id correspondente.</p>
+    </div>
+  </details>
+
+  <footer>CUSTO = MATERIAL + ENERGIA + DEPRECIAÇÃO + MÃO DE OBRA</footer>
+</div>
+
+<script>
+  // ============ CAMPOS PRINCIPAIS ============
+  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoImpressao','potencia','precoKwh','valorImpressora','vidaUtil','tempoManual','valorHora','markup'];
+  const el = {};
+  ids.forEach(id => {
+    el[id] = document.getElementById(id);
+    el[id].addEventListener('input', () => { calc(); saveFieldsToStorage(); });
+  });
+
+  const out = {
+    material: document.getElementById('rMaterial'),
+    energia: document.getElementById('rEnergia'),
+    deprec: document.getElementById('rDeprec'),
+    maoObra: document.getElementById('rMaoObra'),
+    custoLote: document.getElementById('rCustoLote'),
+    custoPeca: document.getElementById('rCustoPeca'),
+    precoPeca: document.getElementById('rPrecoPeca'),
+    precoLote: document.getElementById('rPrecoLote'),
+    lucro: document.getElementById('rLucro'),
+  };
+
+  const fmt = n => n.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+  const num = id => parseFloat(el[id].value) || 0;
+
+  function calc(){
+    const precoKg = num('precoKg');
+    const pesoPeca = num('pesoPeca');
+    const qtd = Math.max(1, num('qtd'));
+    const desperdicio = num('desperdicio');
+    const tempoImpressao = num('tempoImpressao');
+    const potencia = num('potencia');
+    const precoKwh = num('precoKwh');
+    const valorImpressora = num('valorImpressora');
+    const vidaUtil = Math.max(1, num('vidaUtil'));
+    const tempoManual = num('tempoManual');
+    const valorHora = num('valorHora');
+    const markup = num('markup');
+
+    const material = (pesoPeca * qtd / 1000) * precoKg * (1 + desperdicio / 100);
+    const energia = tempoImpressao * (potencia / 1000) * precoKwh;
+    const deprec = (valorImpressora / vidaUtil) * tempoImpressao;
+    const maoObra = tempoManual * valorHora;
+
+    const custoLote = material + energia + deprec + maoObra;
+    const custoPeca = custoLote / qtd;
+    const precoPeca = custoPeca * (1 + markup / 100);
+    const precoLote = precoPeca * qtd;
+    const lucroPeca = precoPeca - custoPeca;
+
+    out.material.textContent = fmt(material);
+    out.energia.textContent = fmt(energia);
+    out.deprec.textContent = fmt(deprec);
+    out.maoObra.textContent = fmt(maoObra);
+    out.custoLote.textContent = fmt(custoLote);
+    out.custoPeca.textContent = fmt(custoPeca);
+    out.precoPeca.textContent = fmt(precoPeca);
+    out.precoLote.textContent = qtd > 1 ? `Lote de ${qtd} peças: ${fmt(precoLote)}` : 'Peça única';
+    out.lucro.textContent = fmt(lucroPeca);
+  }
+
+  // ============ BANCO DE DADOS LOCAL (localStorage) ============
+  // Tudo fica só neste navegador/dispositivo. Se localStorage estiver bloqueado
+  // (ex.: preview dentro de um iframe restrito), as chamadas falham em silêncio
+  // e a calculadora continua funcionando normalmente, só sem persistência.
+  const LS_CAMPOS = 'c3d_campos';
+  const LS_PRINTER = 'c3d_printerId';
+  const LS_FAVS = 'c3d_favoritos';
+  const LS_ORC = 'c3d_orcamentos';
+
+  function lsGet(key, fallback){
+    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+    catch(e){ return fallback; }
+  }
+  function lsSet(key, value){
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){ /* indisponível */ }
+  }
+
+  function saveFieldsToStorage(){
+    const data = {};
+    ids.forEach(id => data[id] = el[id].value);
+    lsSet(LS_CAMPOS, data);
+  }
+  function loadFieldsFromStorage(){
+    const saved = lsGet(LS_CAMPOS, null);
+    if (!saved) return;
+    ids.forEach(id => { if (saved[id] !== undefined) el[id].value = saved[id]; });
+  }
+
+  // ============ SELETOR DE IMPRESSORA (com fotos reais opcionais) ============
+  // TROQUE AQUI: cole uma URL de imagem para usar em vez de arquivo local em images/printers/
+  const PRINTER_IMAGE_OVERRIDES = {
+    // ender3v3se: 'https://exemplo.com/ender3.jpg',
+    // kobra3: '',
+    // mk4s: '',
+    // a1mini: '',
+    // a1: '',
+    // p1s: '',
+    // x1c: '',
+  };
+  const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp'];
+
+  // Potências médias DURANTE A IMPRESSÃO (não o pico de aquecimento), a partir de
+  // specs do fabricante e medições de wattímetro da comunidade. Variam com material,
+  // temperatura de mesa e se a câmara é fechada — ajuste manualmente se souber seu valor real.
+  const PRINTERS = [
+    { id:'custom', name:'Personalizado', spec:'digite o valor manualmente', watts:null, icon:'edit' },
+    { id:'ender3v3se', name:'Creality Ender 3 V3 SE', spec:'aberta · fonte 350 W', watts:110, icon:'bedslinger' },
+    { id:'kobra3', name:'Anycubic Kobra 3', spec:'aberta · fonte 400 W', watts:130, icon:'bedslinger' },
+    { id:'mk4s', name:'Prusa MK4S', spec:'aberta · fonte 240 W', watts:90, icon:'bedslinger' },
+    { id:'a1mini', name:'Bambu Lab A1 mini', spec:'aberta compacta · fonte 150 W', watts:70, icon:'corexy' },
+    { id:'a1', name:'Bambu Lab A1', spec:'aberta · pico 350 W (110V)', watts:120, icon:'corexy' },
+    { id:'p1s', name:'Bambu Lab P1S', spec:'fechada · pico 350 W (110V)', watts:130, icon:'enclosed' },
+    { id:'x1c', name:'Bambu Lab X1 Carbon', spec:'fechada + AMS · pico 350 W (110V)', watts:140, icon:'enclosedAms' },
+  ];
+
+  function printerIconSvg(type){
+    const a = 'viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+    switch(type){
+      case 'edit':
+        return `<svg ${a}><path d="M10 30l1.5-7L26 8.5l5.5 5.5L17 28.5 10 30z"/><path d="M23 11.5l5.5 5.5"/></svg>`;
+      case 'bedslinger':
+        return `<svg ${a}><path d="M8 9h24"/><path d="M9 9v18M31 9v18"/><rect x="12" y="27" width="16" height="5"/><rect x="18" y="6" width="4" height="4"/></svg>`;
+      case 'corexy':
+        return `<svg ${a}><rect x="7" y="7" width="26" height="26" rx="2"/><path d="M7 15h26"/><rect x="14" y="24" width="12" height="4"/></svg>`;
+      case 'enclosed':
+        return `<svg ${a}><rect x="7" y="7" width="26" height="26" rx="2"/><path d="M25 7v26"/><circle cx="22.3" cy="20" r="1.3" fill="currentColor" stroke="none"/><path d="M11 27h10"/></svg>`;
+      case 'enclosedAms':
+        return `<svg ${a}><rect x="7" y="11" width="26" height="22" rx="2"/><path d="M25 11v22"/><circle cx="22.3" cy="23" r="1.3" fill="currentColor" stroke="none"/><path d="M11 30h10"/><rect x="7" y="7" width="26" height="5" rx="1" fill="currentColor" fill-opacity="0.22" stroke-opacity="0.5"/></svg>`;
+      default: return '';
+    }
+  }
+
+  function candidateSources(p){
+    const list = [];
+    if (PRINTER_IMAGE_OVERRIDES[p.id]) list.push(PRINTER_IMAGE_OVERRIDES[p.id]);
+    IMAGE_EXTS.forEach(ext => list.push(`images/printers/${p.id}.${ext}`));
+    return list;
+  }
+  // Preenche um container .picker-icon JÁ EXISTENTE (nunca troca o próprio nó,
+  // só o conteúdo — assim o mesmo elemento pode ser reaproveitado várias vezes).
+  function fillVisual(container, p){
+    container.innerHTML = '';
+    if (p.id === 'custom'){ container.innerHTML = printerIconSvg(p.icon); return; }
+    const sources = candidateSources(p);
+    const img = document.createElement('img');
+    img.alt = p.name;
+    let i = 0;
+    img.addEventListener('error', () => {
+      i++;
+      if (i < sources.length) img.src = sources[i];
+      else container.innerHTML = printerIconSvg(p.icon);
+    });
+    img.src = sources[0];
+    container.appendChild(img);
+  }
+
+  const printerWrap = document.getElementById('printerWrap');
+  const printerTrigger = document.getElementById('printerTrigger');
+  const printerIconEl = document.getElementById('printerIcon');
+  const printerLabelEl = document.getElementById('printerLabel');
+  const printerPanel = document.getElementById('printerPanel');
+  let currentPrinterId = 'custom';
+
+  function orderedPrinters(){
+    const favs = lsGet(LS_FAVS, []);
+    const custom = PRINTERS.filter(p => p.id === 'custom');
+    const rest = PRINTERS.filter(p => p.id !== 'custom');
+    const favd = rest.filter(p => favs.includes(p.id));
+    const other = rest.filter(p => !favs.includes(p.id));
+    return [...custom, ...favd, ...other];
+  }
+
+  function renderPanelList(){
+    const favs = lsGet(LS_FAVS, []);
+    const list = orderedPrinters();
+    printerPanel.innerHTML = list.map(p => `
+      <div class="printer-opt${p.id === currentPrinterId ? ' selected' : ''}" data-id="${p.id}">
+        <button type="button" class="printer-opt-main" data-select="${p.id}">
+          <span class="picker-icon" data-slot="${p.id}"></span>
+          <span class="meta">
+            <span class="name">${p.name}</span>
+            <span class="spec">${p.spec}</span>
+          </span>
+          <span class="watts">${p.watts !== null ? p.watts + ' W' : ''}</span>
+        </button>
+        ${p.id !== 'custom' ? `<button type="button" class="fav-btn${favs.includes(p.id) ? ' active' : ''}" data-fav="${p.id}" aria-label="Favoritar">${favs.includes(p.id) ? '★' : '☆'}</button>` : '<span style="width:36px;flex-shrink:0"></span>'}
+      </div>
+    `).join('');
+    list.forEach(p => {
+      const slot = printerPanel.querySelector(`[data-slot="${p.id}"]`);
+      if (slot) fillVisual(slot, p);
+    });
+  }
+
+  function setTriggerDisplay(p){
+    fillVisual(printerIconEl, p);
+    printerLabelEl.textContent = p.name;
+    currentPrinterId = p.id;
+  }
+
+  function openPanel(){ renderPanelList(); printerPanel.hidden = false; printerTrigger.setAttribute('aria-expanded', 'true'); }
+  function closePanel(){ printerPanel.hidden = true; printerTrigger.setAttribute('aria-expanded', 'false'); }
+
+  printerTrigger.addEventListener('click', () => { printerPanel.hidden ? openPanel() : closePanel(); });
+  document.addEventListener('click', e => { if (!printerWrap.contains(e.target)) closePanel(); });
+
+  printerPanel.addEventListener('click', e => {
+    const favBtn = e.target.closest('[data-fav]');
+    if (favBtn){
+      let favs = lsGet(LS_FAVS, []);
+      const id = favBtn.dataset.fav;
+      favs = favs.includes(id) ? favs.filter(x => x !== id) : [...favs, id];
+      lsSet(LS_FAVS, favs);
+      renderPanelList();
+      return;
+    }
+    const selBtn = e.target.closest('[data-select]');
+    if (selBtn){
+      const p = PRINTERS.find(x => x.id === selBtn.dataset.select);
+      setTriggerDisplay(p);
+      lsSet(LS_PRINTER, p.id);
+      if (p.watts !== null){ el.potencia.value = p.watts; calc(); saveFieldsToStorage(); }
+      closePanel();
+    }
+  });
+
+  el.potencia.addEventListener('input', () => {
+    const current = PRINTERS.find(x => x.id === currentPrinterId);
+    if (current && current.watts !== null && Number(el.potencia.value) !== current.watts){
+      setTriggerDisplay(PRINTERS[0]);
+      lsSet(LS_PRINTER, 'custom');
+    }
+  });
+
+  // ============ ORÇAMENTOS SALVOS ============
+  const orcamentosLista = document.getElementById('orcamentosLista');
+  const orcamentoNomeInput = document.getElementById('orcamentoNome');
+
+  function currentFieldsSnapshot(){
+    const snap = {};
+    ids.forEach(id => snap[id] = el[id].value);
+    snap.printerId = currentPrinterId;
+    return snap;
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function renderOrcamentos(){
+    const list = lsGet(LS_ORC, []);
+    if (!list.length){ orcamentosLista.innerHTML = '<div class="empty-hint">Nenhum orçamento salvo ainda.</div>'; return; }
+    orcamentosLista.innerHTML = list.map(item => `
+      <div class="orcamento-item" data-id="${item.id}">
+        <div class="meta">
+          <div class="nome">${escapeHtml(item.nome)}</div>
+          <div class="info">${new Date(item.savedAt).toLocaleDateString('pt-BR')} · total ${item.custoTotal} · sugerido ${item.precoPeca}</div>
+        </div>
+        <div class="actions">
+          <button type="button" data-load="${item.id}">Carregar</button>
+          <button type="button" class="danger" data-del="${item.id}">Excluir</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('salvarOrcamentoBtn').addEventListener('click', () => {
+    const nome = orcamentoNomeInput.value.trim() || `Orçamento ${new Date().toLocaleDateString('pt-BR')}`;
+    const list = lsGet(LS_ORC, []);
+    list.unshift({
+      id: Date.now().toString(36),
+      nome,
+      savedAt: new Date().toISOString(),
+      campos: currentFieldsSnapshot(),
+      custoTotal: out.custoLote.textContent,
+      precoPeca: out.precoPeca.textContent,
+    });
+    lsSet(LS_ORC, list);
+    orcamentoNomeInput.value = '';
+    renderOrcamentos();
+  });
+
+  orcamentosLista.addEventListener('click', e => {
+    const loadBtn = e.target.closest('[data-load]');
+    const delBtn = e.target.closest('[data-del]');
+    if (loadBtn){
+      const list = lsGet(LS_ORC, []);
+      const item = list.find(x => x.id === loadBtn.dataset.load);
+      if (item){
+        ids.forEach(id => { if (item.campos[id] !== undefined) el[id].value = item.campos[id]; });
+        const p = PRINTERS.find(x => x.id === item.campos.printerId) || PRINTERS[0];
+        setTriggerDisplay(p);
+        lsSet(LS_PRINTER, p.id);
+        calc();
+        saveFieldsToStorage();
+        document.getElementById('materialCard').scrollIntoView({ behavior:'smooth', block:'start' });
+      }
+    }
+    if (delBtn){
+      let list = lsGet(LS_ORC, []);
+      list = list.filter(x => x.id !== delBtn.dataset.del);
+      lsSet(LS_ORC, list);
+      renderOrcamentos();
+    }
+  });
+
+  // ============ LEITOR DE STL (volume, peso e custo de material) ============
+  const stlInput = document.getElementById('stlInput');
+  const stlDrop = document.getElementById('stlDrop');
+  const stlDropText = document.getElementById('stlDropText');
+  const stlStatus = document.getElementById('stlStatus');
+  const stlResult = document.getElementById('stlResult');
+  const stlDims = document.getElementById('stlDims');
+  const stlVolumeEl = document.getElementById('stlVolume');
+  const stlPesoSolido = document.getElementById('stlPesoSolido');
+  const stlPesoInfill = document.getElementById('stlPesoInfill');
+  const stlCustoMaterial = document.getElementById('stlCustoMaterial');
+  const stlInfill = document.getElementById('stlInfill');
+  const SHELL_FACTOR = 0.20; // fração aproximada de "casca" fora do preenchimento
+  let stlVolumeCm3 = 0;
+  let stlDensity = 1.24;
+  let stlPesoInfillAtual = 0;
+
+  function isBinarySTL(buffer){
+    if (buffer.byteLength < 84) return false;
+    const view = new DataView(buffer);
+    const faceCount = view.getUint32(80, true);
+    if (84 + faceCount * 50 === buffer.byteLength) return true;
+    const head = new Uint8Array(buffer, 0, Math.min(256, buffer.byteLength));
+    for (let i = 0; i < head.length; i++){ if (head[i] > 127) return true; }
+    return false;
+  }
+  function readVec3(view, offset){
+    return [view.getFloat32(offset, true), view.getFloat32(offset + 4, true), view.getFloat32(offset + 8, true)];
+  }
+  function parseBinarySTL(buffer){
+    const view = new DataView(buffer);
+    const faceCount = view.getUint32(80, true);
+    const triangles = [];
+    let offset = 84;
+    for (let i = 0; i < faceCount; i++){
+      offset += 12;
+      const v1 = readVec3(view, offset); offset += 12;
+      const v2 = readVec3(view, offset); offset += 12;
+      const v3 = readVec3(view, offset); offset += 12;
+      offset += 2;
+      triangles.push([v1, v2, v3]);
+    }
+    return triangles;
+  }
+  function parseAsciiSTL(text){
+    const verts = [];
+    const re = /vertex\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)\s+([-+0-9.eE]+)/g;
+    let m;
+    while ((m = re.exec(text)) !== null){ verts.push([parseFloat(m[1]), parseFloat(m[2]), parseFloat(m[3])]); }
+    const triangles = [];
+    for (let i = 0; i + 2 < verts.length; i += 3) triangles.push([verts[i], verts[i+1], verts[i+2]]);
+    return triangles;
+  }
+  function computeMeshStats(triangles){
+    let volume = 0;
+    const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
+    for (const [a, b, c] of triangles){
+      volume += (a[0]*(b[1]*c[2]-c[1]*b[2]) - a[1]*(b[0]*c[2]-c[0]*b[2]) + a[2]*(b[0]*c[1]-c[0]*b[1])) / 6;
+      for (const v of [a, b, c]) for (let k = 0; k < 3; k++){ if (v[k] < min[k]) min[k] = v[k]; if (v[k] > max[k]) max[k] = v[k]; }
+    }
+    return { volume: Math.abs(volume), min, max };
+  }
+
+  function updateStlWeights(){
+    if (!stlVolumeCm3) return;
+    const pesoSolido = stlVolumeCm3 * stlDensity;
+    const infillFrac = Math.max(0, Math.min(100, parseFloat(stlInfill.value) || 0)) / 100;
+    const pesoInfill = pesoSolido * (infillFrac + (1 - infillFrac) * SHELL_FACTOR);
+    const precoKg = num('precoKg');
+    const custoMaterial = (pesoInfill / 1000) * precoKg;
+    stlPesoSolido.textContent = `${pesoSolido.toFixed(1)} g`;
+    stlPesoInfill.textContent = `${pesoInfill.toFixed(1)} g`;
+    stlCustoMaterial.textContent = fmt(custoMaterial);
+    stlPesoInfillAtual = pesoInfill;
+  }
+
+  document.querySelectorAll('#materialChips .chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#materialChips .chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      stlDensity = parseFloat(btn.dataset.density);
+      updateStlWeights();
+    });
+  });
+  stlInfill.addEventListener('input', updateStlWeights);
+
+  function handleStlFile(file){
+    if (!file) return;
+    stlDropText.textContent = file.name;
+    stlStatus.hidden = false;
+    stlStatus.className = 'stl-status';
+    stlStatus.textContent = 'Processando...';
+    stlResult.hidden = true;
+    setTimeout(() => {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const buffer = ev.target.result;
+          const triangles = isBinarySTL(buffer) ? parseBinarySTL(buffer) : parseAsciiSTL(new TextDecoder().decode(buffer));
+          if (!triangles.length) throw new Error('nenhum triângulo encontrado');
+          const stats = computeMeshStats(triangles);
+          stlVolumeCm3 = stats.volume / 1000;
+          const dimX = (stats.max[0] - stats.min[0]).toFixed(1);
+          const dimY = (stats.max[1] - stats.min[1]).toFixed(1);
+          const dimZ = (stats.max[2] - stats.min[2]).toFixed(1);
+          stlDims.textContent = `${dimX} × ${dimY} × ${dimZ} mm`;
+          stlVolumeEl.textContent = `${stlVolumeCm3.toFixed(2)} cm³`;
+          stlStatus.hidden = true;
+          stlResult.hidden = false;
+          updateStlWeights();
+        } catch(err){
+          stlStatus.className = 'stl-status error';
+          stlStatus.textContent = 'Não consegui ler este arquivo (' + err.message + ').';
+        }
+      };
+      reader.onerror = () => { stlStatus.className = 'stl-status error'; stlStatus.textContent = 'Erro ao ler o arquivo.'; };
+      reader.readAsArrayBuffer(file);
+    }, 20);
+  }
+
+  stlInput.addEventListener('change', e => handleStlFile(e.target.files[0]));
+  stlDrop.addEventListener('dragover', e => { e.preventDefault(); stlDrop.classList.add('drag'); });
+  stlDrop.addEventListener('dragleave', () => stlDrop.classList.remove('drag'));
+  stlDrop.addEventListener('drop', e => {
+    e.preventDefault();
+    stlDrop.classList.remove('drag');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) handleStlFile(e.dataTransfer.files[0]);
+  });
+
+  document.getElementById('stlUsarBtn').addEventListener('click', () => {
+    if (stlPesoInfillAtual > 0){
+      el.pesoPeca.value = stlPesoInfillAtual.toFixed(1);
+      calc();
+      saveFieldsToStorage();
+      document.getElementById('materialCard').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+  });
+
+  // ============ INICIALIZAÇÃO ============
+  loadFieldsFromStorage();
+  const savedPrinterId = lsGet(LS_PRINTER, 'custom');
+  setTriggerDisplay(PRINTERS.find(p => p.id === savedPrinterId) || PRINTERS[0]);
+  renderOrcamentos();
+  calc();
+</script>
+</body>
+</html>
