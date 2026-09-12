@@ -169,10 +169,12 @@
   .stl-status.error{color:var(--danger);}
   .stl-result{margin-top:8px;}
   .stl-preview{width:100%; height:200px; display:block; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; margin-bottom:10px;}
-  .preview-controls{display:flex; gap:6px; margin-bottom:14px;}
+  .preview-controls{display:flex; gap:6px; margin-bottom:8px;}
   .preview-controls button{flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); border-radius:4px; padding:10px 4px; font-family:'IBM Plex Mono',monospace; font-size:12px; cursor:pointer;}
   .preview-controls button:hover{color:var(--text); border-color:var(--accent);}
   .preview-controls button:active{background:var(--accent-soft); color:var(--accent); border-color:var(--accent);}
+  .preview-reset{width:100%; background:transparent; border:none; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:6px 0 14px; cursor:pointer; text-decoration:underline; text-underline-offset:2px;}
+  .preview-reset:hover{color:var(--accent);}
   .stl-note{font-size:11.5px; color:var(--text-dim); line-height:1.6; margin:12px 0 16px;}
 
   .slider-row{padding:13px 0; border-top:1px solid var(--grid-line);}
@@ -313,6 +315,7 @@
         <button type="button" id="stlRotateUp">Girar ↑</button>
         <button type="button" id="stlRotateRoll">Girar ↻</button>
       </div>
+      <button type="button" class="preview-reset" id="stlResetView">↺ Voltar à posição original</button>
       <div class="line"><span>Dimensões do arquivo</span><span id="stlDimsOriginais">—</span></div>
 
       <div class="slider-row">
@@ -1082,6 +1085,10 @@
   });
   document.getElementById('stlRotateRoll').addEventListener('click', () => {
     stlRotMatrix = matMul(ROT_ROLL, stlRotMatrix);
+    renderStlPreview();
+  });
+  document.getElementById('stlResetView').addEventListener('click', () => {
+    stlRotMatrix = [[1,0,0],[0,1,0],[0,0,1]];
     renderStlPreview();
   });
 
