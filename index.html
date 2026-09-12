@@ -220,15 +220,19 @@
   .profit{ margin-top:10px; padding:14px 16px; border-radius:4px; background:var(--teal-soft); border:1px solid rgba(79,174,147,0.35); display:flex; justify-content:space-between; align-items:center; font-family:'IBM Plex Mono', monospace; font-size:14px; }
   .profit .value{color:var(--teal); font-weight:600;}
 
-  .orcamento-item{display:flex; align-items:center; gap:10px; padding:12px 0; border-top:1px dashed var(--grid-line);}
-  .orcamento-item .meta{flex:1; min-width:0;}
-  .orcamento-item .nome{font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .orcamento-item .info{font-size:11px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin-top:3px;}
-  .orcamento-item .actions{display:flex; gap:6px; flex-shrink:0;}
-  .orcamento-item button{background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); border-radius:4px; padding:8px 11px; font-size:11.5px; font-family:'IBM Plex Mono',monospace; cursor:pointer;}
-  .orcamento-item button:hover{color:var(--text); border-color:var(--accent);}
-  .orcamento-item button.danger:hover{color:var(--danger); border-color:var(--danger);}
+  .saved-item{padding:12px 0; border-top:1px dashed var(--grid-line);}
+  .saved-item .nome{font-size:13.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; overflow:hidden; text-overflow:ellipsis;}
+  .saved-item .info{font-size:11px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin-top:4px; line-height:1.55;}
+  .saved-item .actions{display:flex; gap:6px; margin-top:9px; flex-wrap:wrap;}
+  .saved-item .actions button{flex:1; min-width:84px; background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); border-radius:4px; padding:9px 10px; font-size:11.5px; font-family:'IBM Plex Mono',monospace; cursor:pointer;}
+  .saved-item .actions button:hover{color:var(--text); border-color:var(--accent);}
+  .saved-item .actions button.danger:hover{color:var(--danger); border-color:var(--danger);}
   .empty-hint{font-size:12.5px; color:var(--text-dim); padding:10px 0; font-style:italic;}
+  .badge{font-size:10px; padding:3px 8px; border-radius:10px; font-family:'IBM Plex Mono',monospace; white-space:nowrap;}
+  .badge.ok{background:var(--teal-soft); color:var(--teal);}
+  .badge.warn{background:var(--accent-soft); color:var(--accent);}
+  .badge.late{background:rgba(224,104,92,0.16); color:var(--danger);}
+  .badge.neutral{background:var(--surface-2); color:var(--text-dim);}
 
   .howto{margin-top:22px; border:1px solid var(--border); border-radius:4px; background:var(--surface); padding:2px 18px;}
   .howto summary{cursor:pointer; padding:14px 0; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--text-dim); letter-spacing:.02em;}
@@ -300,7 +304,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="printerCard">
     <h2><span class="n">02</span> Impressão &amp; energia</h2>
     <div class="field no-prefix">
       <label>Tempo de impressão<span class="hint">duração total do lote</span></label>
@@ -377,7 +381,30 @@
   </div>
 
   <div class="card">
-    <h2><span class="n">05</span> Orçamentos salvos</h2>
+    <h2><span class="n">05</span> Minhas impressoras</h2>
+    <p class="card-desc">Cadastre suas impressoras reais para reaproveitar os dados e acompanhar a manutenção.</p>
+    <div class="text-field">
+      <label for="mpNome">Nome</label>
+      <input type="text" id="mpNome" placeholder="ex: Minha Ender 3 V3 SE">
+    </div>
+    <div class="field">
+      <label>Potência<span class="hint">consumo médio da sua impressora</span></label>
+      <div class="input-box"><input type="number" id="mpPotencia" step="10"></div>
+    </div>
+    <div class="field">
+      <label>Preço de compra<span class="hint">quanto você pagou</span></label>
+      <div class="input-box"><span class="unit">R$</span><input type="number" id="mpPreco" step="50"></div>
+    </div>
+    <div class="field no-prefix">
+      <label>Intervalo de manutenção<span class="hint">a cada quantos dias revisar</span></label>
+      <div class="input-box"><input type="number" id="mpIntervalo" value="90" step="10"></div>
+    </div>
+    <button type="button" class="save-btn" id="mpAddBtn">Adicionar impressora</button>
+    <div id="mpLista"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">06</span> Orçamentos salvos</h2>
     <div class="text-field">
       <label for="orcamentoNome">Nome deste orçamento</label>
       <input type="text" id="orcamentoNome" placeholder="ex: Suporte de celular">
@@ -394,10 +421,12 @@
         <li><code>ender3v3se.jpg</code> — Creality Ender 3 V3 SE</li>
         <li><code>kobra3.jpg</code> — Anycubic Kobra 3</li>
         <li><code>mk4s.jpg</code> — Prusa MK4S</li>
+        <li><code>crealityhi.jpg</code> — Creality Hi</li>
         <li><code>a1mini.jpg</code> — Bambu Lab A1 mini</li>
         <li><code>a1.jpg</code> — Bambu Lab A1</li>
         <li><code>p1s.jpg</code> — Bambu Lab P1S</li>
         <li><code>x1c.jpg</code> — Bambu Lab X1 Carbon</li>
+        <li><code>k2plus.jpg</code> — Creality K2 Plus</li>
       </ul>
       <p>Aceita <code>.jpg</code>, <code>.png</code> ou <code>.webp</code> — o site testa sozinho, nessa ordem. Sem o arquivo, continua mostrando o ícone.</p>
       <p><strong>Opção 2 — URL externa:</strong> no código-fonte, procure <code>PRINTER_IMAGE_OVERRIDES</code> perto do início da tag <code>&lt;script&gt;</code> e cole a URL da imagem no id correspondente.</p>
@@ -516,10 +545,12 @@
     { id:'ender3v3se', name:'Creality Ender 3 V3 SE', spec:'aberta · fonte 350 W', watts:110, icon:'bedslinger' },
     { id:'kobra3', name:'Anycubic Kobra 3', spec:'aberta · fonte 400 W', watts:130, icon:'bedslinger' },
     { id:'mk4s', name:'Prusa MK4S', spec:'aberta · fonte 240 W', watts:90, icon:'bedslinger' },
+    { id:'crealityhi', name:'Creality Hi', spec:'aberta · pico 390 W (110V)', watts:120, icon:'bedslinger' },
     { id:'a1mini', name:'Bambu Lab A1 mini', spec:'aberta compacta · fonte 150 W', watts:70, icon:'corexy' },
     { id:'a1', name:'Bambu Lab A1', spec:'aberta · pico 350 W (110V)', watts:120, icon:'corexy' },
     { id:'p1s', name:'Bambu Lab P1S', spec:'fechada · pico 350 W (110V)', watts:130, icon:'enclosed' },
     { id:'x1c', name:'Bambu Lab X1 Carbon', spec:'fechada + AMS · pico 350 W (110V)', watts:140, icon:'enclosedAms' },
+    { id:'k2plus', name:'Creality K2 Plus', spec:'fechada · aquecimento 800 W (pico)', watts:180, icon:'enclosed' },
   ];
 
   function printerIconSvg(type){
@@ -662,11 +693,9 @@
     const list = lsGet(LS_ORC, []);
     if (!list.length){ orcamentosLista.innerHTML = '<div class="empty-hint">Nenhum orçamento salvo ainda.</div>'; return; }
     orcamentosLista.innerHTML = list.map(item => `
-      <div class="orcamento-item" data-id="${item.id}">
-        <div class="meta">
-          <div class="nome">${escapeHtml(item.nome)}</div>
-          <div class="info">${new Date(item.savedAt).toLocaleDateString('pt-BR')} · total ${item.custoTotal} · sugerido ${item.precoPeca}</div>
-        </div>
+      <div class="saved-item" data-id="${item.id}">
+        <div class="nome">${escapeHtml(item.nome)}</div>
+        <div class="info">${new Date(item.savedAt).toLocaleDateString('pt-BR')} · total ${item.custoTotal} · sugerido ${item.precoPeca}</div>
         <div class="actions">
           <button type="button" data-load="${item.id}">Carregar</button>
           <button type="button" class="danger" data-del="${item.id}">Excluir</button>
@@ -853,11 +882,92 @@
     }
   });
 
+  // ============ MINHAS IMPRESSORAS (potência, preço, manutenção) ============
+  const LS_MEUS = 'c3d_minhas_impressoras';
+  const mpNome = document.getElementById('mpNome');
+  const mpPotencia = document.getElementById('mpPotencia');
+  const mpPreco = document.getElementById('mpPreco');
+  const mpIntervalo = document.getElementById('mpIntervalo');
+  const mpLista = document.getElementById('mpLista');
+
+  function statusManutencao(item){
+    if (!item.ultimaManutencao) return { label:'sem registro', cls:'neutral' };
+    const dias = Math.floor((Date.now() - new Date(item.ultimaManutencao).getTime()) / 86400000);
+    const restante = item.intervaloDias - dias;
+    if (restante > item.intervaloDias * 0.2) return { label:`próxima em ${restante}d`, cls:'ok' };
+    if (restante >= 0) return { label:`atenção · ${restante}d`, cls:'warn' };
+    return { label:`atrasada ${Math.abs(restante)}d`, cls:'late' };
+  }
+
+  function renderMinhasImpressoras(){
+    const list = lsGet(LS_MEUS, []);
+    if (!list.length){ mpLista.innerHTML = '<div class="empty-hint">Nenhuma impressora cadastrada ainda.</div>'; return; }
+    mpLista.innerHTML = list.map(item => {
+      const st = statusManutencao(item);
+      const ultima = item.ultimaManutencao ? new Date(item.ultimaManutencao).toLocaleDateString('pt-BR') : 'nunca';
+      return `
+        <div class="saved-item" data-id="${item.id}">
+          <div class="nome">${escapeHtml(item.nome)} <span class="badge ${st.cls}">${st.label}</span></div>
+          <div class="info">${item.potencia || 0} W · R$ ${Number(item.precoCompra || 0).toLocaleString('pt-BR')} · última manutenção: ${ultima}</div>
+          <div class="actions">
+            <button type="button" data-use="${item.id}">Usar na calculadora</button>
+            <button type="button" data-maint="${item.id}">Manutenção feita hoje</button>
+            <button type="button" class="danger" data-delmp="${item.id}">Excluir</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('mpAddBtn').addEventListener('click', () => {
+    const nome = mpNome.value.trim();
+    if (!nome) { mpNome.focus(); return; }
+    const list = lsGet(LS_MEUS, []);
+    list.unshift({
+      id: Date.now().toString(36),
+      nome,
+      potencia: parseFloat(mpPotencia.value) || 0,
+      precoCompra: parseFloat(mpPreco.value) || 0,
+      intervaloDias: parseFloat(mpIntervalo.value) || 90,
+      ultimaManutencao: null,
+    });
+    lsSet(LS_MEUS, list);
+    mpNome.value = ''; mpPotencia.value = ''; mpPreco.value = ''; mpIntervalo.value = '90';
+    renderMinhasImpressoras();
+  });
+
+  mpLista.addEventListener('click', e => {
+    const list = lsGet(LS_MEUS, []);
+    const useBtn = e.target.closest('[data-use]');
+    const maintBtn = e.target.closest('[data-maint]');
+    const delBtn = e.target.closest('[data-delmp]');
+
+    if (useBtn){
+      const item = list.find(x => x.id === useBtn.dataset.use);
+      if (item){
+        if (item.potencia) el.potencia.value = item.potencia;
+        if (item.precoCompra) el.valorImpressora.value = item.precoCompra;
+        calc();
+        saveFieldsToStorage();
+        document.getElementById('printerCard').scrollIntoView({ behavior:'smooth', block:'start' });
+      }
+    }
+    if (maintBtn){
+      const item = list.find(x => x.id === maintBtn.dataset.maint);
+      if (item){ item.ultimaManutencao = new Date().toISOString(); lsSet(LS_MEUS, list); renderMinhasImpressoras(); }
+    }
+    if (delBtn){
+      lsSet(LS_MEUS, list.filter(x => x.id !== delBtn.dataset.delmp));
+      renderMinhasImpressoras();
+    }
+  });
+
   // ============ INICIALIZAÇÃO ============
   loadFieldsFromStorage();
   const savedPrinterId = lsGet(LS_PRINTER, 'custom');
   setTriggerDisplay(PRINTERS.find(p => p.id === savedPrinterId) || PRINTERS[0]);
   renderOrcamentos();
+  renderMinhasImpressoras();
   calc();
 </script>
 </body>
