@@ -262,6 +262,12 @@
   input[type=range]:focus::-moz-range-thumb{ box-shadow:0 0 0 4px rgba(230,126,51,0.25); }
 
   .picker-wrap{position:relative; margin-top:2px; padding:14px 0 16px; border-top:1px solid var(--grid-line);}
+  .active-printer-info{margin-top:-6px; padding-bottom:14px; font-size:12px; color:var(--text-dim); line-height:1.6;}
+  .active-printer-info .api-line strong{color:var(--accent); font-family:'IBM Plex Mono',monospace;}
+  .active-printer-info .api-pecas{margin-top:3px; font-family:'IBM Plex Mono',monospace; font-size:11px;}
+  .active-printer-empty{margin-top:-6px; padding-bottom:14px; font-size:12px; color:var(--text-dim); line-height:1.6;}
+  .active-printer-empty a{color:var(--accent); text-decoration:none;}
+  .active-printer-empty a:hover{text-decoration:underline;}
   .picker-wrap .picker-caption{font-size:12px; color:var(--text-dim); margin-bottom:9px;}
   .picker-trigger{
     width:100%; display:flex; align-items:center; gap:10px;
@@ -533,6 +539,14 @@
       </button>
       <div class="picker-panel" id="printerPanel" hidden></div>
     </div>
+
+    <div class="active-printer-info" id="activePrinterInfo" hidden>
+      <div class="api-line">Depreciação (máquina + manutenção): <strong id="apiDeprec">—</strong>/h</div>
+      <div class="api-pecas" id="apiPecas"></div>
+    </div>
+    <div class="active-printer-empty" id="activePrinterEmpty" hidden>
+      Nenhuma impressora sua selecionada — depreciação fica zerada. <a href="#" id="apiGoSettings">Cadastrar em Configurações →</a>
+    </div>
   </div>
   <div class="card">
     <h2><span class="n">03</span> Mão de obra &amp; margem</h2>
@@ -625,22 +639,6 @@
         <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
         <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01"></div>
       </div>
-    </div>
-
-    <div class="card">
-      <h2>Depreciação da máquina</h2>
-    <div class="field">
-      <label>Valor da impressora<span class="hint">investimento inicial</span></label>
-      <div class="input-box"><span class="unit">R$</span><input type="number" id="valorImpressora" value="2500" step="50"></div>
-    </div>
-    <div class="field no-prefix suffix">
-      <label>Vida útil estimada<span class="hint">horas de uso até troca</span></label>
-      <div class="input-box"><input type="number" id="vidaUtil" value="5000" step="100"><span class="unit-suffix">h</span></div>
-    </div>
-    <div class="field">
-      <label>Custo de manutenção<span class="hint">por hora — some as peças em "Dados da impressora" ou digite na mão</span></label>
-      <div class="input-box"><span class="unit">R$</span><input type="number" id="custoManutencaoHora" value="0" step="0.01"></div>
-    </div>
     </div>
 
     <div class="card">
@@ -769,7 +767,7 @@
   let cloudSyncTimer = null;
   let aplicandoDadosDaNuvem = false; // trava pra não reenviar pra nuvem o que acabou de baixar dela
   // ============ CAMPOS PRINCIPAIS ============
-  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','potencia','precoKwh','valorImpressora','vidaUtil','custoManutencaoHora','tempoManualHoras','tempoManualMinutos','valorHora','markup'];
+  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','potencia','precoKwh','tempoManualHoras','tempoManualMinutos','valorHora','markup'];
   const el = {};
   ids.forEach(id => {
     el[id] = document.getElementById(id);
@@ -799,9 +797,10 @@
     const tempoImpressao = (parseFloat(el.tempoHoras.value) || 0) + (parseFloat(el.tempoMinutos.value) || 0) / 60;
     const potencia = num('potencia');
     const precoKwh = num('precoKwh');
-    const valorImpressora = num('valorImpressora');
-    const vidaUtil = Math.max(1, num('vidaUtil'));
-    const custoManutencaoHora = num('custoManutencaoHora');
+    const ativa = dadosImpressoraAtiva();
+    const valorImpressora = ativa ? ativa.precoCompra : 0;
+    const vidaUtil = ativa && ativa.vidaUtil ? ativa.vidaUtil : 1;
+    const custoManutencaoHora = ativa ? ativa.custoManutencaoHora : 0;
     const tempoManual = (parseFloat(el.tempoManualHoras.value) || 0) + (parseFloat(el.tempoManualMinutos.value) || 0) / 60;
     const valorHora = num('valorHora');
     const markup = num('markup');
@@ -919,6 +918,7 @@
         renderOrcamentos();
         renderMinhasImpressoras();
         renderFilamentos();
+        renderActivePrinterInfo();
         calc();
         setStatusVisual('synced', 'sincronizado ✓');
       } else {
@@ -1078,6 +1078,39 @@
     return [PRINTERS[0], ...meus, ...PRINTERS.slice(1)];
   }
 
+  // A impressora atualmente selecionada no seletor — só retorna dado se for
+  // uma cadastrada por você (catálogo genérico não tem preço/vida útil real).
+  function dadosImpressoraAtiva(){
+    const p = todasImpressoras().find(x => x.id === currentPrinterId);
+    return (p && p.minhaImpressoraId) ? p : null;
+  }
+
+  // Mostra, junto do seletor, a depreciação e a lista de peças da impressora
+  // ativa — atualiza sempre que a seleção muda ou os dados dela são editados.
+  function renderActivePrinterInfo(){
+    const ativa = dadosImpressoraAtiva();
+    const infoBox = document.getElementById('activePrinterInfo');
+    const emptyBox = document.getElementById('activePrinterEmpty');
+    if (!ativa){
+      infoBox.hidden = true;
+      emptyBox.hidden = false;
+      return;
+    }
+    emptyBox.hidden = true;
+    infoBox.hidden = false;
+    const deprecHora = (ativa.vidaUtil ? ativa.precoCompra / ativa.vidaUtil : 0) + ativa.custoManutencaoHora;
+    document.getElementById('apiDeprec').textContent = fmt(deprecHora);
+
+    const original = lsGet(LS_MEUS, []).find(x => x.id === ativa.minhaImpressoraId);
+    const pecas = original ? pecasDoItem(original) : {};
+    const linhas = PECAS_MANUTENCAO
+      .filter(pm => pecas[pm.id] && pecas[pm.id].custo > 0 && pecas[pm.id].horas > 0)
+      .map(pm => `${pm.nome} ${fmt(pecas[pm.id].custo)}/${pecas[pm.id].horas}h`)
+      .join(' · ');
+    document.getElementById('apiPecas').textContent = linhas || 'Nenhuma peça de manutenção configurada — edite em "Dados da impressora".';
+  }
+  document.getElementById('apiGoSettings').addEventListener('click', e => { e.preventDefault(); showScreen('settings'); });
+
   function candidateSources(p){
     const list = [];
     if (PRINTER_IMAGE_OVERRIDES[p.id]) list.push(PRINTER_IMAGE_OVERRIDES[p.id]);
@@ -1177,13 +1210,9 @@
       const p = todasImpressoras().find(x => x.id === selBtn.dataset.select);
       setTriggerDisplay(p);
       lsSet(LS_PRINTER, p.id);
-      if (p.watts !== null){ el.potencia.value = p.watts; }
-      if (p.minhaImpressoraId){
-        el.valorImpressora.value = p.precoCompra;
-        el.vidaUtil.value = p.vidaUtil;
-        el.custoManutencaoHora.value = p.custoManutencaoHora.toFixed(2);
-      }
-      if (p.watts !== null || p.minhaImpressoraId){ calc(); saveFieldsToStorage(); }
+      if (p.watts !== null){ el.potencia.value = p.watts; saveFieldsToStorage(); }
+      renderActivePrinterInfo();
+      calc();
       closePanel();
     }
   });
@@ -1365,6 +1394,7 @@
         const f = todosFilamentos().find(x => x.id === item.campos.filamentoId) || todosFilamentos()[0];
         setFilamentDisplay(f);
         lsSet(LS_FILAMENT_ID, f.id);
+        renderActivePrinterInfo();
         calc();
         saveFieldsToStorage();
         document.getElementById('materialCard').scrollIntoView({ behavior:'smooth', block:'start' });
@@ -1873,6 +1903,8 @@
       const favs = lsGet(LS_FAVS, []);
       lsSet(LS_FAVS, favs.filter(x => x !== 'meu_' + delBtn.dataset.delmp));
       renderMinhasImpressoras();
+      renderActivePrinterInfo();
+      calc();
     }
     if (saveBtn){
       // não chama renderMinhasImpressoras() aqui de propósito — re-renderizar
@@ -1892,6 +1924,8 @@
         const resumo = container.querySelector(`[data-resumo="${item.id}"]`);
         if (resumo) resumo.innerHTML = `Custo de manutenção estimado: <strong>${fmt(custoManutencaoPorHora(item))}/hora</strong> de impressão`;
 
+        renderActivePrinterInfo();
+        calc();
         saveBtn.textContent = 'Salvo ✓';
         saveBtn.classList.add('saved');
         setTimeout(() => { saveBtn.textContent = 'Salvar peças'; saveBtn.classList.remove('saved'); }, 1600);
@@ -1908,6 +1942,7 @@
   renderOrcamentos();
   renderMinhasImpressoras();
   renderFilamentos();
+  renderActivePrinterInfo();
   calc();
 </script>
 </body>
