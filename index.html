@@ -323,6 +323,28 @@
   .badge.late{background:rgba(224,104,92,0.16); color:var(--danger);}
   .badge.neutral{background:var(--surface-2); color:var(--text-dim);}
 
+  .parts-details{margin-top:10px; border-top:1px dashed var(--grid-line); padding-top:2px;}
+  .parts-details summary{cursor:pointer; padding:10px 0; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:.02em; list-style:none; display:flex; align-items:center; gap:6px; user-select:none;}
+  .parts-details summary::-webkit-details-marker{display:none;}
+  .parts-details summary::before{content:'▸'; font-size:9px; display:inline-block; transition:transform .15s ease;}
+  .parts-details[open] summary::before{transform:rotate(90deg);}
+  .parts-details summary:hover{color:var(--accent);}
+  .peca-row{display:flex; align-items:center; gap:8px; padding:7px 0; border-top:1px dashed var(--grid-line);}
+  .peca-row:first-of-type{border-top:none;}
+  .peca-nome{font-size:11.5px; color:var(--text); width:76px; flex-shrink:0; line-height:1.3;}
+  .peca-inputs{display:flex; gap:6px; flex:1; min-width:0;}
+  .peca-inputs .input-box{position:relative; flex:1; min-width:0;}
+  .peca-inputs input{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:3px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:7px 20px 7px 6px; text-align:right;}
+  .peca-inputs input:focus{outline:none; border-color:var(--accent);}
+  .peca-inputs .unit-mini{position:absolute; left:6px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--text-dim); pointer-events:none;}
+  .peca-inputs .unit-mini-suffix{position:absolute; right:6px; top:50%; transform:translateY(-50%); font-size:10px; color:var(--text-dim); pointer-events:none;}
+  .peca-inputs input.tem-prefixo{padding-left:20px; padding-right:6px;}
+  .parts-resumo{font-size:11px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; padding:9px 0; border-top:1px solid var(--grid-line); margin-top:2px;}
+  .parts-resumo strong{color:var(--accent);}
+  .save-parts-btn{width:100%; margin-top:10px; padding:9px; background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:11px; border-radius:4px; cursor:pointer;}
+  .save-parts-btn:hover{color:var(--accent); border-color:var(--accent);}
+  .save-parts-btn.saved{color:var(--teal); border-color:var(--teal);}
+
   .howto{margin-top:22px; border:1px solid var(--border); border-radius:4px; background:var(--surface); padding:2px 18px;}
   .howto summary{cursor:pointer; padding:14px 0; font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--text-dim); letter-spacing:.02em;}
   .howto summary:hover{color:var(--accent);}
@@ -482,23 +504,16 @@
         <div class="input-box"><input type="number" id="tempoMinutos" value="0" min="0" max="59" step="5"><span class="unit-suffix">min</span></div>
       </div>
     </div>
-    <details class="subsection">
-      <summary>Configurações da impressora</summary>
-      <div class="field no-prefix suffix">
-        <label>Potência da impressora<span class="hint">consumo médio, não o pico</span></label>
-        <div class="input-box"><input type="number" id="potencia" value="200" step="10"><span class="unit-suffix">W</span></div>
-      </div>
 
-      <div class="picker-wrap" id="printerWrap">
-        <div class="picker-caption">Ou selecione um modelo comum para preencher automaticamente</div>
-        <button type="button" class="picker-trigger" id="printerTrigger" aria-haspopup="listbox" aria-expanded="false">
-          <span class="picker-icon" id="printerIcon"></span>
-          <span class="picker-label" id="printerLabel">Personalizado</span>
-          <span class="picker-chevron">▾</span>
-        </button>
-        <div class="picker-panel" id="printerPanel" hidden></div>
-      </div>
-    </details>
+    <div class="picker-wrap" id="printerWrap">
+      <div class="picker-caption">Impressora ativa — toque pra trocar</div>
+      <button type="button" class="picker-trigger" id="printerTrigger" aria-haspopup="listbox" aria-expanded="false">
+        <span class="picker-icon" id="printerIcon"></span>
+        <span class="picker-label" id="printerLabel">Personalizado</span>
+        <span class="picker-chevron">▾</span>
+      </button>
+      <div class="picker-panel" id="printerPanel" hidden></div>
+    </div>
   </div>
   <div class="card">
     <h2><span class="n">03</span> Mão de obra &amp; margem</h2>
@@ -558,7 +573,11 @@
     <p class="screen-desc">Valores que normalmente não mudam a cada peça — configure uma vez e esqueça.</p>
 
     <div class="card">
-      <h2>Custo de energia</h2>
+      <h2>Energia</h2>
+      <div class="field no-prefix suffix">
+        <label>Potência da impressora<span class="hint">consumo médio, não o pico — ou selecione uma impressora no card 02</span></label>
+        <div class="input-box"><input type="number" id="potencia" value="200" step="10"><span class="unit-suffix">W</span></div>
+      </div>
       <div class="field">
         <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
         <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01"></div>
@@ -1486,6 +1505,34 @@
   const mpIntervalo = document.getElementById('mpIntervalo');
   const mpLista = document.getElementById('mpLista');
 
+  // Peças de desgaste comuns — cada uma com custo de reposição e o intervalo
+  // (em horas de impressão) até precisar trocar. É referência/planejamento,
+  // não entra automaticamente no cálculo do resultado principal.
+  const PECAS_MANUTENCAO = [
+    { id:'hotend', nome:'Hotend' },
+    { id:'bico', nome:'Bico' },
+    { id:'mesa', nome:'Placa da mesa' },
+    { id:'filtro', nome:'Filtro de ar' },
+    { id:'graxa', nome:'Graxa' },
+  ];
+
+  function pecasDoItem(item){
+    const p = item.pecas || {};
+    const out = {};
+    PECAS_MANUTENCAO.forEach(pm => { out[pm.id] = p[pm.id] || { custo:0, horas:0 }; });
+    return out;
+  }
+
+  function custoManutencaoPorHora(item){
+    const pecas = pecasDoItem(item);
+    let total = 0;
+    PECAS_MANUTENCAO.forEach(pm => {
+      const d = pecas[pm.id];
+      if (d.custo > 0 && d.horas > 0) total += d.custo / d.horas;
+    });
+    return total;
+  }
+
   function statusManutencao(item){
     if (!item.ultimaManutencao) return { label:'sem registro', cls:'neutral' };
     const dias = Math.floor((Date.now() - new Date(item.ultimaManutencao).getTime()) / 86400000);
@@ -1501,6 +1548,17 @@
     mpLista.innerHTML = list.map(item => {
       const st = statusManutencao(item);
       const ultima = item.ultimaManutencao ? new Date(item.ultimaManutencao).toLocaleDateString('pt-BR') : 'nunca';
+      const pecas = pecasDoItem(item);
+      const custoHora = custoManutencaoPorHora(item);
+      const linhasPecas = PECAS_MANUTENCAO.map(pm => `
+        <div class="peca-row">
+          <span class="peca-nome">${pm.nome}</span>
+          <div class="peca-inputs">
+            <div class="input-box"><span class="unit-mini">R$</span><input type="number" class="peca-custo tem-prefixo" data-peca="${pm.id}" value="${pecas[pm.id].custo}" step="5"></div>
+            <div class="input-box"><input type="number" class="peca-horas" data-peca="${pm.id}" value="${pecas[pm.id].horas}" step="50"><span class="unit-mini-suffix">h</span></div>
+          </div>
+        </div>
+      `).join('');
       return `
         <div class="saved-item" data-id="${item.id}">
           <div class="nome">${escapeHtml(item.nome)} <span class="badge ${st.cls}">${st.label}</span></div>
@@ -1510,6 +1568,12 @@
             <button type="button" data-maint="${item.id}">Manutenção feita hoje</button>
             <button type="button" class="danger" data-delmp="${item.id}">Excluir</button>
           </div>
+          <details class="parts-details">
+            <summary>Peças de manutenção (custo e horas até trocar)</summary>
+            ${linhasPecas}
+            <div class="parts-resumo" data-resumo="${item.id}">Custo de manutenção estimado: <strong>${fmt(custoHora)}/hora</strong> de impressão</div>
+            <button type="button" class="save-parts-btn" data-save-parts="${item.id}">Salvar peças</button>
+          </details>
         </div>
       `;
     }).join('');
@@ -1527,6 +1591,7 @@
       vidaUtil: parseFloat(mpVidaUtil.value) || 5000,
       intervaloDias: parseFloat(mpIntervalo.value) || 90,
       ultimaManutencao: null,
+      pecas: {},
     });
     lsSet(LS_MEUS, list);
     mpNome.value = ''; mpPotencia.value = ''; mpPreco.value = ''; mpVidaUtil.value = '5000'; mpIntervalo.value = '90';
@@ -1538,6 +1603,7 @@
     const useBtn = e.target.closest('[data-use]');
     const maintBtn = e.target.closest('[data-maint]');
     const delBtn = e.target.closest('[data-delmp]');
+    const saveBtn = e.target.closest('[data-save-parts]');
 
     if (useBtn){
       const item = list.find(x => x.id === useBtn.dataset.use);
@@ -1557,6 +1623,29 @@
     if (delBtn){
       lsSet(LS_MEUS, list.filter(x => x.id !== delBtn.dataset.delmp));
       renderMinhasImpressoras();
+    }
+    if (saveBtn){
+      // não chama renderMinhasImpressoras() aqui de propósito — re-renderizar
+      // fecharia o <details> que o usuário acabou de preencher.
+      const item = list.find(x => x.id === saveBtn.dataset.saveParts);
+      if (item){
+        const container = saveBtn.closest('.parts-details');
+        const novasPecas = {};
+        PECAS_MANUTENCAO.forEach(pm => {
+          const custoInput = container.querySelector(`.peca-custo[data-peca="${pm.id}"]`);
+          const horasInput = container.querySelector(`.peca-horas[data-peca="${pm.id}"]`);
+          novasPecas[pm.id] = { custo: parseFloat(custoInput.value) || 0, horas: parseFloat(horasInput.value) || 0 };
+        });
+        item.pecas = novasPecas;
+        lsSet(LS_MEUS, list);
+
+        const resumo = container.querySelector(`[data-resumo="${item.id}"]`);
+        if (resumo) resumo.innerHTML = `Custo de manutenção estimado: <strong>${fmt(custoManutencaoPorHora(item))}/hora</strong> de impressão`;
+
+        saveBtn.textContent = 'Salvo ✓';
+        saveBtn.classList.add('saved');
+        setTimeout(() => { saveBtn.textContent = 'Salvar peças'; saveBtn.classList.remove('saved'); }, 1600);
+      }
     }
   });
 
