@@ -489,12 +489,19 @@
       <label>Quantidade no lote<span class="hint">peças impressas juntas</span></label>
       <div class="input-box"><input type="number" id="qtd" value="1" step="1" min="1"></div>
     </div>
+
+    <div class="picker-wrap" id="filamentWrap">
+      <div class="picker-caption">Filamento ativo — toque pra trocar</div>
+      <button type="button" class="picker-trigger" id="filamentTrigger" aria-haspopup="listbox" aria-expanded="false">
+        <span class="picker-icon" id="filamentIcon"></span>
+        <span class="picker-label" id="filamentLabel">Personalizado</span>
+        <span class="picker-chevron">▾</span>
+      </button>
+      <div class="picker-panel" id="filamentPanel" hidden></div>
+    </div>
+
     <details class="subsection">
       <summary>Configurações de material</summary>
-      <div class="field">
-        <label>Preço do filamento<span class="hint">por quilo</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
-      </div>
       <div class="field no-prefix suffix">
         <label>Desperdício / falha<span class="hint">sobra, purga, reimpressões</span></label>
         <div class="input-box"><input type="number" id="desperdicio" value="5" step="1"><span class="unit-suffix">%</span></div>
@@ -577,6 +584,24 @@
   <div id="settingsScreen" class="screen" hidden>
     <h1 class="screen-title">Configurações</h1>
     <p class="screen-desc">Valores que normalmente não mudam a cada peça — configure uma vez e esqueça.</p>
+
+    <div class="card">
+      <h2>Dados do filamento</h2>
+      <div class="field">
+        <label>Preço do filamento ativo<span class="hint">por quilo — ou selecione um cadastrado no card 01</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
+      </div>
+      <div class="text-field">
+        <label for="filNome">Nome do filamento</label>
+        <input type="text" id="filNome" placeholder="ex: PLA Preto Voolt">
+      </div>
+      <div class="field">
+        <label>Preço por kg<span class="hint">pra cadastrar na lista</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="filPreco" step="5"></div>
+      </div>
+      <button type="button" class="save-btn" id="filAddBtn">Adicionar filamento</button>
+      <div id="filLista"></div>
+    </div>
 
     <div class="card">
       <h2>Energia</h2>
@@ -790,8 +815,10 @@
   // e a calculadora continua funcionando normalmente, só sem persistência.
   const LS_CAMPOS = 'c3d_campos';
   const LS_PRINTER = 'c3d_printerId';
+  const LS_FILAMENT_ID = 'c3d_filamentoId';
   const LS_FAVS = 'c3d_favoritos';
   const LS_ORC = 'c3d_orcamentos';
+  const LS_FILS = 'c3d_filamentos';
 
   function lsGet(key, fallback){
     try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
@@ -834,9 +861,11 @@
     const payload = {
       campos: lsGet(LS_CAMPOS, {}),
       printerId: lsGet(LS_PRINTER, 'custom'),
+      filamentoId: lsGet(LS_FILAMENT_ID, 'custom'),
       favoritos: lsGet(LS_FAVS, []),
       orcamentos: lsGet(LS_ORC, []),
       minhasImpressoras: lsGet('c3d_minhas_impressoras', []),
+      filamentos: lsGet(LS_FILS, []),
       atualizadoEm: new Date().toISOString(),
     };
     try {
@@ -856,16 +885,21 @@
         aplicandoDadosDaNuvem = true;
         if (data.campos) lsSetRaw(LS_CAMPOS, data.campos);
         if (data.printerId) lsSetRaw(LS_PRINTER, data.printerId);
+        if (data.filamentoId) lsSetRaw(LS_FILAMENT_ID, data.filamentoId);
         if (data.favoritos) lsSetRaw(LS_FAVS, data.favoritos);
         if (data.orcamentos) lsSetRaw(LS_ORC, data.orcamentos);
         if (data.minhasImpressoras) lsSetRaw('c3d_minhas_impressoras', data.minhasImpressoras);
+        if (data.filamentos) lsSetRaw(LS_FILS, data.filamentos);
         aplicandoDadosDaNuvem = false;
 
         loadFieldsFromStorage();
         const savedPrinterId = lsGet(LS_PRINTER, 'custom');
         setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || PRINTERS[0]);
+        const savedFilamentId = lsGet(LS_FILAMENT_ID, 'custom');
+        setFilamentDisplay(todosFilamentos().find(f => f.id === savedFilamentId) || todosFilamentos()[0]);
         renderOrcamentos();
         renderMinhasImpressoras();
+        renderFilamentos();
         calc();
         setStatusVisual('synced', 'sincronizado ✓');
       } else {
@@ -1130,6 +1164,102 @@
     }
   });
 
+  // ============ SELETOR DE FILAMENTO (mesmo padrão do seletor de impressora) ============
+  const SPOOL_ICON = '<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="20" r="15"/><circle cx="20" cy="20" r="5"/><path d="M20 5v10M20 25v10M5 20h10M25 20h10" stroke-opacity="0.5"/></svg>';
+
+  function todosFilamentos(){
+    const custom = { id:'custom', nome:'Personalizado', precoKg:null };
+    return [custom, ...lsGet(LS_FILS, [])];
+  }
+
+  const filamentWrap = document.getElementById('filamentWrap');
+  const filamentTrigger = document.getElementById('filamentTrigger');
+  const filamentIconEl = document.getElementById('filamentIcon');
+  const filamentLabelEl = document.getElementById('filamentLabel');
+  const filamentPanel = document.getElementById('filamentPanel');
+  let currentFilamentId = 'custom';
+
+  function renderFilamentPanel(){
+    const list = todosFilamentos();
+    filamentPanel.innerHTML = list.map(f => `
+      <div class="printer-opt${f.id === currentFilamentId ? ' selected' : ''}" data-id="${f.id}">
+        <button type="button" class="printer-opt-main" data-selectfil="${f.id}">
+          <span class="picker-icon">${f.id === 'custom' ? printerIconSvg('edit') : SPOOL_ICON}</span>
+          <span class="meta"><span class="name">${f.nome}</span></span>
+          <span class="watts">${f.precoKg !== null ? 'R$ ' + f.precoKg.toFixed(2) + '/kg' : ''}</span>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  function setFilamentDisplay(f){
+    filamentIconEl.innerHTML = f.id === 'custom' ? printerIconSvg('edit') : SPOOL_ICON;
+    filamentLabelEl.textContent = f.nome;
+    currentFilamentId = f.id;
+  }
+
+  function openFilamentPanel(){ renderFilamentPanel(); filamentPanel.hidden = false; filamentTrigger.setAttribute('aria-expanded', 'true'); }
+  function closeFilamentPanel(){ filamentPanel.hidden = true; filamentTrigger.setAttribute('aria-expanded', 'false'); }
+
+  filamentTrigger.addEventListener('click', () => { filamentPanel.hidden ? openFilamentPanel() : closeFilamentPanel(); });
+  document.addEventListener('click', e => { if (!filamentWrap.contains(e.target)) closeFilamentPanel(); });
+
+  filamentPanel.addEventListener('click', e => {
+    const selBtn = e.target.closest('[data-selectfil]');
+    if (selBtn){
+      const f = todosFilamentos().find(x => x.id === selBtn.dataset.selectfil);
+      setFilamentDisplay(f);
+      lsSet(LS_FILAMENT_ID, f.id);
+      if (f.precoKg !== null){ el.precoKg.value = f.precoKg; calc(); saveFieldsToStorage(); }
+      closeFilamentPanel();
+    }
+  });
+
+  el.precoKg.addEventListener('input', () => {
+    const current = todosFilamentos().find(x => x.id === currentFilamentId);
+    if (current && current.precoKg !== null && Number(el.precoKg.value) !== current.precoKg){
+      setFilamentDisplay(todosFilamentos()[0]);
+      lsSet(LS_FILAMENT_ID, 'custom');
+    }
+  });
+
+  const filNome = document.getElementById('filNome');
+  const filPreco = document.getElementById('filPreco');
+  const filLista = document.getElementById('filLista');
+
+  function renderFilamentos(){
+    const list = lsGet(LS_FILS, []);
+    if (!list.length){ filLista.innerHTML = '<div class="empty-hint">Nenhum filamento cadastrado ainda.</div>'; return; }
+    filLista.innerHTML = list.map(f => `
+      <div class="saved-item" data-id="${f.id}">
+        <div class="nome">${escapeHtml(f.nome)}</div>
+        <div class="info">R$ ${f.precoKg.toFixed(2)}/kg</div>
+        <div class="actions">
+          <button type="button" class="danger" data-delfil="${f.id}">Excluir</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('filAddBtn').addEventListener('click', () => {
+    const nome = filNome.value.trim();
+    const preco = parseFloat(filPreco.value) || 0;
+    if (!nome || preco <= 0) { filNome.focus(); return; }
+    const list = lsGet(LS_FILS, []);
+    list.unshift({ id: Date.now().toString(36), nome, precoKg: preco });
+    lsSet(LS_FILS, list);
+    filNome.value = ''; filPreco.value = '';
+    renderFilamentos();
+  });
+
+  filLista.addEventListener('click', e => {
+    const delBtn = e.target.closest('[data-delfil]');
+    if (delBtn){
+      lsSet(LS_FILS, lsGet(LS_FILS, []).filter(x => x.id !== delBtn.dataset.delfil));
+      renderFilamentos();
+    }
+  });
+
   // ============ ORÇAMENTOS SALVOS ============
   const orcamentosLista = document.getElementById('orcamentosLista');
   const orcamentoNomeInput = document.getElementById('orcamentoNome');
@@ -1138,6 +1268,7 @@
     const snap = {};
     ids.forEach(id => snap[id] = el[id].value);
     snap.printerId = currentPrinterId;
+    snap.filamentoId = currentFilamentId;
     return snap;
   }
 
@@ -1189,6 +1320,9 @@
         const p = todasImpressoras().find(x => x.id === item.campos.printerId) || PRINTERS[0];
         setTriggerDisplay(p);
         lsSet(LS_PRINTER, p.id);
+        const f = todosFilamentos().find(x => x.id === item.campos.filamentoId) || todosFilamentos()[0];
+        setFilamentDisplay(f);
+        lsSet(LS_FILAMENT_ID, f.id);
         calc();
         saveFieldsToStorage();
         document.getElementById('materialCard').scrollIntoView({ behavior:'smooth', block:'start' });
@@ -1731,8 +1865,11 @@
   loadFieldsFromStorage();
   const savedPrinterId = lsGet(LS_PRINTER, 'custom');
   setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || PRINTERS[0]);
+  const savedFilamentId = lsGet(LS_FILAMENT_ID, 'custom');
+  setFilamentDisplay(todosFilamentos().find(f => f.id === savedFilamentId) || todosFilamentos()[0]);
   renderOrcamentos();
   renderMinhasImpressoras();
+  renderFilamentos();
   calc();
 </script>
 </body>
