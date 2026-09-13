@@ -341,12 +341,36 @@
   .auth-sync-status{font-size:10.5px; color:var(--teal); font-family:'IBM Plex Mono',monospace; white-space:nowrap;}
   .auth-signout{background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:11px; padding:7px 11px; border-radius:4px; cursor:pointer; flex-shrink:0;}
   .auth-signout:hover{color:var(--danger); border-color:var(--danger);}
+
+  .header-top{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+  .header-icons{display:flex; gap:8px; flex-shrink:0;}
+  .icon-btn{width:34px; height:34px; border-radius:4px; background:var(--surface); border:1px solid var(--border); color:var(--text-dim); font-size:15px; font-family:'IBM Plex Mono',monospace; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+  .icon-btn:hover{color:var(--accent); border-color:var(--accent);}
+
+  .screen-back{background:transparent; border:none; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:12.5px; padding:0 0 16px; cursor:pointer;}
+  .screen-back:hover{color:var(--accent);}
+  .screen-title{font-size:22px; font-weight:600; margin:0 0 6px; letter-spacing:-0.01em;}
+  .screen-desc{font-size:13.5px; color:var(--text-dim); margin:0 0 20px; line-height:1.55;}
+  .screen .card h2{margin-bottom:14px;}
+
+  .help-text{font-size:13px; color:var(--text-dim); line-height:1.65; margin:0 0 12px;}
+  .help-text:last-child{margin-bottom:0;}
+  .help-text strong{color:var(--text);}
+  .glossary dt{font-size:13.5px; color:var(--accent); font-family:'IBM Plex Mono',monospace; margin-top:14px;}
+  .glossary dt:first-child{margin-top:0;}
+  .glossary dd{font-size:13px; color:var(--text-dim); line-height:1.6; margin:4px 0 0;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">FICHA TÉCNICA · CUSTO DE IMPRESSÃO</div>
+    <div class="header-top">
+      <div class="eyebrow">FICHA TÉCNICA · CUSTO DE IMPRESSÃO</div>
+      <div class="header-icons">
+        <button type="button" class="icon-btn" id="openSettings" aria-label="Configurações">⚙</button>
+        <button type="button" class="icon-btn" id="openHelp" aria-label="Ajuda">?</button>
+      </div>
+    </div>
     <h1>Calculadora de Impressão 3D</h1>
     <p>Preencha os campos abaixo. O resultado é recalculado em tempo real e fica salvo neste navegador.</p>
   </header>
@@ -363,6 +387,8 @@
       <button type="button" class="auth-signout" id="authSignOut">Sair</button>
     </div>
   </div>
+
+  <div id="mainScreen" class="screen">
 
   <div class="card">
     <h2><span class="n">00</span> Estimativa rápida por STL <span class="opt-tag">opcional</span></h2>
@@ -431,7 +457,6 @@
       </div>
     </details>
   </div>
-
   <div class="card" id="printerCard">
     <h2><span class="n">02</span> Impressão &amp; energia</h2>
     <div class="field no-prefix time-field">
@@ -457,31 +482,10 @@
         </button>
         <div class="picker-panel" id="printerPanel" hidden></div>
       </div>
-
-      <div class="field">
-        <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01"></div>
-      </div>
     </details>
   </div>
-
-  <details class="card">
-    <summary>
-      <span class="n">03</span> Depreciação da máquina
-      <span class="summary-chevron">▾</span>
-    </summary>
-    <div class="field">
-      <label>Valor da impressora<span class="hint">investimento inicial</span></label>
-      <div class="input-box"><span class="unit">R$</span><input type="number" id="valorImpressora" value="2500" step="50"></div>
-    </div>
-    <div class="field no-prefix suffix">
-      <label>Vida útil estimada<span class="hint">horas de uso até troca</span></label>
-      <div class="input-box"><input type="number" id="vidaUtil" value="5000" step="100"><span class="unit-suffix">h</span></div>
-    </div>
-  </details>
-
   <div class="card">
-    <h2><span class="n">04</span> Mão de obra &amp; margem</h2>
+    <h2><span class="n">03</span> Mão de obra &amp; margem</h2>
     <div class="field no-prefix time-field">
       <label>Trabalho manual<span class="hint">setup + pós-processamento, lote</span></label>
       <div class="time-inputs">
@@ -491,10 +495,6 @@
     </div>
     <details class="subsection">
       <summary>Configurações de mão de obra</summary>
-      <div class="field">
-        <label>Valor da sua hora<span class="hint">zere se for uso pessoal</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="valorHora" value="30" step="1"></div>
-      </div>
       <div class="field no-prefix suffix">
         <label>Margem de lucro<span class="hint">markup sobre o custo</span></label>
         <div class="input-box"><input type="number" id="markup" value="40" step="5"><span class="unit-suffix">%</span></div>
@@ -522,12 +522,56 @@
       <span class="value" id="rLucro">—</span>
     </div>
   </div>
-
   <details class="card">
     <summary>
-      <span class="n">05</span> Minhas impressoras
+      <span class="n">04</span> Orçamentos salvos
       <span class="summary-chevron">▾</span>
     </summary>
+    <div class="text-field">
+      <label for="orcamentoNome">Nome deste orçamento</label>
+      <input type="text" id="orcamentoNome" placeholder="ex: Suporte de celular">
+    </div>
+    <button type="button" class="save-btn" id="salvarOrcamentoBtn">Salvar orçamento atual</button>
+    <div id="orcamentosLista"></div>
+  </details>
+  <footer>CUSTO = MATERIAL + ENERGIA + DEPRECIAÇÃO + MÃO DE OBRA</footer>
+  </div>
+
+  <div id="settingsScreen" class="screen" hidden>
+    <button type="button" class="screen-back" id="closeSettings">← Voltar</button>
+    <h1 class="screen-title">Configurações</h1>
+    <p class="screen-desc">Valores que normalmente não mudam a cada peça — configure uma vez e esqueça.</p>
+
+    <div class="card">
+      <h2>Custo de energia</h2>
+      <div class="field">
+        <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Depreciação da máquina</h2>
+    <div class="field">
+      <label>Valor da impressora<span class="hint">investimento inicial</span></label>
+      <div class="input-box"><span class="unit">R$</span><input type="number" id="valorImpressora" value="2500" step="50"></div>
+    </div>
+    <div class="field no-prefix suffix">
+      <label>Vida útil estimada<span class="hint">horas de uso até troca</span></label>
+      <div class="input-box"><input type="number" id="vidaUtil" value="5000" step="100"><span class="unit-suffix">h</span></div>
+    </div>
+    </div>
+
+    <div class="card">
+      <h2>Valor da sua hora</h2>
+      <div class="field">
+        <label>Valor da sua hora<span class="hint">zere se for uso pessoal</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="valorHora" value="30" step="1"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Minhas impressoras</h2>
     <p class="card-desc">Cadastre suas impressoras reais para reaproveitar os dados e acompanhar a manutenção.</p>
     <div class="text-field">
       <label for="mpNome">Nome</label>
@@ -551,23 +595,44 @@
     </div>
     <button type="button" class="save-btn" id="mpAddBtn">Adicionar impressora</button>
     <div id="mpLista"></div>
-  </details>
-
-  <details class="card">
-    <summary>
-      <span class="n">06</span> Orçamentos salvos
-      <span class="summary-chevron">▾</span>
-    </summary>
-    <div class="text-field">
-      <label for="orcamentoNome">Nome deste orçamento</label>
-      <input type="text" id="orcamentoNome" placeholder="ex: Suporte de celular">
     </div>
-    <button type="button" class="save-btn" id="salvarOrcamentoBtn">Salvar orçamento atual</button>
-    <div id="orcamentosLista"></div>
-  </details>
+  </div>
 
-  <details class="howto">
-    <summary>Como usar fotos reais das impressoras</summary>
+  <div id="helpScreen" class="screen" hidden>
+    <button type="button" class="screen-back" id="closeHelp">← Voltar</button>
+    <h1 class="screen-title">Ajuda</h1>
+    <p class="screen-desc">Guia rápido pra quem tá começando na impressão 3D.</p>
+
+    <div class="card">
+      <h2>Sobre a estimativa por STL</h2>
+      <p class="help-text">O card "Estimativa rápida por STL" é só uma <strong>referência</strong>, calculada a partir do volume geométrico do arquivo. Duas coisas importantes que ele <strong>não</strong> leva em conta:</p>
+      <p class="help-text"><strong>Tempo de impressão</strong> — depende da velocidade, altura de camada, número de paredes e outras configurações do seu fatiador (slicer). Não dá pra saber só olhando a geometria do arquivo. Sempre fatie de verdade no seu programa de impressão pra pegar o tempo real.</p>
+      <p class="help-text"><strong>Multicor / troca de filamento</strong> — se a peça usa mais de uma cor ou material, cada troca gasta tempo extra e geralmente um pouco de filamento de purga (a "torre de purga"). A estimativa por STL não sabe se a peça é multicor, então não soma nada disso.</p>
+      <p class="help-text">Use o peso e o custo de material como ponto de partida, mas ajuste tempo e energia na mão depois de fatiar de verdade.</p>
+    </div>
+
+    <div class="card">
+      <h2>O que significa cada campo</h2>
+      <dl class="glossary">
+        <dt>Desperdício / falha</dt>
+        <dd>Uma margem em cima do peso da peça pra cobrir purga de filamento, primeira camada que não colou, ou reimpressões. 5% é um chute razoável pra começar; ajuste com sua experiência.</dd>
+
+        <dt>Preenchimento (infill)</dt>
+        <dd>Percentual do interior da peça que fica preenchido com uma estrutura, em vez de oco. Baixo (10-20%) é o padrão pra peças decorativas; mais alto (40%+) pra peças que precisam aguentar força.</dd>
+
+        <dt>Potência da impressora</dt>
+        <dd>O consumo médio em Watts <em>durante</em> a impressão — não o pico de aquecimento da mesa/bico, que é bem mais alto só nos primeiros minutos.</dd>
+
+        <dt>Vida útil estimada</dt>
+        <dd>Quantas horas de uso você espera tirar da impressora até trocar ou considerar o investimento "pago". Usado só pra ratear o custo da máquina ao longo do tempo (depreciação) — não é uma garantia do fabricante.</dd>
+
+        <dt>Margem de lucro</dt>
+        <dd>Um markup percentual em cima do custo total, aplicado só se você for vender as peças. Zere se for uso pessoal.</dd>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h2>Como usar fotos reais das impressoras</h2>
     <div class="howto-body">
       <p><strong>Opção 1 — arquivo local (mais simples):</strong> crie uma pasta <code>images/printers/</code> ao lado deste HTML e salve uma imagem quadrada (300×300px+, fundo neutro) com o nome exato do modelo:</p>
       <ul>
@@ -584,9 +649,9 @@
       <p>Aceita <code>.jpg</code>, <code>.png</code> ou <code>.webp</code> — o site testa sozinho, nessa ordem. Sem o arquivo, continua mostrando o ícone.</p>
       <p><strong>Opção 2 — URL externa:</strong> no código-fonte, procure <code>PRINTER_IMAGE_OVERRIDES</code> perto do início da tag <code>&lt;script&gt;</code> e cole a URL da imagem no id correspondente.</p>
     </div>
-  </details>
+    </div>
+  </div>
 
-  <footer>CUSTO = MATERIAL + ENERGIA + DEPRECIAÇÃO + MÃO DE OBRA</footer>
 </div>
 
 <script type="module">
@@ -787,6 +852,22 @@
       authUserInfo.hidden = true;
     }
   });
+
+  // ============ TROCA DE TELA (principal / configurações / ajuda) ============
+  const mainScreen = document.getElementById('mainScreen');
+  const settingsScreen = document.getElementById('settingsScreen');
+  const helpScreen = document.getElementById('helpScreen');
+
+  function showScreen(nome){
+    mainScreen.hidden = nome !== 'main';
+    settingsScreen.hidden = nome !== 'settings';
+    helpScreen.hidden = nome !== 'help';
+    window.scrollTo(0, 0);
+  }
+  document.getElementById('openSettings').addEventListener('click', () => showScreen('settings'));
+  document.getElementById('closeSettings').addEventListener('click', () => showScreen('main'));
+  document.getElementById('openHelp').addEventListener('click', () => showScreen('help'));
+  document.getElementById('closeHelp').addEventListener('click', () => showScreen('main'));
 
   function saveFieldsToStorage(){
     const data = {};
