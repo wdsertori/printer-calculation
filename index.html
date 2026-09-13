@@ -547,9 +547,19 @@
       <div class="picker-panel" id="printerPanel" hidden></div>
     </div>
 
+    <div class="field no-prefix suffix" id="potenciaCustomField">
+      <label>Potência da impressora<span class="hint">consumo médio, não o pico</span></label>
+      <div class="input-box"><input type="number" id="potencia" value="200" step="10"><span class="unit-suffix">W</span></div>
+    </div>
+
     <div class="active-printer-info" id="activePrinterInfo" hidden>
+      <div class="api-line" id="apiPotenciaLine">Potência: <strong id="apiPotencia">—</strong></div>
       <div class="api-line">Depreciação (máquina + manutenção): <strong id="apiDeprec">—</strong>/h</div>
-      <div class="api-pecas" id="apiPecas"></div>
+      <details class="parts-details" id="apiPecasDetails">
+        <summary>Peças de manutenção — editar custos</summary>
+        <div id="apiPecasEditor"></div>
+        <button type="button" class="save-parts-btn" id="apiSalvarPecas">Salvar peças</button>
+      </details>
     </div>
     <div class="active-printer-empty" id="activePrinterEmpty" hidden>
       Nenhuma impressora sua selecionada — depreciação fica zerada. <a href="#" id="apiGoSettings">Cadastrar em Configurações →</a>
@@ -634,10 +644,6 @@
 
     <div class="card">
       <h2>Energia</h2>
-      <div class="field no-prefix suffix">
-        <label>Potência da impressora<span class="hint">consumo médio, não o pico — ou selecione uma impressora no card 02</span></label>
-        <div class="input-box"><input type="number" id="potencia" value="200" step="10"><span class="unit-suffix">W</span></div>
-      </div>
       <div class="field">
         <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
         <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01"></div>
@@ -798,9 +804,10 @@
     const qtd = Math.max(1, num('qtd'));
     const desperdicio = num('desperdicio');
     const tempoImpressao = (parseFloat(el.tempoHoras.value) || 0) + (parseFloat(el.tempoMinutos.value) || 0) / 60;
-    const potencia = num('potencia');
     const precoKwh = num('precoKwh');
     const ativa = dadosImpressoraAtiva();
+    // Potência: se tem impressora sua selecionada, usa a dela; senão o campo manual.
+    const potencia = ativa ? (ativa.watts || 0) : num('potencia');
     const valorImpressora = ativa ? ativa.precoCompra : 0;
     const vidaUtil = ativa && ativa.vidaUtil ? ativa.vidaUtil : 1;
     const custoManutencaoHora = ativa ? ativa.custoManutencaoHora : 0;
@@ -1094,35 +1101,69 @@
     const ativa = dadosImpressoraAtiva();
     const infoBox = document.getElementById('activePrinterInfo');
     const emptyBox = document.getElementById('activePrinterEmpty');
+    const potenciaField = document.getElementById('potenciaCustomField');
     if (!ativa){
       infoBox.hidden = true;
       emptyBox.hidden = false;
+      potenciaField.hidden = false; // sem impressora cadastrada: digita a potência na mão
       return;
     }
     emptyBox.hidden = true;
     infoBox.hidden = false;
+    potenciaField.hidden = true;    // potência vem da impressora selecionada
+
+    document.getElementById('apiPotencia').textContent = (ativa.watts || 0) + ' W';
     const deprecHora = (ativa.vidaUtil ? ativa.precoCompra / ativa.vidaUtil : 0) + ativa.custoManutencaoHora;
     document.getElementById('apiDeprec').textContent = fmt(deprecHora);
 
+    // Editor de peças inline: mesmos campos de "Dados da impressora", pra não
+    // precisar sair da calculadora pra ajustar custo/intervalo de cada peça.
     const original = lsGet(LS_MEUS, []).find(x => x.id === ativa.minhaImpressoraId);
     const pecas = original ? pecasDoItem(original) : {};
-    const configuradas = PECAS_MANUTENCAO.filter(pm => pecas[pm.id] && pecas[pm.id].custo > 0 && pecas[pm.id].horas > 0);
-    const apiPecasEl = document.getElementById('apiPecas');
-    if (!configuradas.length){
-      apiPecasEl.innerHTML = 'Nenhuma peça de manutenção configurada — edite em "Dados da impressora".';
-    } else {
-      // Link de "comprar" por peça: usa seu link de afiliado se estiver
-      // configurado em catalogo.js, senão cai pra busca no Mercado Livre.
-      apiPecasEl.innerHTML = configuradas.map(pm => {
-        const link = LINKS_COMPRAR_PECA[pm.id] || linkBuscaMercadoLivre(pm.nome + ' impressora 3D');
-        return `<div class="api-peca-row">
-          <span>${pm.nome} — ${fmt(pecas[pm.id].custo)} / ${pecas[pm.id].horas}h</span>
-          <a href="${link}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a>
-        </div>`;
-      }).join('');
-    }
+    document.getElementById('apiPecasEditor').innerHTML = PECAS_MANUTENCAO.map(pm => {
+      const link = LINKS_COMPRAR_PECA[pm.id] || linkBuscaMercadoLivre(pm.nome + ' impressora 3D');
+      return `
+        <div class="peca-row">
+          <span class="peca-nome">${pm.nome} <a href="${link}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a></span>
+          <div class="peca-inputs">
+            <div class="input-box"><span class="unit-mini">R$</span><input type="number" class="api-peca-custo tem-prefixo" data-peca="${pm.id}" value="${pecas[pm.id] ? pecas[pm.id].custo : 0}" step="5"></div>
+            <div class="input-box"><input type="number" class="api-peca-horas" data-peca="${pm.id}" value="${pecas[pm.id] ? pecas[pm.id].horas : 0}" step="50"><span class="unit-mini-suffix">h</span></div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
   document.getElementById('apiGoSettings').addEventListener('click', e => { e.preventDefault(); showScreen('settings'); });
+
+  // Salvar as peças editadas direto no card 02 — grava na impressora ativa e
+  // recalcula a depreciação, sem fechar o accordion.
+  document.getElementById('apiSalvarPecas').addEventListener('click', () => {
+    const ativa = dadosImpressoraAtiva();
+    if (!ativa) return;
+    const list = lsGet(LS_MEUS, []);
+    const item = list.find(x => x.id === ativa.minhaImpressoraId);
+    if (!item) return;
+    const editor = document.getElementById('apiPecasEditor');
+    const novasPecas = {};
+    PECAS_MANUTENCAO.forEach(pm => {
+      const c = editor.querySelector(`.api-peca-custo[data-peca="${pm.id}"]`);
+      const h = editor.querySelector(`.api-peca-horas[data-peca="${pm.id}"]`);
+      novasPecas[pm.id] = { custo: parseFloat(c.value) || 0, horas: parseFloat(h.value) || 0 };
+    });
+    item.pecas = novasPecas;
+    lsSet(LS_MEUS, list);
+
+    document.getElementById('apiDeprec').textContent = fmt(
+      (item.vidaUtil ? item.precoCompra / item.vidaUtil : 0) + custoManutencaoPorHora(item)
+    );
+    renderMinhasImpressoras();
+    calc();
+
+    const btn = document.getElementById('apiSalvarPecas');
+    btn.textContent = 'Salvo ✓';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = 'Salvar peças'; btn.classList.remove('saved'); }, 1600);
+  });
 
   function candidateSources(p){
     const list = [];
@@ -1223,18 +1264,12 @@
       const p = todasImpressoras().find(x => x.id === selBtn.dataset.select);
       setTriggerDisplay(p);
       lsSet(LS_PRINTER, p.id);
-      if (p.watts !== null){ el.potencia.value = p.watts; saveFieldsToStorage(); }
+      // Modelo do catálogo (não é "sua") só sugere a potência no campo manual;
+      // impressora cadastrada tem a potência lida direto dela em calc().
+      if (!p.minhaImpressoraId && p.watts !== null){ el.potencia.value = p.watts; saveFieldsToStorage(); }
       renderActivePrinterInfo();
       calc();
       closePanel();
-    }
-  });
-
-  el.potencia.addEventListener('input', () => {
-    const current = todasImpressoras().find(x => x.id === currentPrinterId);
-    if (current && current.watts !== null && Number(el.potencia.value) !== current.watts){
-      setTriggerDisplay(PRINTERS[0]);
-      lsSet(LS_PRINTER, 'custom');
     }
   });
 
