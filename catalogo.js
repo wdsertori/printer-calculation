@@ -3,7 +3,7 @@
 //
 // Edite este arquivo à vontade pra ir adicionando impressoras, peças e
 // filamentos com o tempo. Não precisa mexer no index.html pra isso — só
-// seguir o padrão de cada lista abaixo (copia uma linha existente, troca
+// seguir o padrão de cada lista abaixo (copia um bloco existente, troca
 // os valores, salva).
 //
 // Depois de editar, é só subir os dois arquivos (index.html + catalogo.js)
@@ -13,35 +13,84 @@
 
 // ----------------------------------------------------------------------------
 // IMPRESSORAS DO CATÁLOGO
-// Aparecem no seletor do card "Impressão & energia" pra qualquer visitante
-// escolher, mesmo sem cadastrar nada. "watts" é o consumo médio DURANTE A
-// IMPRESSÃO (não o pico de aquecimento).
+// Aparecem no seletor do card 02 pra qualquer visitante escolher e já sair
+// calculando, sem precisar cadastrar nada.
 //
-// icon aceita: 'bedslinger' (impressora aberta, mesa que anda pra frente)
+// watts .......... consumo médio DURANTE A IMPRESSÃO (não o pico de aquecimento)
+// precoCompra .... preço de referência em R$ (estimativa de mercado brasileiro)
+// vidaUtil ....... horas de uso estimadas até a máquina "se pagar"/ser trocada
+// intervaloDias .. de quantos em quantos dias fazer uma revisão geral
+// pecas .......... custo (R$) e intervalo de troca (horas) de cada peça
+//
+// icon aceita: 'bedslinger' (aberta, mesa que anda pra frente)
 //            | 'corexy'     (aberta, compacta, mesa fixa)
 //            | 'enclosed'   (câmara fechada)
 //            | 'enclosedAms'(câmara fechada + unidade multicor tipo AMS)
 // ----------------------------------------------------------------------------
 export const CATALOGO_IMPRESSORAS = [
-  { id:'ender3v3se', name:'Creality Ender 3 V3 SE', spec:'aberta · fonte 350 W', watts:110, icon:'bedslinger' },
-  { id:'kobra3', name:'Anycubic Kobra 3', spec:'aberta · fonte 400 W', watts:130, icon:'bedslinger' },
-  { id:'mk4s', name:'Prusa MK4S', spec:'aberta · fonte 240 W', watts:90, icon:'bedslinger' },
-  { id:'crealityhi', name:'Creality Hi', spec:'aberta · pico 390 W (110V)', watts:120, icon:'bedslinger' },
-  { id:'a1mini', name:'Bambu Lab A1 mini', spec:'aberta compacta · fonte 150 W', watts:70, icon:'corexy' },
-  { id:'a1', name:'Bambu Lab A1', spec:'aberta · pico 350 W (110V)', watts:120, icon:'corexy' },
-  { id:'p1s', name:'Bambu Lab P1S', spec:'fechada · pico 350 W (110V)', watts:130, icon:'enclosed' },
-  { id:'x1c', name:'Bambu Lab X1 Carbon', spec:'fechada + AMS · pico 350 W (110V)', watts:140, icon:'enclosedAms' },
-  { id:'k2', name:'Creality K2', spec:'fechada · pico 450 W (+20 W do CFS)', watts:150, icon:'enclosed' },
+  {
+    id:'ender3v3se', fabricante:'Creality', modelo:'Ender 3 V3 SE',
+    spec:'aberta · fonte 350 W', watts:110, icon:'bedslinger',
+    precoCompra:2000, vidaUtil:3000, intervaloDias:90,
+    pecas:{ hotend:{custo:150,horas:2000}, bico:{custo:40,horas:800}, mesa:{custo:180,horas:1500}, filtro:{custo:0,horas:0}, graxa:{custo:25,horas:400} },
+  },
+  {
+    id:'kobra3', fabricante:'Anycubic', modelo:'Kobra 3',
+    spec:'aberta · fonte 400 W', watts:130, icon:'bedslinger',
+    precoCompra:2400, vidaUtil:3000, intervaloDias:90,
+    pecas:{ hotend:{custo:150,horas:2000}, bico:{custo:40,horas:800}, mesa:{custo:180,horas:1500}, filtro:{custo:0,horas:0}, graxa:{custo:25,horas:400} },
+  },
+  {
+    id:'crealityhi', fabricante:'Creality', modelo:'Hi',
+    spec:'aberta · pico 390 W (110V)', watts:120, icon:'bedslinger',
+    precoCompra:2699, vidaUtil:3000, intervaloDias:90,
+    pecas:{ hotend:{custo:150,horas:2000}, bico:{custo:40,horas:800}, mesa:{custo:180,horas:1500}, filtro:{custo:0,horas:0}, graxa:{custo:25,horas:400} },
+  },
+  {
+    id:'a1mini', fabricante:'Bambu Lab', modelo:'A1 mini',
+    spec:'aberta compacta · fonte 150 W', watts:70, icon:'corexy',
+    precoCompra:2500, vidaUtil:4000, intervaloDias:90,
+    pecas:{ hotend:{custo:150,horas:2000}, bico:{custo:40,horas:800}, mesa:{custo:180,horas:1500}, filtro:{custo:0,horas:0}, graxa:{custo:25,horas:400} },
+  },
+  {
+    id:'a1', fabricante:'Bambu Lab', modelo:'A1',
+    spec:'aberta · pico 350 W (110V)', watts:120, icon:'corexy',
+    precoCompra:3200, vidaUtil:4000, intervaloDias:90,
+    pecas:{ hotend:{custo:150,horas:2000}, bico:{custo:40,horas:800}, mesa:{custo:180,horas:1500}, filtro:{custo:0,horas:0}, graxa:{custo:25,horas:400} },
+  },
+  {
+    id:'k2', fabricante:'Creality', modelo:'K2',
+    spec:'fechada · pico 450 W (+20 W do CFS)', watts:150, icon:'enclosed',
+    precoCompra:4600, vidaUtil:5000, intervaloDias:90,
+    pecas:{ hotend:{custo:150,horas:2000}, bico:{custo:40,horas:800}, mesa:{custo:180,horas:1500}, filtro:{custo:50,horas:350}, graxa:{custo:25,horas:400} },
+  },
+  {
+    id:'p1s', fabricante:'Bambu Lab', modelo:'P1S',
+    spec:'fechada · pico 350 W (110V)', watts:130, icon:'enclosed',
+    precoCompra:5000, vidaUtil:6000, intervaloDias:90,
+    pecas:{ hotend:{custo:150,horas:2000}, bico:{custo:40,horas:800}, mesa:{custo:180,horas:1500}, filtro:{custo:50,horas:350}, graxa:{custo:25,horas:400} },
+  },
+  {
+    id:'x1c', fabricante:'Bambu Lab', modelo:'X1 Carbon',
+    spec:'fechada + AMS · pico 350 W (110V)', watts:140, icon:'enclosedAms',
+    precoCompra:14000, vidaUtil:8000, intervaloDias:90,
+    pecas:{ hotend:{custo:150,horas:2000}, bico:{custo:40,horas:800}, mesa:{custo:180,horas:1500}, filtro:{custo:50,horas:350}, graxa:{custo:25,horas:400} },
+  },
 
-  // Pra adicionar uma nova, copia o padrão abaixo (descomenta e edita):
-  // { id:'meu-id-unico', name:'Nome que aparece', spec:'texto curto de descrição', watts:150, icon:'bedslinger' },
+  // Pra adicionar uma nova, copia um bloco acima inteiro e edita:
+  // {
+  //   id:'meu-id-unico', fabricante:'Marca', modelo:'Modelo X',
+  //   spec:'texto curto de descrição', watts:150, icon:'bedslinger',
+  //   precoCompra:3000, vidaUtil:4000, intervaloDias:90,
+  //   pecas:{ hotend:{custo:150,horas:2000}, bico:{custo:40,horas:800}, mesa:{custo:180,horas:1500}, filtro:{custo:0,horas:0}, graxa:{custo:25,horas:400} },
+  // },
 ];
 
 
 // ----------------------------------------------------------------------------
 // PEÇAS DE MANUTENÇÃO
-// Aparecem no card "Peças de manutenção" de cada impressora cadastrada em
-// "Dados da impressora". "id" precisa ser único e sem espaço/acento.
+// Definem quais linhas aparecem no bloco de peças de cada impressora.
+// "id" precisa ser único e sem espaço/acento.
 // ----------------------------------------------------------------------------
 export const CATALOGO_PECAS = [
   { id:'hotend', nome:'Hotend' },
@@ -50,23 +99,31 @@ export const CATALOGO_PECAS = [
   { id:'filtro', nome:'Filtro de ar' },
   { id:'graxa', nome:'Graxa' },
 
-  // Exemplo de como adicionar mais uma:
   // { id:'correia', nome:'Correia' },
 ];
 
 
 // ----------------------------------------------------------------------------
+// TIPOS DE FILAMENTO
+// Alimentam o seletor "Tipo" no cadastro de filamento.
+// ----------------------------------------------------------------------------
+export const CATALOGO_TIPOS_FILAMENTO = [
+  'PLA', 'PETG', 'ABS', 'ASA', 'TPU', 'Nylon (PA)', 'PC', 'PLA-CF', 'PETG-CF', 'HIPS', 'PVA', 'Outro',
+];
+
+
+// ----------------------------------------------------------------------------
 // FILAMENTOS SUGERIDOS
-// Aparecem como atalho de preenchimento em "Dados do filamento" (Configurações)
-// — quem visita o site pode escolher um desses em vez de cadastrar do zero.
-// precoKg é só uma sugestão de partida, cada pessoa pode ajustar o preço dela.
+// Atalho de preenchimento em "Dados do filamento" (Configurações).
 // ----------------------------------------------------------------------------
 export const CATALOGO_FILAMENTOS = [
-  { id:'pla_generico', nome:'PLA genérico', precoKg:120 },
-  { id:'petg_generico', nome:'PETG genérico', precoKg:135 },
-  { id:'abs_generico', nome:'ABS genérico', precoKg:110 },
+  { id:'pla_generico', nome:'PLA genérico', tipo:'PLA', precoKg:120 },
+  { id:'petg_generico', nome:'PETG genérico', tipo:'PETG', precoKg:135 },
+  { id:'abs_generico', nome:'ABS genérico', tipo:'ABS', precoKg:110 },
+  { id:'tpu_generico', nome:'TPU genérico', tipo:'TPU', precoKg:190 },
+  { id:'nylon_generico', nome:'Nylon genérico', tipo:'Nylon (PA)', precoKg:260 },
 
-  // { id:'meu-filamento', nome:'Nome que aparece', precoKg:130 },
+  // { id:'meu-filamento', nome:'Nome que aparece', tipo:'PLA', precoKg:130 },
 ];
 
 
@@ -75,24 +132,20 @@ export const CATALOGO_FILAMENTOS = [
 // no site (por segurança, e pra ninguém trocar seu link sem querer).
 //
 // Cole sua URL de afiliado no id correspondente. Deixe comentado (com // na
-// frente) ou vazio pra não mostrar o botão "Comprar" naquele item.
+// frente) ou vazio pra cair na busca automática do Mercado Livre.
 //
-// Isso só funciona pros itens FIXOS acima (catálogo de impressoras e peças),
-// porque eles têm um "id" estável. Filamentos e impressoras que cada pessoa
-// cadastra na hora (nome livre) não têm como receber link de afiliado fixo —
-// pra esses, o site gera sozinho um link de busca no Mercado Livre usando o
-// nome digitado, só pra não deixar a pessoa sem nenhum link.
+// Sem link cadastrado, o site monta sozinho uma busca no Mercado Livre com
+// "peça + modelo + fabricante" (ex: "Bico Ender 3 V3 SE Creality").
 // ============================================================================
 export const LINKS_AFILIADO_IMPRESSORA = {
   // ender3v3se: 'https://seulink.com/ender3v3se?afiliado=SEUCODIGO',
   // kobra3: 'https://seulink.com/...',
-  // mk4s: 'https://seulink.com/...',
   // crealityhi: 'https://seulink.com/...',
   // a1mini: 'https://seulink.com/...',
   // a1: 'https://seulink.com/...',
+  // k2: 'https://seulink.com/...',
   // p1s: 'https://seulink.com/...',
   // x1c: 'https://seulink.com/...',
-  // k2: 'https://seulink.com/...',
 };
 
 export const LINKS_AFILIADO_PECA = {
@@ -107,14 +160,15 @@ export const LINKS_AFILIADO_FILAMENTO = {
   // pla_generico: 'https://seulink.com/...',
   // petg_generico: 'https://seulink.com/...',
   // abs_generico: 'https://seulink.com/...',
+  // tpu_generico: 'https://seulink.com/...',
+  // nylon_generico: 'https://seulink.com/...',
 };
 
 
 // ----------------------------------------------------------------------------
 // FOTOS REAIS DAS IMPRESSORAS (opcional)
 // Cole a URL de uma imagem pra usar no lugar do ícone genérico. Alternativa:
-// salvar o arquivo em images/printers/{id}.jpg (ou .png/.webp) — ver "Ajuda"
-// no site pra mais detalhes.
+// salvar o arquivo em images/printers/{id}.jpg (ou .png/.webp).
 // ----------------------------------------------------------------------------
 export const PRINTER_IMAGE_OVERRIDES = {
   // ender3v3se: 'https://exemplo.com/ender3.jpg',

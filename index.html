@@ -264,6 +264,26 @@
   .picker-wrap{position:relative; margin-top:2px; padding:14px 0 16px; border-top:1px solid var(--grid-line);}
   .active-printer-info{margin-top:-6px; padding-bottom:14px; font-size:12px; color:var(--text-dim); line-height:1.6;}
   .active-printer-info .api-line strong{color:var(--accent); font-family:'IBM Plex Mono',monospace;}
+  .active-printer-info .api-sub{font-size:11px; margin-top:3px;}
+  .active-printer-info .api-sub a{color:var(--accent); text-decoration:none;}
+  .active-printer-info .api-sub a:hover{text-decoration:underline;}
+  .mp-edit-field{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 0; border-top:1px dashed var(--grid-line);}
+  .mp-edit-field label{font-size:12px; color:var(--text);}
+  .mp-edit-field .input-box{position:relative; width:106px; flex-shrink:0;}
+  .mp-edit-field input{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:3px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:12.5px; padding:8px 24px 8px 8px; text-align:right;}
+  .mp-edit-field input[type=text]{text-align:left; font-family:'IBM Plex Sans',sans-serif;}
+  .mp-edit-field input:focus{outline:none; border-color:var(--accent);}
+  .mp-edit-field .unit-mini-suffix{position:absolute; right:7px; top:50%; transform:translateY(-50%); font-size:10.5px; color:var(--text-dim); pointer-events:none;}
+  .mp-edit-field.wide-input .input-box{width:150px;}
+  .parts-subtitle{font-size:10.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin:12px 0 2px; letter-spacing:.02em;}
+  .mp-item{border-top:1px solid var(--grid-line); margin-top:0;}
+  .mp-item > summary{font-size:13.5px; color:var(--text); font-family:'IBM Plex Sans',sans-serif; padding:13px 0; gap:8px; flex-wrap:wrap;}
+  .mp-item > summary::before{color:var(--text-dim);}
+  .saved-item-actions{display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;}
+  .saved-item-actions button, .saved-item-actions .buy-link-action{flex:1; min-width:84px; background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); border-radius:4px; padding:9px 10px; font-size:11.5px; font-family:'IBM Plex Mono',monospace; cursor:pointer; text-align:center; text-decoration:none;}
+  .saved-item-actions button:hover{color:var(--text); border-color:var(--accent);}
+  .saved-item-actions button.danger:hover{color:var(--danger); border-color:var(--danger);}
+  .saved-item-actions .buy-link-action{background:var(--accent-soft); border-color:rgba(230,126,51,0.4); color:var(--accent);}
   .active-printer-info .api-pecas{margin-top:3px; font-family:'IBM Plex Mono',monospace; font-size:11px;}
   .api-peca-row{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:3px 0;}
   .active-filament-info{margin-top:-6px; padding-bottom:14px; font-size:11.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; display:flex; justify-content:space-between; align-items:baseline; gap:10px;}
@@ -528,7 +548,7 @@
     </details>
   </div>
   <div class="card" id="printerCard">
-    <h2><span class="n">02</span> Impressão &amp; energia</h2>
+    <h2><span class="n">02</span> Impressão</h2>
     <div class="field no-prefix time-field">
       <label>Tempo de impressão<span class="hint">duração total do lote</span></label>
       <div class="time-inputs">
@@ -538,31 +558,21 @@
     </div>
 
     <div class="picker-wrap" id="printerWrap">
-      <div class="picker-caption">Impressora ativa — toque pra trocar</div>
+      <div class="picker-caption">Impressora — toque pra trocar</div>
       <button type="button" class="picker-trigger" id="printerTrigger" aria-haspopup="listbox" aria-expanded="false">
         <span class="picker-icon" id="printerIcon"></span>
-        <span class="picker-label" id="printerLabel">Personalizado</span>
+        <span class="picker-label" id="printerLabel">Escolher impressora</span>
         <span class="picker-chevron">▾</span>
       </button>
       <div class="picker-panel" id="printerPanel" hidden></div>
     </div>
 
-    <div class="field no-prefix suffix" id="potenciaCustomField">
-      <label>Potência da impressora<span class="hint">consumo médio, não o pico</span></label>
-      <div class="input-box"><input type="number" id="potencia" value="200" step="10"><span class="unit-suffix">W</span></div>
-    </div>
-
     <div class="active-printer-info" id="activePrinterInfo" hidden>
-      <div class="api-line" id="apiPotenciaLine">Potência: <strong id="apiPotencia">—</strong></div>
-      <div class="api-line">Depreciação (máquina + manutenção): <strong id="apiDeprec">—</strong>/h</div>
-      <details class="parts-details" id="apiPecasDetails">
-        <summary>Peças de manutenção — editar custos</summary>
-        <div id="apiPecasEditor"></div>
-        <button type="button" class="save-parts-btn" id="apiSalvarPecas">Salvar peças</button>
-      </details>
+      <div class="api-line"><strong id="apiPotencia">—</strong> · depreciação <strong id="apiDeprec">—</strong>/h</div>
+      <div class="api-line api-sub">Editar potência, preço, vida útil e peças: <a href="#" id="apiGoSettingsEdit">Configurações →</a></div>
     </div>
     <div class="active-printer-empty" id="activePrinterEmpty" hidden>
-      Nenhuma impressora sua selecionada — depreciação fica zerada. <a href="#" id="apiGoSettings">Cadastrar em Configurações →</a>
+      Escolha uma impressora acima pra calcular energia e depreciação.
     </div>
   </div>
   <div class="card">
@@ -634,6 +644,10 @@
         <label for="filNome">Nome do filamento</label>
         <input type="text" id="filNome" placeholder="ex: PLA Preto Voolt">
       </div>
+      <div class="text-field">
+        <label for="filTipo">Tipo</label>
+        <select id="filTipo" class="mp-template-select"></select>
+      </div>
       <div class="field">
         <label>Preço por kg<span class="hint">pra cadastrar na lista</span></label>
         <div class="input-box"><span class="unit">R$</span><input type="number" id="filPreco" step="5"></div>
@@ -660,36 +674,15 @@
 
     <div class="card">
       <h2>Dados da impressora</h2>
-    <p class="card-desc">Cadastre suas impressoras — selecionando uma no card 02 da calculadora já preenche tudo automaticamente.</p>
-    <div class="text-field">
-      <label for="mpTemplate">Preencher com modelo do catálogo (opcional)</label>
-      <select id="mpTemplate" class="mp-template-select">
-        <option value="">— nenhum, preencher na mão —</option>
-      </select>
-      <p class="mp-template-hint">Preenche nome, potência e uma estimativa de peças de manutenção baseada em preço/vida útil médios de mercado (não é específico do fabricante) — ajuste com o preço real que você paga.</p>
-    </div>
-    <div class="text-field">
-      <label for="mpNome">Nome</label>
-      <input type="text" id="mpNome" placeholder="ex: Minha Ender 3 V3 SE">
-    </div>
-    <div class="field suffix">
-      <label>Potência<span class="hint">consumo médio da sua impressora</span></label>
-      <div class="input-box"><input type="number" id="mpPotencia" step="10"><span class="unit-suffix">W</span></div>
-    </div>
-    <div class="field">
-      <label>Preço de compra<span class="hint">quanto você pagou</span></label>
-      <div class="input-box"><span class="unit">R$</span><input type="number" id="mpPreco" step="50"></div>
-    </div>
-    <div class="field no-prefix suffix">
-      <label>Vida útil estimada<span class="hint">horas de uso até troca</span></label>
-      <div class="input-box"><input type="number" id="mpVidaUtil" value="5000" step="100"><span class="unit-suffix">h</span></div>
-    </div>
-    <div class="field no-prefix suffix wide">
-      <label>Intervalo de manutenção<span class="hint">a cada quantos dias revisar</span></label>
-      <div class="input-box"><input type="number" id="mpIntervalo" value="90" step="10"><span class="unit-suffix">dias</span></div>
-    </div>
-    <button type="button" class="save-btn" id="mpAddBtn">Adicionar impressora</button>
-    <div id="mpLista"></div>
+      <p class="card-desc">Suas impressoras. Toque numa pra abrir e editar tudo — potência, preço, vida útil e peças de reposição.</p>
+      <div class="text-field">
+        <label for="mpTemplate">Começar a partir de um modelo do catálogo (opcional)</label>
+        <select id="mpTemplate" class="mp-template-select">
+          <option value="">— em branco, copiando meus maiores valores —</option>
+        </select>
+      </div>
+      <button type="button" class="save-btn" id="mpAddBtn">Adicionar impressora</button>
+      <div id="mpLista"></div>
     </div>
   </div>
 
@@ -753,7 +746,7 @@
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
   import {
-    CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS,
+    CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS, CATALOGO_TIPOS_FILAMENTO,
     LINKS_AFILIADO_IMPRESSORA as LINKS_COMPRAR_IMPRESSORA,
     LINKS_AFILIADO_PECA as LINKS_COMPRAR_PECA,
     LINKS_AFILIADO_FILAMENTO,
@@ -776,7 +769,7 @@
   let cloudSyncTimer = null;
   let aplicandoDadosDaNuvem = false; // trava pra não reenviar pra nuvem o que acabou de baixar dela
   // ============ CAMPOS PRINCIPAIS ============
-  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','potencia','precoKwh','tempoManualHoras','tempoManualMinutos','valorHora','markup'];
+  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','precoKwh','tempoManualHoras','tempoManualMinutos','valorHora','markup'];
   const el = {};
   ids.forEach(id => {
     el[id] = document.getElementById(id);
@@ -807,7 +800,7 @@
     const precoKwh = num('precoKwh');
     const ativa = dadosImpressoraAtiva();
     // Potência: se tem impressora sua selecionada, usa a dela; senão o campo manual.
-    const potencia = ativa ? (ativa.watts || 0) : num('potencia');
+    const potencia = ativa ? (ativa.watts || 0) : 0;
     const valorImpressora = ativa ? ativa.precoCompra : 0;
     const vidaUtil = ativa && ativa.vidaUtil ? ativa.vidaUtil : 1;
     const custoManutencaoHora = ativa ? ativa.custoManutencaoHora : 0;
@@ -921,8 +914,8 @@
         aplicandoDadosDaNuvem = false;
 
         loadFieldsFromStorage();
-        const savedPrinterId = lsGet(LS_PRINTER, 'custom');
-        setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || PRINTERS[0]);
+        const savedPrinterId = lsGet(LS_PRINTER, '');
+        setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || null);
         const savedFilamentId = lsGet(LS_FILAMENT_ID, 'custom');
         setFilamentDisplay(todosFilamentos().find(f => f.id === savedFilamentId) || todosFilamentos()[0]);
         renderOrcamentos();
@@ -1023,33 +1016,29 @@
   // ver esse arquivo pra adicionar/editar itens.
   const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp'];
 
-  // Filamentos e impressoras cadastradas à mão não têm id fixo (nome é livre),
-  // então esses dois usam busca automática no Mercado Livre pelo nome digitado,
-  // em vez de link fixo por item.
-  function linkBuscaMercadoLivre(nome){
-    return `https://lista.mercadolivre.com.br/${encodeURIComponent(nome)}`;
+  // Sem link de afiliado cadastrado em catalogo.js, monta uma busca no
+  // Mercado Livre. Pra peças, inclui modelo + fabricante pra afinar o resultado.
+  function linkBuscaMercadoLivre(termo){
+    return `https://lista.mercadolivre.com.br/${encodeURIComponent(termo)}`;
   }
-  // Pra impressoras cadastradas em "Dados da impressora": se o nome bate com um
-  // modelo do catálogo (ex: veio do "Preencher com modelo"), usa o link fixo
-  // configurado em catalogo.js; senão cai pra busca automática pelo nome.
-  function linkComprarImpressoraPorNome(nome){
-    const catalogo = PRINTERS.find(p => p.name === nome);
-    if (catalogo && LINKS_COMPRAR_IMPRESSORA[catalogo.id]) return LINKS_COMPRAR_IMPRESSORA[catalogo.id];
-    return linkBuscaMercadoLivre(nome);
+  function linkComprarImpressora(p){
+    if (p.catalogoId && LINKS_COMPRAR_IMPRESSORA[p.catalogoId]) return LINKS_COMPRAR_IMPRESSORA[p.catalogoId];
+    return linkBuscaMercadoLivre(`${p.fabricante} ${p.modelo} impressora 3D`);
   }
-  // Mesma lógica, mas pra filamentos: bate o nome com o catálogo sugerido.
+  function linkComprarPeca(pecaNome, impressora){
+    const pm = PECAS_MANUTENCAO.find(x => x.nome === pecaNome);
+    if (pm && LINKS_COMPRAR_PECA[pm.id]) return LINKS_COMPRAR_PECA[pm.id];
+    const sufixo = impressora ? ` ${impressora.modelo} ${impressora.fabricante}` : ' impressora 3D';
+    return linkBuscaMercadoLivre(pecaNome + sufixo);
+  }
   function linkComprarFilamentoPorNome(nome){
     const catalogo = CATALOGO_FILAMENTOS.find(f => f.nome === nome);
     if (catalogo && LINKS_AFILIADO_FILAMENTO[catalogo.id]) return LINKS_AFILIADO_FILAMENTO[catalogo.id];
-    return linkBuscaMercadoLivre(nome);
+    return linkBuscaMercadoLivre(nome + ' filamento impressora 3D');
   }
 
-  // Potências médias DURANTE A IMPRESSÃO (não o pico de aquecimento) — ver
-  // catalogo.js pra adicionar mais modelos ou editar os existentes.
-  const PRINTERS = [
-    { id:'custom', name:'Personalizado', spec:'digite o valor manualmente', watts:null, icon:'edit' },
-    ...CATALOGO_IMPRESSORAS,
-  ];
+  // Catálogo do GitHub — ver catalogo.js pra adicionar/editar modelos.
+  const PRINTERS = CATALOGO_IMPRESSORAS;
 
   function printerIconSvg(type){
     const a = 'viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
@@ -1070,100 +1059,63 @@
     }
   }
 
-  // Junta o catálogo fixo com as impressoras que você cadastrou em
-  // "Dados da impressora" (Configurações) — selecionar qualquer uma no
-  // seletor abaixo já preenche tudo que tiver disponível pra ela.
+  // Lista unificada do seletor: catálogo do GitHub + as que você cadastrou.
+  // Ambas vêm completas (potência, preço, vida útil, peças), então qualquer
+  // uma dá pra usar direto no cálculo.
   function todasImpressoras(){
+    const doCatalogo = CATALOGO_IMPRESSORAS.map(c => ({
+      id: c.id,
+      catalogoId: c.id,
+      fabricante: c.fabricante,
+      modelo: c.modelo,
+      name: `${c.fabricante} ${c.modelo}`,
+      spec: c.spec,
+      watts: c.watts,
+      icon: c.icon,
+      precoCompra: c.precoCompra,
+      vidaUtil: c.vidaUtil,
+      intervaloDias: c.intervaloDias,
+      custoManutencaoHora: custoManutencaoPorHora(c),
+    }));
     const meus = lsGet(LS_MEUS, []).map(item => ({
       id: 'meu_' + item.id,
-      name: item.nome,
-      spec: `sua impressora · ${item.potencia || 0} W`,
-      watts: item.potencia || null,
-      icon: 'minha',
       minhaImpressoraId: item.id,
+      fabricante: item.fabricante || '',
+      modelo: item.modelo || '',
+      name: `${item.fabricante || ''} ${item.modelo || ''}`.trim() || 'Sem nome',
+      spec: `minha · ${item.potencia || 0} W`,
+      watts: item.potencia || 0,
+      icon: 'minha',
       precoCompra: item.precoCompra || 0,
       vidaUtil: item.vidaUtil || 0,
+      intervaloDias: item.intervaloDias || 90,
       custoManutencaoHora: custoManutencaoPorHora(item),
     }));
-    return [PRINTERS[0], ...meus, ...PRINTERS.slice(1)];
+    return [...meus, ...doCatalogo];
   }
 
-  // A impressora atualmente selecionada no seletor — só retorna dado se for
-  // uma cadastrada por você (catálogo genérico não tem preço/vida útil real).
   function dadosImpressoraAtiva(){
-    const p = todasImpressoras().find(x => x.id === currentPrinterId);
-    return (p && p.minhaImpressoraId) ? p : null;
+    return todasImpressoras().find(x => x.id === currentPrinterId) || null;
   }
 
-  // Mostra, junto do seletor, a depreciação e a lista de peças da impressora
-  // ativa — atualiza sempre que a seleção muda ou os dados dela são editados.
+  // Resumo compacto da impressora ativa (potência + depreciação por hora).
+  // A edição dos dados fica em Configurações, pra não duplicar campos.
   function renderActivePrinterInfo(){
     const ativa = dadosImpressoraAtiva();
     const infoBox = document.getElementById('activePrinterInfo');
     const emptyBox = document.getElementById('activePrinterEmpty');
-    const potenciaField = document.getElementById('potenciaCustomField');
     if (!ativa){
       infoBox.hidden = true;
       emptyBox.hidden = false;
-      potenciaField.hidden = false; // sem impressora cadastrada: digita a potência na mão
       return;
     }
     emptyBox.hidden = true;
     infoBox.hidden = false;
-    potenciaField.hidden = true;    // potência vem da impressora selecionada
-
     document.getElementById('apiPotencia').textContent = (ativa.watts || 0) + ' W';
     const deprecHora = (ativa.vidaUtil ? ativa.precoCompra / ativa.vidaUtil : 0) + ativa.custoManutencaoHora;
     document.getElementById('apiDeprec').textContent = fmt(deprecHora);
-
-    // Editor de peças inline: mesmos campos de "Dados da impressora", pra não
-    // precisar sair da calculadora pra ajustar custo/intervalo de cada peça.
-    const original = lsGet(LS_MEUS, []).find(x => x.id === ativa.minhaImpressoraId);
-    const pecas = original ? pecasDoItem(original) : {};
-    document.getElementById('apiPecasEditor').innerHTML = PECAS_MANUTENCAO.map(pm => {
-      const link = LINKS_COMPRAR_PECA[pm.id] || linkBuscaMercadoLivre(pm.nome + ' impressora 3D');
-      return `
-        <div class="peca-row">
-          <span class="peca-nome">${pm.nome} <a href="${link}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a></span>
-          <div class="peca-inputs">
-            <div class="input-box"><span class="unit-mini">R$</span><input type="number" class="api-peca-custo tem-prefixo" data-peca="${pm.id}" value="${pecas[pm.id] ? pecas[pm.id].custo : 0}" step="5"></div>
-            <div class="input-box"><input type="number" class="api-peca-horas" data-peca="${pm.id}" value="${pecas[pm.id] ? pecas[pm.id].horas : 0}" step="50"><span class="unit-mini-suffix">h</span></div>
-          </div>
-        </div>
-      `;
-    }).join('');
   }
-  document.getElementById('apiGoSettings').addEventListener('click', e => { e.preventDefault(); showScreen('settings'); });
-
-  // Salvar as peças editadas direto no card 02 — grava na impressora ativa e
-  // recalcula a depreciação, sem fechar o accordion.
-  document.getElementById('apiSalvarPecas').addEventListener('click', () => {
-    const ativa = dadosImpressoraAtiva();
-    if (!ativa) return;
-    const list = lsGet(LS_MEUS, []);
-    const item = list.find(x => x.id === ativa.minhaImpressoraId);
-    if (!item) return;
-    const editor = document.getElementById('apiPecasEditor');
-    const novasPecas = {};
-    PECAS_MANUTENCAO.forEach(pm => {
-      const c = editor.querySelector(`.api-peca-custo[data-peca="${pm.id}"]`);
-      const h = editor.querySelector(`.api-peca-horas[data-peca="${pm.id}"]`);
-      novasPecas[pm.id] = { custo: parseFloat(c.value) || 0, horas: parseFloat(h.value) || 0 };
-    });
-    item.pecas = novasPecas;
-    lsSet(LS_MEUS, list);
-
-    document.getElementById('apiDeprec').textContent = fmt(
-      (item.vidaUtil ? item.precoCompra / item.vidaUtil : 0) + custoManutencaoPorHora(item)
-    );
-    renderMinhasImpressoras();
-    calc();
-
-    const btn = document.getElementById('apiSalvarPecas');
-    btn.textContent = 'Salvo ✓';
-    btn.classList.add('saved');
-    setTimeout(() => { btn.textContent = 'Salvar peças'; btn.classList.remove('saved'); }, 1600);
-  });
+  document.getElementById('apiGoSettingsEdit').addEventListener('click', e => { e.preventDefault(); showScreen('settings'); });
 
   function candidateSources(p){
     const list = [];
@@ -1199,24 +1151,15 @@
   function orderedPrinters(){
     const favs = lsGet(LS_FAVS, []);
     const todas = todasImpressoras();
-    const custom = todas.filter(p => p.id === 'custom');
-    const rest = todas.filter(p => p.id !== 'custom');
-    const favd = rest.filter(p => favs.includes(p.id));
-    const other = rest.filter(p => !favs.includes(p.id));
-    return [...custom, ...favd, ...other];
-  }
-
-  function linkComprarPickerItem(p){
-    if (p.id === 'custom') return null;
-    return LINKS_COMPRAR_IMPRESSORA[p.id] || linkBuscaMercadoLivre(p.name);
+    const favd = todas.filter(p => favs.includes(p.id));
+    const other = todas.filter(p => !favs.includes(p.id));
+    return [...favd, ...other];
   }
 
   function renderPanelList(){
     const favs = lsGet(LS_FAVS, []);
     const list = orderedPrinters();
-    printerPanel.innerHTML = list.map(p => {
-      const link = linkComprarPickerItem(p);
-      return `
+    const itens = list.map(p => `
       <div class="printer-opt${p.id === currentPrinterId ? ' selected' : ''}" data-id="${p.id}">
         <button type="button" class="printer-opt-main" data-select="${p.id}">
           <span class="picker-icon" data-slot="${p.id}"></span>
@@ -1224,13 +1167,24 @@
             <span class="name">${p.name}</span>
             <span class="spec">${p.spec}</span>
           </span>
-          <span class="watts">${p.watts !== null ? p.watts + ' W' : ''}</span>
+          <span class="watts">${p.watts ? p.watts + ' W' : ''}</span>
         </button>
-        ${link ? `<a href="${link}" target="_blank" rel="noopener" class="buy-link-btn" aria-label="Comprar" onclick="event.stopPropagation()">🛒</a>` : ''}
-        ${p.id !== 'custom' ? `<button type="button" class="fav-btn${favs.includes(p.id) ? ' active' : ''}" data-fav="${p.id}" aria-label="Favoritar">${favs.includes(p.id) ? '★' : '☆'}</button>` : '<span style="width:36px;flex-shrink:0"></span>'}
+        <a href="${linkComprarImpressora(p)}" target="_blank" rel="noopener" class="buy-link-btn" aria-label="Comprar">🛒</a>
+        <button type="button" class="fav-btn${favs.includes(p.id) ? ' active' : ''}" data-fav="${p.id}" aria-label="Favoritar">${favs.includes(p.id) ? '★' : '☆'}</button>
+      </div>
+    `).join('');
+    // Último item da lista: atalho pra cadastrar uma impressora nova.
+    const addItem = `
+      <div class="printer-opt">
+        <button type="button" class="printer-opt-main" data-addprinter="1">
+          <span class="picker-icon">${printerIconSvg('edit')}</span>
+          <span class="meta"><span class="name">+ Adicionar impressora</span>
+          <span class="spec">cadastrar a sua em Configurações</span></span>
+        </button>
+        <span style="width:36px;flex-shrink:0"></span>
       </div>
     `;
-    }).join('');
+    printerPanel.innerHTML = itens + addItem;
     list.forEach(p => {
       const slot = printerPanel.querySelector(`[data-slot="${p.id}"]`);
       if (slot) fillVisual(slot, p);
@@ -1238,6 +1192,12 @@
   }
 
   function setTriggerDisplay(p){
+    if (!p){ // nenhuma impressora escolhida ainda
+      printerIconEl.innerHTML = printerIconSvg('edit');
+      printerLabelEl.textContent = 'Escolher impressora';
+      currentPrinterId = null;
+      return;
+    }
     fillVisual(printerIconEl, p);
     printerLabelEl.textContent = p.name;
     currentPrinterId = p.id;
@@ -1259,14 +1219,16 @@
       renderPanelList();
       return;
     }
+    if (e.target.closest('[data-addprinter]')){
+      closePanel();
+      showScreen('settings');
+      return;
+    }
     const selBtn = e.target.closest('[data-select]');
     if (selBtn){
       const p = todasImpressoras().find(x => x.id === selBtn.dataset.select);
       setTriggerDisplay(p);
       lsSet(LS_PRINTER, p.id);
-      // Modelo do catálogo (não é "sua") só sugere a potência no campo manual;
-      // impressora cadastrada tem a potência lida direto dela em calc().
-      if (!p.minhaImpressoraId && p.watts !== null){ el.potencia.value = p.watts; saveFieldsToStorage(); }
       renderActivePrinterInfo();
       calc();
       closePanel();
@@ -1346,14 +1308,18 @@
 
   const filTemplate = document.getElementById('filTemplate');
   const filNome = document.getElementById('filNome');
+  const filTipo = document.getElementById('filTipo');
   const filPreco = document.getElementById('filPreco');
   const filLista = document.getElementById('filLista');
+
+  filTipo.innerHTML = CATALOGO_TIPOS_FILAMENTO
+    .map(t => `<option value="${t}">${t}</option>`).join('');
 
   filTemplate.innerHTML += CATALOGO_FILAMENTOS
     .map(f => `<option value="${f.id}">${f.nome}</option>`).join('');
   filTemplate.addEventListener('change', () => {
     const f = CATALOGO_FILAMENTOS.find(x => x.id === filTemplate.value);
-    if (f){ filNome.value = f.nome; filPreco.value = f.precoKg; }
+    if (f){ filNome.value = f.nome; filPreco.value = f.precoKg; if (f.tipo) filTipo.value = f.tipo; }
   });
 
   function renderFilamentos(){
@@ -1361,7 +1327,7 @@
     if (!list.length){ filLista.innerHTML = '<div class="empty-hint">Nenhum filamento cadastrado ainda.</div>'; return; }
     filLista.innerHTML = list.map(f => `
       <div class="saved-item" data-id="${f.id}">
-        <div class="nome">${escapeHtml(f.nome)}</div>
+        <div class="nome">${escapeHtml(f.nome)}${f.tipo ? ` <span class="badge neutral">${escapeHtml(f.tipo)}</span>` : ''}</div>
         <div class="info">R$ ${f.precoKg.toFixed(2)}/kg</div>
         <div class="actions">
           <a href="${linkComprarFilamentoPorNome(f.nome)}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
@@ -1376,7 +1342,7 @@
     const preco = parseFloat(filPreco.value) || 0;
     if (!nome || preco <= 0) { filNome.focus(); return; }
     const list = lsGet(LS_FILS, []);
-    list.unshift({ id: Date.now().toString(36), nome, precoKg: preco });
+    list.unshift({ id: Date.now().toString(36), nome, tipo: filTipo.value, precoKg: preco });
     lsSet(LS_FILS, list);
     filTemplate.value = '';
     filNome.value = ''; filPreco.value = '';
@@ -1807,48 +1773,39 @@
     renderStlPreview();
   });
 
-  // ============ MINHAS IMPRESSORAS (potência, preço, manutenção) ============
+  // ============ DADOS DA IMPRESSORA (cadastro e edição) ============
   const LS_MEUS = 'c3d_minhas_impressoras';
   const mpTemplate = document.getElementById('mpTemplate');
-  const mpNome = document.getElementById('mpNome');
-  const mpPotencia = document.getElementById('mpPotencia');
-  const mpPreco = document.getElementById('mpPreco');
-  const mpVidaUtil = document.getElementById('mpVidaUtil');
-  const mpIntervalo = document.getElementById('mpIntervalo');
   const mpLista = document.getElementById('mpLista');
 
-  // Peças de desgaste comuns — cada uma com custo de reposição e o intervalo
-  // (em horas de impressão) até precisar trocar. É referência/planejamento,
-  // não entra automaticamente no cálculo do resultado principal. Lista vem
-  // de catalogo.js — edite lá pra adicionar mais tipos de peça.
+  // Lista de peças vem de catalogo.js.
   const PECAS_MANUTENCAO = CATALOGO_PECAS;
 
-  // Valores recomendados de partida — baseados em dados gerais de mercado
-  // (preço médio + vida útil típica por peça, majoritariamente independente
-  // de marca; o que muda o intervalo de verdade é o material impresso, não
-  // o modelo da impressora). São estimativas em R$, ajuste com o preço real
-  // que você paga. Filtro de ar só se aplica a impressoras com câmara fechada.
-  const MODELOS_CAMARA_FECHADA = ['p1s', 'x1c', 'k2'];
-  function pecasRecomendadasPara(printerId){
-    const fechada = MODELOS_CAMARA_FECHADA.includes(printerId);
+  mpTemplate.innerHTML += CATALOGO_IMPRESSORAS
+    .map(p => `<option value="${p.id}">${p.fabricante} ${p.modelo}</option>`).join('');
+
+  // Nova impressora em branco: copia os MAIORES valores das que você já tem
+  // (se errar, que erre pra cima). Sem nenhuma cadastrada, usa o topo do catálogo.
+  function valoresIniciaisNovaImpressora(){
+    const meus = lsGet(LS_MEUS, []);
+    const base = meus.length ? meus : CATALOGO_IMPRESSORAS;
+    const maior = campo => Math.max(...base.map(x => Number(x[campo]) || 0), 0);
+    const pecas = {};
+    PECAS_MANUTENCAO.forEach(pm => {
+      pecas[pm.id] = {
+        custo: Math.max(...base.map(x => (x.pecas && x.pecas[pm.id] ? Number(x.pecas[pm.id].custo) || 0 : 0)), 0),
+        horas: Math.max(...base.map(x => (x.pecas && x.pecas[pm.id] ? Number(x.pecas[pm.id].horas) || 0 : 0)), 0),
+      };
+    });
     return {
-      hotend: { custo:150, horas:2000 },
-      bico: { custo:40, horas:800 },
-      mesa: { custo:180, horas:1500 },
-      filtro: fechada ? { custo:50, horas:350 } : { custo:0, horas:0 },
-      graxa: { custo:25, horas:400 },
+      fabricante: '', modelo: '',
+      potencia: maior('potencia') || maior('watts'),
+      precoCompra: maior('precoCompra'),
+      vidaUtil: maior('vidaUtil') || 5000,
+      intervaloDias: maior('intervaloDias') || 90,
+      pecas,
     };
   }
-
-  mpTemplate.innerHTML += PRINTERS.filter(p => p.id !== 'custom')
-    .map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-  mpTemplate.addEventListener('change', () => {
-    const p = PRINTERS.find(x => x.id === mpTemplate.value);
-    if (p){
-      mpNome.value = p.name;
-      if (p.watts) mpPotencia.value = p.watts;
-    }
-  });
 
   function pecasDoItem(item){
     const p = item.pecas || {};
@@ -1870,26 +1827,26 @@
   function statusManutencao(item){
     if (!item.ultimaManutencao) return { label:'sem registro', cls:'neutral' };
     const dias = Math.floor((Date.now() - new Date(item.ultimaManutencao).getTime()) / 86400000);
-    const restante = item.intervaloDias - dias;
-    if (restante > item.intervaloDias * 0.2) return { label:`próxima em ${restante}d`, cls:'ok' };
+    const restante = (item.intervaloDias || 90) - dias;
+    if (restante > (item.intervaloDias || 90) * 0.2) return { label:`próxima em ${restante}d`, cls:'ok' };
     if (restante >= 0) return { label:`atenção · ${restante}d`, cls:'warn' };
     return { label:`atrasada ${Math.abs(restante)}d`, cls:'late' };
   }
 
   function renderMinhasImpressoras(){
     const list = lsGet(LS_MEUS, []);
-    if (!list.length){ mpLista.innerHTML = '<div class="empty-hint">Nenhuma impressora cadastrada ainda.</div>'; return; }
+    if (!list.length){ mpLista.innerHTML = '<div class="empty-hint">Nenhuma impressora cadastrada ainda. Use o botão acima.</div>'; return; }
     const favs = lsGet(LS_FAVS, []);
     mpLista.innerHTML = list.map(item => {
       const st = statusManutencao(item);
       const ultima = item.ultimaManutencao ? new Date(item.ultimaManutencao).toLocaleDateString('pt-BR') : 'nunca';
       const pecas = pecasDoItem(item);
-      const custoHora = custoManutencaoPorHora(item);
       const favId = 'meu_' + item.id;
       const favorita = favs.includes(favId);
+      const nomeExib = `${item.fabricante || ''} ${item.modelo || ''}`.trim() || 'Impressora sem nome';
       const linhasPecas = PECAS_MANUTENCAO.map(pm => `
         <div class="peca-row">
-          <span class="peca-nome">${pm.nome}${LINKS_COMPRAR_PECA[pm.id] ? ` <a href="${LINKS_COMPRAR_PECA[pm.id]}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a>` : ''}</span>
+          <span class="peca-nome">${pm.nome} <a href="${linkComprarPeca(pm.nome, item)}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a></span>
           <div class="peca-inputs">
             <div class="input-box"><span class="unit-mini">R$</span><input type="number" class="peca-custo tem-prefixo" data-peca="${pm.id}" value="${pecas[pm.id].custo}" step="5"></div>
             <div class="input-box"><input type="number" class="peca-horas" data-peca="${pm.id}" value="${pecas[pm.id].horas}" step="50"><span class="unit-mini-suffix">h</span></div>
@@ -1897,56 +1854,87 @@
         </div>
       `).join('');
       return `
-        <div class="saved-item" data-id="${item.id}">
-          <div class="nome">
+        <details class="parts-details mp-item" data-id="${item.id}">
+          <summary>
             <button type="button" class="fav-btn-inline${favorita ? ' active' : ''}" data-favmp="${item.id}" aria-label="Favoritar">${favorita ? '★' : '☆'}</button>
-            ${escapeHtml(item.nome)} <span class="badge ${st.cls}">${st.label}</span>
+            ${escapeHtml(nomeExib)} <span class="badge ${st.cls}">${st.label}</span>
+          </summary>
+
+          <div class="mp-edit-field wide-input">
+            <label>Fabricante</label>
+            <div class="input-box"><input type="text" class="mp-f-fabricante" value="${escapeHtml(item.fabricante || '')}" placeholder="ex: Creality"></div>
           </div>
-          <div class="info">${item.potencia || 0} W · R$ ${Number(item.precoCompra || 0).toLocaleString('pt-BR')} · vida útil ${item.vidaUtil || 0}h · última manutenção: ${ultima}</div>
-          <div class="actions">
-            <button type="button" data-maint="${item.id}">Manutenção feita hoje</button>
-            <a href="${linkComprarImpressoraPorNome(item.nome)}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
+          <div class="mp-edit-field wide-input">
+            <label>Modelo</label>
+            <div class="input-box"><input type="text" class="mp-f-modelo" value="${escapeHtml(item.modelo || '')}" placeholder="ex: Ender 3 V3 SE"></div>
+          </div>
+          <div class="mp-edit-field">
+            <label>Potência</label>
+            <div class="input-box"><input type="number" class="mp-f-potencia" value="${item.potencia || 0}" step="10"><span class="unit-mini-suffix">W</span></div>
+          </div>
+          <div class="mp-edit-field">
+            <label>Preço de compra</label>
+            <div class="input-box"><input type="number" class="mp-f-preco" value="${item.precoCompra || 0}" step="50"><span class="unit-mini-suffix">R$</span></div>
+          </div>
+          <div class="mp-edit-field">
+            <label>Vida útil</label>
+            <div class="input-box"><input type="number" class="mp-f-vidautil" value="${item.vidaUtil || 0}" step="100"><span class="unit-mini-suffix">h</span></div>
+          </div>
+          <div class="mp-edit-field">
+            <label>Revisão a cada</label>
+            <div class="input-box"><input type="number" class="mp-f-intervalo" value="${item.intervaloDias || 90}" step="10"><span class="unit-mini-suffix">dias</span></div>
+          </div>
+
+          <div class="parts-subtitle">PEÇAS DE REPOSIÇÃO — CUSTO E HORAS ATÉ TROCAR</div>
+          ${linhasPecas}
+
+          <div class="parts-resumo" data-resumo="${item.id}">Manutenção: <strong>${fmt(custoManutencaoPorHora(item))}/hora</strong> · última revisão: ${ultima}</div>
+          <button type="button" class="save-parts-btn" data-save-mp="${item.id}">Salvar alterações</button>
+          <div class="saved-item-actions">
+            <a href="${linkComprarImpressora({catalogoId:null, fabricante:item.fabricante, modelo:item.modelo})}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
+            <button type="button" data-maint="${item.id}">Revisão feita hoje</button>
             <button type="button" class="danger" data-delmp="${item.id}">Excluir</button>
           </div>
-          <details class="parts-details">
-            <summary>Peças de manutenção (custo e horas até trocar)</summary>
-            ${linhasPecas}
-            <div class="parts-resumo" data-resumo="${item.id}">Custo de manutenção estimado: <strong>${fmt(custoHora)}/hora</strong> de impressão</div>
-            <button type="button" class="save-parts-btn" data-save-parts="${item.id}">Salvar peças</button>
-          </details>
-        </div>
+        </details>
       `;
     }).join('');
   }
 
   document.getElementById('mpAddBtn').addEventListener('click', () => {
-    const nome = mpNome.value.trim();
-    if (!nome) { mpNome.focus(); return; }
     const list = lsGet(LS_MEUS, []);
-    list.unshift({
-      id: Date.now().toString(36),
-      nome,
-      potencia: parseFloat(mpPotencia.value) || 0,
-      precoCompra: parseFloat(mpPreco.value) || 0,
-      vidaUtil: parseFloat(mpVidaUtil.value) || 5000,
-      intervaloDias: parseFloat(mpIntervalo.value) || 90,
-      ultimaManutencao: null,
-      pecas: mpTemplate.value ? pecasRecomendadasPara(mpTemplate.value) : {},
-    });
+    let nova;
+    const modelo = CATALOGO_IMPRESSORAS.find(x => x.id === mpTemplate.value);
+    if (modelo){
+      // Partiu de um modelo do catálogo: copia os dados dele.
+      nova = {
+        fabricante: modelo.fabricante, modelo: modelo.modelo,
+        potencia: modelo.watts, precoCompra: modelo.precoCompra,
+        vidaUtil: modelo.vidaUtil, intervaloDias: modelo.intervaloDias,
+        pecas: JSON.parse(JSON.stringify(modelo.pecas)),
+      };
+    } else {
+      nova = valoresIniciaisNovaImpressora();
+    }
+    nova.id = Date.now().toString(36);
+    nova.ultimaManutencao = null;
+    list.unshift(nova);
     lsSet(LS_MEUS, list);
     mpTemplate.value = '';
-    mpNome.value = ''; mpPotencia.value = ''; mpPreco.value = ''; mpVidaUtil.value = '5000'; mpIntervalo.value = '90';
     renderMinhasImpressoras();
+    // Abre o accordion da nova pra já poder editar.
+    const el0 = mpLista.querySelector(`.mp-item[data-id="${nova.id}"]`);
+    if (el0){ el0.open = true; el0.scrollIntoView({ behavior:'smooth', block:'center' }); }
   });
 
   mpLista.addEventListener('click', e => {
     const list = lsGet(LS_MEUS, []);
+    const favBtn = e.target.closest('[data-favmp]');
     const maintBtn = e.target.closest('[data-maint]');
     const delBtn = e.target.closest('[data-delmp]');
-    const saveBtn = e.target.closest('[data-save-parts]');
-    const favBtn = e.target.closest('[data-favmp]');
+    const saveBtn = e.target.closest('[data-save-mp]');
 
     if (favBtn){
+      e.preventDefault(); // não deixa o clique abrir/fechar o accordion
       const favId = 'meu_' + favBtn.dataset.favmp;
       let favs = lsGet(LS_FAVS, []);
       favs = favs.includes(favId) ? favs.filter(x => x !== favId) : [...favs, favId];
@@ -1957,46 +1945,63 @@
     if (maintBtn){
       const item = list.find(x => x.id === maintBtn.dataset.maint);
       if (item){ item.ultimaManutencao = new Date().toISOString(); lsSet(LS_MEUS, list); renderMinhasImpressoras(); }
+      return;
     }
     if (delBtn){
       lsSet(LS_MEUS, list.filter(x => x.id !== delBtn.dataset.delmp));
       const favs = lsGet(LS_FAVS, []);
       lsSet(LS_FAVS, favs.filter(x => x !== 'meu_' + delBtn.dataset.delmp));
+      // Se a excluída era a selecionada, limpa a seleção.
+      if (currentPrinterId === 'meu_' + delBtn.dataset.delmp){
+        setTriggerDisplay(null);
+        lsSet(LS_PRINTER, '');
+      }
       renderMinhasImpressoras();
       renderActivePrinterInfo();
       calc();
+      return;
     }
     if (saveBtn){
-      // não chama renderMinhasImpressoras() aqui de propósito — re-renderizar
-      // fecharia o <details> que o usuário acabou de preencher.
-      const item = list.find(x => x.id === saveBtn.dataset.saveParts);
-      if (item){
-        const container = saveBtn.closest('.parts-details');
-        const novasPecas = {};
-        PECAS_MANUTENCAO.forEach(pm => {
-          const custoInput = container.querySelector(`.peca-custo[data-peca="${pm.id}"]`);
-          const horasInput = container.querySelector(`.peca-horas[data-peca="${pm.id}"]`);
-          novasPecas[pm.id] = { custo: parseFloat(custoInput.value) || 0, horas: parseFloat(horasInput.value) || 0 };
-        });
-        item.pecas = novasPecas;
-        lsSet(LS_MEUS, list);
+      const item = list.find(x => x.id === saveBtn.dataset.saveMp);
+      if (!item) return;
+      const box = saveBtn.closest('.mp-item');
+      item.fabricante = box.querySelector('.mp-f-fabricante').value.trim();
+      item.modelo = box.querySelector('.mp-f-modelo').value.trim();
+      item.potencia = parseFloat(box.querySelector('.mp-f-potencia').value) || 0;
+      item.precoCompra = parseFloat(box.querySelector('.mp-f-preco').value) || 0;
+      item.vidaUtil = parseFloat(box.querySelector('.mp-f-vidautil').value) || 0;
+      item.intervaloDias = parseFloat(box.querySelector('.mp-f-intervalo').value) || 90;
+      const novasPecas = {};
+      PECAS_MANUTENCAO.forEach(pm => {
+        const c = box.querySelector(`.peca-custo[data-peca="${pm.id}"]`);
+        const h = box.querySelector(`.peca-horas[data-peca="${pm.id}"]`);
+        novasPecas[pm.id] = { custo: parseFloat(c.value) || 0, horas: parseFloat(h.value) || 0 };
+      });
+      item.pecas = novasPecas;
+      lsSet(LS_MEUS, list);
 
-        const resumo = container.querySelector(`[data-resumo="${item.id}"]`);
-        if (resumo) resumo.innerHTML = `Custo de manutenção estimado: <strong>${fmt(custoManutencaoPorHora(item))}/hora</strong> de impressão`;
-
+      // Atualiza só o resumo (não re-renderiza, pra não fechar o accordion).
+      const resumo = box.querySelector(`[data-resumo="${item.id}"]`);
+      const ultima = item.ultimaManutencao ? new Date(item.ultimaManutencao).toLocaleDateString('pt-BR') : 'nunca';
+      if (resumo) resumo.innerHTML = `Manutenção: <strong>${fmt(custoManutencaoPorHora(item))}/hora</strong> · última revisão: ${ultima}`;
+      // Se essa é a impressora ativa, o resultado principal muda também.
+      if (currentPrinterId === 'meu_' + item.id){
+        const p = todasImpressoras().find(x => x.id === currentPrinterId);
+        if (p) setTriggerDisplay(p);
         renderActivePrinterInfo();
         calc();
-        saveBtn.textContent = 'Salvo ✓';
-        saveBtn.classList.add('saved');
-        setTimeout(() => { saveBtn.textContent = 'Salvar peças'; saveBtn.classList.remove('saved'); }, 1600);
       }
+      saveBtn.textContent = 'Salvo ✓';
+      saveBtn.classList.add('saved');
+      setTimeout(() => { saveBtn.textContent = 'Salvar alterações'; saveBtn.classList.remove('saved'); }, 1600);
     }
   });
 
+
   // ============ INICIALIZAÇÃO ============
   loadFieldsFromStorage();
-  const savedPrinterId = lsGet(LS_PRINTER, 'custom');
-  setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || PRINTERS[0]);
+  const savedPrinterId = lsGet(LS_PRINTER, '');
+  setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || null);
   const savedFilamentId = lsGet(LS_FILAMENT_ID, 'custom');
   setFilamentDisplay(todosFilamentos().find(f => f.id === savedFilamentId) || todosFilamentos()[0]);
   renderOrcamentos();
