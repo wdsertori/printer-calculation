@@ -514,6 +514,10 @@
       <div class="picker-panel" id="filamentPanel" hidden></div>
     </div>
     <div class="active-filament-info" id="activeFilamentInfo" hidden></div>
+    <div class="field" id="precoKgCustomField">
+      <label>Preço do filamento<span class="hint">por quilo</span></label>
+      <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
+    </div>
 
     <details class="subsection">
       <summary>Configurações de material</summary>
@@ -610,10 +614,6 @@
 
     <div class="card">
       <h2>Dados do filamento</h2>
-      <div class="field">
-        <label>Preço do filamento ativo<span class="hint">por quilo — ou selecione um cadastrado no card 01</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
-      </div>
       <div class="text-field">
         <label for="filTemplate">Preencher com filamento sugerido (opcional)</label>
         <select id="filTemplate" class="mp-template-select">
@@ -1272,10 +1272,13 @@
     currentFilamentId = f.id;
 
     const infoEl = document.getElementById('activeFilamentInfo');
+    const precoField = document.getElementById('precoKgCustomField');
     if (f.id === 'custom'){
       infoEl.hidden = true;
+      precoField.hidden = false; // sem filamento cadastrado: digita o preço na mão
     } else {
       infoEl.hidden = false;
+      precoField.hidden = true;  // preço vem do filamento selecionado
       infoEl.innerHTML = `<span>${escapeHtml(f.nome)} — R$ ${f.precoKg.toFixed(2)}/kg</span>
         <a href="${linkComprarFilamentoPorNome(f.nome)}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a>`;
     }
