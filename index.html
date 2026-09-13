@@ -594,6 +594,10 @@
       <label>Vida útil estimada<span class="hint">horas de uso até troca</span></label>
       <div class="input-box"><input type="number" id="vidaUtil" value="5000" step="100"><span class="unit-suffix">h</span></div>
     </div>
+    <div class="field">
+      <label>Custo de manutenção<span class="hint">por hora — some as peças em "Minhas impressoras" ou digite na mão</span></label>
+      <div class="input-box"><span class="unit">R$</span><input type="number" id="custoManutencaoHora" value="0" step="0.01"></div>
+    </div>
     </div>
 
     <div class="card">
@@ -708,7 +712,7 @@
   let cloudSyncTimer = null;
   let aplicandoDadosDaNuvem = false; // trava pra não reenviar pra nuvem o que acabou de baixar dela
   // ============ CAMPOS PRINCIPAIS ============
-  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','potencia','precoKwh','valorImpressora','vidaUtil','tempoManualHoras','tempoManualMinutos','valorHora','markup'];
+  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','potencia','precoKwh','valorImpressora','vidaUtil','custoManutencaoHora','tempoManualHoras','tempoManualMinutos','valorHora','markup'];
   const el = {};
   ids.forEach(id => {
     el[id] = document.getElementById(id);
@@ -740,13 +744,14 @@
     const precoKwh = num('precoKwh');
     const valorImpressora = num('valorImpressora');
     const vidaUtil = Math.max(1, num('vidaUtil'));
+    const custoManutencaoHora = num('custoManutencaoHora');
     const tempoManual = (parseFloat(el.tempoManualHoras.value) || 0) + (parseFloat(el.tempoManualMinutos.value) || 0) / 60;
     const valorHora = num('valorHora');
     const markup = num('markup');
 
     const material = (pesoPeca * qtd / 1000) * precoKg * (1 + desperdicio / 100);
     const energia = tempoImpressao * (potencia / 1000) * precoKwh;
-    const deprec = (valorImpressora / vidaUtil) * tempoImpressao;
+    const deprec = ((valorImpressora / vidaUtil) + custoManutencaoHora) * tempoImpressao;
     const maoObra = tempoManual * valorHora;
 
     const custoLote = material + energia + deprec + maoObra;
@@ -1611,6 +1616,7 @@
         if (item.potencia) el.potencia.value = item.potencia;
         if (item.precoCompra) el.valorImpressora.value = item.precoCompra;
         if (item.vidaUtil) el.vidaUtil.value = item.vidaUtil;
+        el.custoManutencaoHora.value = custoManutencaoPorHora(item).toFixed(2);
         calc();
         saveFieldsToStorage();
         document.getElementById('printerCard').scrollIntoView({ behavior:'smooth', block:'start' });
