@@ -36,6 +36,7 @@
   }
 
   *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
 
   body{
     margin:0;
@@ -753,11 +754,22 @@
     }
   }
 
+  let entrandoComGoogle = false;
   authSignIn.addEventListener('click', () => {
-    signInWithPopup(auth, googleProvider).catch(e => {
-      alert('Não consegui entrar: ' + e.message);
-      console.error(e);
-    });
+    if (entrandoComGoogle) return; // ignora clique repetido enquanto o popup já está abrindo
+    entrandoComGoogle = true;
+    authSignIn.disabled = true;
+    signInWithPopup(auth, googleProvider)
+      .catch(e => {
+        if (e.code !== 'auth/cancelled-popup-request' && e.code !== 'auth/popup-closed-by-user'){
+          alert('Não consegui entrar: ' + e.message);
+        }
+        console.error(e);
+      })
+      .finally(() => {
+        entrandoComGoogle = false;
+        authSignIn.disabled = false;
+      });
   });
   authSignOut.addEventListener('click', () => { signOut(auth); });
 
