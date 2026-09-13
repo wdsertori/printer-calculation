@@ -335,9 +335,15 @@
   .parts-details summary::before{content:'▸'; font-size:9px; display:inline-block; transition:transform .15s ease;}
   .parts-details[open] summary::before{transform:rotate(90deg);}
   .parts-details summary:hover{color:var(--accent);}
-  .peca-row{display:flex; align-items:center; gap:8px; padding:7px 0; border-top:1px dashed var(--grid-line);}
+  .peca-row{display:flex; flex-direction:column; gap:5px; padding:8px 0; border-top:1px dashed var(--grid-line);}
   .peca-row:first-of-type{border-top:none;}
-  .peca-nome{font-size:11.5px; color:var(--text); width:76px; flex-shrink:0; line-height:1.3;}
+  .peca-nome{font-size:11.5px; color:var(--text); line-height:1.3;}
+  .buy-link{color:var(--accent); text-decoration:none; font-size:10px; margin-left:3px;}
+  .buy-link:hover{text-decoration:underline;}
+  .buy-link-action{background:var(--accent-soft); border:1px solid rgba(230,126,51,0.4); color:var(--accent); border-radius:4px; padding:8px 11px; font-size:11.5px; font-family:'IBM Plex Mono',monospace; cursor:pointer; text-decoration:none; text-align:center; flex:1; min-width:84px; display:inline-block;}
+  .buy-link-action:hover{background:rgba(230,126,51,0.22);}
+  .buy-link-btn{width:36px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--accent); text-decoration:none; font-size:15px;}
+  .buy-link-btn:hover{opacity:0.75;}
   .peca-inputs{display:flex; gap:6px; flex:1; min-width:0;}
   .peca-inputs .input-box{position:relative; flex:1; min-width:0;}
   .peca-inputs input{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:3px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:7px 20px 7px 6px; text-align:right;}
@@ -1002,6 +1008,44 @@
   };
   const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp'];
 
+  // ============ LINKS DE "COMPRAR" (só editável aqui, não tem campo no site) ============
+  // Cole a URL do marketplace (Mercado Livre, Amazon, loja oficial, etc.) no id
+  // correspondente. Deixe em branco/comentado pra não mostrar o link "Comprar"
+  // naquele item. Isso vale pra impressoras do catálogo (ids fixos abaixo) e
+  // pras peças de manutenção (ids fixos: hotend, bico, mesa, filtro, graxa).
+  const LINKS_COMPRAR_IMPRESSORA = {
+    // ender3v3se: 'https://...',
+    // kobra3: 'https://...',
+    // mk4s: 'https://...',
+    // crealityhi: 'https://...',
+    // a1mini: 'https://...',
+    // a1: 'https://...',
+    // p1s: 'https://...',
+    // x1c: 'https://...',
+    // k2: 'https://...',
+  };
+  const LINKS_COMPRAR_PECA = {
+    // hotend: 'https://...',
+    // bico: 'https://...',
+    // mesa: 'https://...',
+    // filtro: 'https://...',
+    // graxa: 'https://...',
+  };
+  // Filamentos e impressoras cadastradas à mão não têm id fixo (nome é livre),
+  // então esses dois usam busca automática no Mercado Livre pelo nome digitado,
+  // em vez de link fixo por item.
+  function linkBuscaMercadoLivre(nome){
+    return `https://lista.mercadolivre.com.br/${encodeURIComponent(nome)}`;
+  }
+  // Pra impressoras cadastradas em "Dados da impressora": se o nome bate com um
+  // modelo do catálogo (ex: veio do "Preencher com modelo"), usa o link fixo
+  // configurado ali em cima; senão cai pra busca automática pelo nome.
+  function linkComprarImpressoraPorNome(nome){
+    const catalogo = PRINTERS.find(p => p.name === nome);
+    if (catalogo && LINKS_COMPRAR_IMPRESSORA[catalogo.id]) return LINKS_COMPRAR_IMPRESSORA[catalogo.id];
+    return linkBuscaMercadoLivre(nome);
+  }
+
   // Potências médias DURANTE A IMPRESSÃO (não o pico de aquecimento), a partir de
   // specs do fabricante e medições de wattímetro da comunidade. Variam com material,
   // temperatura de mesa e se a câmara é fechada — ajuste manualmente se souber seu valor real.
@@ -1096,10 +1140,17 @@
     return [...custom, ...favd, ...other];
   }
 
+  function linkComprarPickerItem(p){
+    if (p.id === 'custom') return null;
+    return LINKS_COMPRAR_IMPRESSORA[p.id] || linkBuscaMercadoLivre(p.name);
+  }
+
   function renderPanelList(){
     const favs = lsGet(LS_FAVS, []);
     const list = orderedPrinters();
-    printerPanel.innerHTML = list.map(p => `
+    printerPanel.innerHTML = list.map(p => {
+      const link = linkComprarPickerItem(p);
+      return `
       <div class="printer-opt${p.id === currentPrinterId ? ' selected' : ''}" data-id="${p.id}">
         <button type="button" class="printer-opt-main" data-select="${p.id}">
           <span class="picker-icon" data-slot="${p.id}"></span>
@@ -1109,9 +1160,11 @@
           </span>
           <span class="watts">${p.watts !== null ? p.watts + ' W' : ''}</span>
         </button>
+        ${link ? `<a href="${link}" target="_blank" rel="noopener" class="buy-link-btn" aria-label="Comprar" onclick="event.stopPropagation()">🛒</a>` : ''}
         ${p.id !== 'custom' ? `<button type="button" class="fav-btn${favs.includes(p.id) ? ' active' : ''}" data-fav="${p.id}" aria-label="Favoritar">${favs.includes(p.id) ? '★' : '☆'}</button>` : '<span style="width:36px;flex-shrink:0"></span>'}
       </div>
-    `).join('');
+    `;
+    }).join('');
     list.forEach(p => {
       const slot = printerPanel.querySelector(`[data-slot="${p.id}"]`);
       if (slot) fillVisual(slot, p);
@@ -1235,6 +1288,7 @@
         <div class="nome">${escapeHtml(f.nome)}</div>
         <div class="info">R$ ${f.precoKg.toFixed(2)}/kg</div>
         <div class="actions">
+          <a href="${linkBuscaMercadoLivre(f.nome)}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
           <button type="button" class="danger" data-delfil="${f.id}">Excluir</button>
         </div>
       </div>
@@ -1762,7 +1816,7 @@
       const favorita = favs.includes(favId);
       const linhasPecas = PECAS_MANUTENCAO.map(pm => `
         <div class="peca-row">
-          <span class="peca-nome">${pm.nome}</span>
+          <span class="peca-nome">${pm.nome}${LINKS_COMPRAR_PECA[pm.id] ? ` <a href="${LINKS_COMPRAR_PECA[pm.id]}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a>` : ''}</span>
           <div class="peca-inputs">
             <div class="input-box"><span class="unit-mini">R$</span><input type="number" class="peca-custo tem-prefixo" data-peca="${pm.id}" value="${pecas[pm.id].custo}" step="5"></div>
             <div class="input-box"><input type="number" class="peca-horas" data-peca="${pm.id}" value="${pecas[pm.id].horas}" step="50"><span class="unit-mini-suffix">h</span></div>
@@ -1778,6 +1832,7 @@
           <div class="info">${item.potencia || 0} W · R$ ${Number(item.precoCompra || 0).toLocaleString('pt-BR')} · vida útil ${item.vidaUtil || 0}h · última manutenção: ${ultima}</div>
           <div class="actions">
             <button type="button" data-maint="${item.id}">Manutenção feita hoje</button>
+            <a href="${linkComprarImpressoraPorNome(item.nome)}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
             <button type="button" class="danger" data-delmp="${item.id}">Excluir</button>
           </div>
           <details class="parts-details">
