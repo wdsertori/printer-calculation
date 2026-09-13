@@ -499,8 +499,11 @@
     </div>
   </div>
 
-  <div class="card">
-    <h2><span class="n">05</span> Minhas impressoras</h2>
+  <details class="card">
+    <summary>
+      <span class="n">05</span> Minhas impressoras
+      <span class="summary-chevron">▾</span>
+    </summary>
     <p class="card-desc">Cadastre suas impressoras reais para reaproveitar os dados e acompanhar a manutenção.</p>
     <div class="text-field">
       <label for="mpNome">Nome</label>
@@ -524,17 +527,20 @@
     </div>
     <button type="button" class="save-btn" id="mpAddBtn">Adicionar impressora</button>
     <div id="mpLista"></div>
-  </div>
+  </details>
 
-  <div class="card">
-    <h2><span class="n">06</span> Orçamentos salvos</h2>
+  <details class="card">
+    <summary>
+      <span class="n">06</span> Orçamentos salvos
+      <span class="summary-chevron">▾</span>
+    </summary>
     <div class="text-field">
       <label for="orcamentoNome">Nome deste orçamento</label>
       <input type="text" id="orcamentoNome" placeholder="ex: Suporte de celular">
     </div>
     <button type="button" class="save-btn" id="salvarOrcamentoBtn">Salvar orçamento atual</button>
     <div id="orcamentosLista"></div>
-  </div>
+  </details>
 
   <details class="howto">
     <summary>Como usar fotos reais das impressoras</summary>
