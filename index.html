@@ -311,6 +311,9 @@
 
   .saved-item{padding:12px 0; border-top:1px dashed var(--grid-line);}
   .saved-item .nome{font-size:13.5px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; overflow:hidden; text-overflow:ellipsis;}
+  .fav-btn-inline{background:transparent; border:none; color:var(--text-dim); font-size:16px; cursor:pointer; padding:0; line-height:1;}
+  .fav-btn-inline.active{color:var(--accent);}
+  .fav-btn-inline:hover{color:var(--accent);}
   .saved-item .info{font-size:11px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin-top:4px; line-height:1.55;}
   .saved-item .actions{display:flex; gap:6px; margin-top:9px; flex-wrap:wrap;}
   .saved-item .actions button{flex:1; min-width:84px; background:var(--surface-2); border:1px solid var(--border); color:var(--text-dim); border-radius:4px; padding:9px 10px; font-size:11.5px; font-family:'IBM Plex Mono',monospace; cursor:pointer;}
@@ -595,7 +598,7 @@
       <div class="input-box"><input type="number" id="vidaUtil" value="5000" step="100"><span class="unit-suffix">h</span></div>
     </div>
     <div class="field">
-      <label>Custo de manutenção<span class="hint">por hora — some as peças em "Minhas impressoras" ou digite na mão</span></label>
+      <label>Custo de manutenção<span class="hint">por hora — some as peças em "Dados da impressora" ou digite na mão</span></label>
       <div class="input-box"><span class="unit">R$</span><input type="number" id="custoManutencaoHora" value="0" step="0.01"></div>
     </div>
     </div>
@@ -609,8 +612,8 @@
     </div>
 
     <div class="card">
-      <h2>Minhas impressoras</h2>
-    <p class="card-desc">Cadastre suas impressoras reais para reaproveitar os dados e acompanhar a manutenção.</p>
+      <h2>Dados da impressora</h2>
+    <p class="card-desc">Cadastre suas impressoras — selecionando uma no card 02 da calculadora já preenche tudo automaticamente.</p>
     <div class="text-field">
       <label for="mpNome">Nome</label>
       <input type="text" id="mpNome" placeholder="ex: Minha Ender 3 V3 SE">
@@ -850,7 +853,7 @@
 
         loadFieldsFromStorage();
         const savedPrinterId = lsGet(LS_PRINTER, 'custom');
-        setTriggerDisplay(PRINTERS.find(p => p.id === savedPrinterId) || PRINTERS[0]);
+        setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || PRINTERS[0]);
         renderOrcamentos();
         renderMinhasImpressoras();
         calc();
@@ -984,8 +987,28 @@
         return `<svg ${a}><rect x="7" y="7" width="26" height="26" rx="2"/><path d="M25 7v26"/><circle cx="22.3" cy="20" r="1.3" fill="currentColor" stroke="none"/><path d="M11 27h10"/></svg>`;
       case 'enclosedAms':
         return `<svg ${a}><rect x="7" y="11" width="26" height="22" rx="2"/><path d="M25 11v22"/><circle cx="22.3" cy="23" r="1.3" fill="currentColor" stroke="none"/><path d="M11 30h10"/><rect x="7" y="7" width="26" height="5" rx="1" fill="currentColor" fill-opacity="0.22" stroke-opacity="0.5"/></svg>`;
+      case 'minha':
+        return `<svg ${a}><path d="M20 5l3.5 7.5L31 14l-5.5 5.5L27 27l-7-4-7 4 1.5-7.5L9 14l7.5-1.5z"/></svg>`;
       default: return '';
     }
+  }
+
+  // Junta o catálogo fixo com as impressoras que você cadastrou em
+  // "Dados da impressora" (Configurações) — selecionar qualquer uma no
+  // seletor abaixo já preenche tudo que tiver disponível pra ela.
+  function todasImpressoras(){
+    const meus = lsGet(LS_MEUS, []).map(item => ({
+      id: 'meu_' + item.id,
+      name: item.nome,
+      spec: `sua impressora · ${item.potencia || 0} W`,
+      watts: item.potencia || null,
+      icon: 'minha',
+      minhaImpressoraId: item.id,
+      precoCompra: item.precoCompra || 0,
+      vidaUtil: item.vidaUtil || 0,
+      custoManutencaoHora: custoManutencaoPorHora(item),
+    }));
+    return [PRINTERS[0], ...meus, ...PRINTERS.slice(1)];
   }
 
   function candidateSources(p){
@@ -1021,8 +1044,9 @@
 
   function orderedPrinters(){
     const favs = lsGet(LS_FAVS, []);
-    const custom = PRINTERS.filter(p => p.id === 'custom');
-    const rest = PRINTERS.filter(p => p.id !== 'custom');
+    const todas = todasImpressoras();
+    const custom = todas.filter(p => p.id === 'custom');
+    const rest = todas.filter(p => p.id !== 'custom');
     const favd = rest.filter(p => favs.includes(p.id));
     const other = rest.filter(p => !favs.includes(p.id));
     return [...custom, ...favd, ...other];
@@ -1074,16 +1098,22 @@
     }
     const selBtn = e.target.closest('[data-select]');
     if (selBtn){
-      const p = PRINTERS.find(x => x.id === selBtn.dataset.select);
+      const p = todasImpressoras().find(x => x.id === selBtn.dataset.select);
       setTriggerDisplay(p);
       lsSet(LS_PRINTER, p.id);
-      if (p.watts !== null){ el.potencia.value = p.watts; calc(); saveFieldsToStorage(); }
+      if (p.watts !== null){ el.potencia.value = p.watts; }
+      if (p.minhaImpressoraId){
+        el.valorImpressora.value = p.precoCompra;
+        el.vidaUtil.value = p.vidaUtil;
+        el.custoManutencaoHora.value = p.custoManutencaoHora.toFixed(2);
+      }
+      if (p.watts !== null || p.minhaImpressoraId){ calc(); saveFieldsToStorage(); }
       closePanel();
     }
   });
 
   el.potencia.addEventListener('input', () => {
-    const current = PRINTERS.find(x => x.id === currentPrinterId);
+    const current = todasImpressoras().find(x => x.id === currentPrinterId);
     if (current && current.watts !== null && Number(el.potencia.value) !== current.watts){
       setTriggerDisplay(PRINTERS[0]);
       lsSet(LS_PRINTER, 'custom');
@@ -1146,7 +1176,7 @@
       const item = list.find(x => x.id === loadBtn.dataset.load);
       if (item){
         ids.forEach(id => { if (item.campos[id] !== undefined) el[id].value = item.campos[id]; });
-        const p = PRINTERS.find(x => x.id === item.campos.printerId) || PRINTERS[0];
+        const p = todasImpressoras().find(x => x.id === item.campos.printerId) || PRINTERS[0];
         setTriggerDisplay(p);
         lsSet(LS_PRINTER, p.id);
         calc();
@@ -1550,11 +1580,14 @@
   function renderMinhasImpressoras(){
     const list = lsGet(LS_MEUS, []);
     if (!list.length){ mpLista.innerHTML = '<div class="empty-hint">Nenhuma impressora cadastrada ainda.</div>'; return; }
+    const favs = lsGet(LS_FAVS, []);
     mpLista.innerHTML = list.map(item => {
       const st = statusManutencao(item);
       const ultima = item.ultimaManutencao ? new Date(item.ultimaManutencao).toLocaleDateString('pt-BR') : 'nunca';
       const pecas = pecasDoItem(item);
       const custoHora = custoManutencaoPorHora(item);
+      const favId = 'meu_' + item.id;
+      const favorita = favs.includes(favId);
       const linhasPecas = PECAS_MANUTENCAO.map(pm => `
         <div class="peca-row">
           <span class="peca-nome">${pm.nome}</span>
@@ -1566,10 +1599,12 @@
       `).join('');
       return `
         <div class="saved-item" data-id="${item.id}">
-          <div class="nome">${escapeHtml(item.nome)} <span class="badge ${st.cls}">${st.label}</span></div>
+          <div class="nome">
+            <button type="button" class="fav-btn-inline${favorita ? ' active' : ''}" data-favmp="${item.id}" aria-label="Favoritar">${favorita ? '★' : '☆'}</button>
+            ${escapeHtml(item.nome)} <span class="badge ${st.cls}">${st.label}</span>
+          </div>
           <div class="info">${item.potencia || 0} W · R$ ${Number(item.precoCompra || 0).toLocaleString('pt-BR')} · vida útil ${item.vidaUtil || 0}h · última manutenção: ${ultima}</div>
           <div class="actions">
-            <button type="button" data-use="${item.id}">Usar na calculadora</button>
             <button type="button" data-maint="${item.id}">Manutenção feita hoje</button>
             <button type="button" class="danger" data-delmp="${item.id}">Excluir</button>
           </div>
@@ -1605,22 +1640,18 @@
 
   mpLista.addEventListener('click', e => {
     const list = lsGet(LS_MEUS, []);
-    const useBtn = e.target.closest('[data-use]');
     const maintBtn = e.target.closest('[data-maint]');
     const delBtn = e.target.closest('[data-delmp]');
     const saveBtn = e.target.closest('[data-save-parts]');
+    const favBtn = e.target.closest('[data-favmp]');
 
-    if (useBtn){
-      const item = list.find(x => x.id === useBtn.dataset.use);
-      if (item){
-        if (item.potencia) el.potencia.value = item.potencia;
-        if (item.precoCompra) el.valorImpressora.value = item.precoCompra;
-        if (item.vidaUtil) el.vidaUtil.value = item.vidaUtil;
-        el.custoManutencaoHora.value = custoManutencaoPorHora(item).toFixed(2);
-        calc();
-        saveFieldsToStorage();
-        document.getElementById('printerCard').scrollIntoView({ behavior:'smooth', block:'start' });
-      }
+    if (favBtn){
+      const favId = 'meu_' + favBtn.dataset.favmp;
+      let favs = lsGet(LS_FAVS, []);
+      favs = favs.includes(favId) ? favs.filter(x => x !== favId) : [...favs, favId];
+      lsSet(LS_FAVS, favs);
+      renderMinhasImpressoras();
+      return;
     }
     if (maintBtn){
       const item = list.find(x => x.id === maintBtn.dataset.maint);
@@ -1628,6 +1659,8 @@
     }
     if (delBtn){
       lsSet(LS_MEUS, list.filter(x => x.id !== delBtn.dataset.delmp));
+      const favs = lsGet(LS_FAVS, []);
+      lsSet(LS_FAVS, favs.filter(x => x !== 'meu_' + delBtn.dataset.delmp));
       renderMinhasImpressoras();
     }
     if (saveBtn){
@@ -1658,7 +1691,7 @@
   // ============ INICIALIZAÇÃO ============
   loadFieldsFromStorage();
   const savedPrinterId = lsGet(LS_PRINTER, 'custom');
-  setTriggerDisplay(PRINTERS.find(p => p.id === savedPrinterId) || PRINTERS[0]);
+  setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || PRINTERS[0]);
   renderOrcamentos();
   renderMinhasImpressoras();
   calc();
