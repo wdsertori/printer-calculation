@@ -196,6 +196,9 @@
   .text-field label{display:block; font-size:14.5px; margin-bottom:8px;}
   .text-field input[type=text]{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:'IBM Plex Sans',sans-serif; font-size:15px; padding:12px;}
   .text-field input[type=text]:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(230,126,51,0.15);}
+  .mp-template-select{width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text); font-family:'IBM Plex Sans',sans-serif; font-size:14px; padding:11px 10px; border-radius:4px;}
+  .mp-template-select:focus{outline:none; border-color:var(--accent);}
+  .mp-template-hint{font-size:11px; color:var(--text-dim); line-height:1.5; margin:8px 0 0;}
 
   .save-btn{width:100%; margin:14px 0 18px; padding:13px; background:var(--accent-soft); border:1px solid rgba(230,126,51,0.4); color:var(--accent); font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:.02em; border-radius:4px; cursor:pointer;}
   .save-btn:hover{background:rgba(230,126,51,0.22);}
@@ -614,6 +617,13 @@
     <div class="card">
       <h2>Dados da impressora</h2>
     <p class="card-desc">Cadastre suas impressoras — selecionando uma no card 02 da calculadora já preenche tudo automaticamente.</p>
+    <div class="text-field">
+      <label for="mpTemplate">Preencher com modelo do catálogo (opcional)</label>
+      <select id="mpTemplate" class="mp-template-select">
+        <option value="">— nenhum, preencher na mão —</option>
+      </select>
+      <p class="mp-template-hint">Preenche nome, potência e uma estimativa de peças de manutenção baseada em preço/vida útil médios de mercado (não é específico do fabricante) — ajuste com o preço real que você paga.</p>
+    </div>
     <div class="text-field">
       <label for="mpNome">Nome</label>
       <input type="text" id="mpNome" placeholder="ex: Minha Ender 3 V3 SE">
@@ -1533,6 +1543,7 @@
 
   // ============ MINHAS IMPRESSORAS (potência, preço, manutenção) ============
   const LS_MEUS = 'c3d_minhas_impressoras';
+  const mpTemplate = document.getElementById('mpTemplate');
   const mpNome = document.getElementById('mpNome');
   const mpPotencia = document.getElementById('mpPotencia');
   const mpPreco = document.getElementById('mpPreco');
@@ -1550,6 +1561,33 @@
     { id:'filtro', nome:'Filtro de ar' },
     { id:'graxa', nome:'Graxa' },
   ];
+
+  // Valores recomendados de partida — baseados em dados gerais de mercado
+  // (preço médio + vida útil típica por peça, majoritariamente independente
+  // de marca; o que muda o intervalo de verdade é o material impresso, não
+  // o modelo da impressora). São estimativas em R$, ajuste com o preço real
+  // que você paga. Filtro de ar só se aplica a impressoras com câmara fechada.
+  const MODELOS_CAMARA_FECHADA = ['p1s', 'x1c', 'k2'];
+  function pecasRecomendadasPara(printerId){
+    const fechada = MODELOS_CAMARA_FECHADA.includes(printerId);
+    return {
+      hotend: { custo:150, horas:2000 },
+      bico: { custo:40, horas:800 },
+      mesa: { custo:180, horas:1500 },
+      filtro: fechada ? { custo:50, horas:350 } : { custo:0, horas:0 },
+      graxa: { custo:25, horas:400 },
+    };
+  }
+
+  mpTemplate.innerHTML += PRINTERS.filter(p => p.id !== 'custom')
+    .map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  mpTemplate.addEventListener('change', () => {
+    const p = PRINTERS.find(x => x.id === mpTemplate.value);
+    if (p){
+      mpNome.value = p.name;
+      if (p.watts) mpPotencia.value = p.watts;
+    }
+  });
 
   function pecasDoItem(item){
     const p = item.pecas || {};
@@ -1631,9 +1669,10 @@
       vidaUtil: parseFloat(mpVidaUtil.value) || 5000,
       intervaloDias: parseFloat(mpIntervalo.value) || 90,
       ultimaManutencao: null,
-      pecas: {},
+      pecas: mpTemplate.value ? pecasRecomendadasPara(mpTemplate.value) : {},
     });
     lsSet(LS_MEUS, list);
+    mpTemplate.value = '';
     mpNome.value = ''; mpPotencia.value = ''; mpPreco.value = ''; mpVidaUtil.value = '5000'; mpIntervalo.value = '90';
     renderMinhasImpressoras();
   });
