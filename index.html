@@ -598,6 +598,12 @@
         <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
       </div>
       <div class="text-field">
+        <label for="filTemplate">Preencher com filamento sugerido (opcional)</label>
+        <select id="filTemplate" class="mp-template-select">
+          <option value="">— nenhum, preencher na mão —</option>
+        </select>
+      </div>
+      <div class="text-field">
         <label for="filNome">Nome do filamento</label>
         <input type="text" id="filNome" placeholder="ex: PLA Preto Voolt">
       </div>
@@ -728,7 +734,7 @@
         <li><code>k2.jpg</code> — Creality K2</li>
       </ul>
       <p>Aceita <code>.jpg</code>, <code>.png</code> ou <code>.webp</code> — o site testa sozinho, nessa ordem. Sem o arquivo, continua mostrando o ícone.</p>
-      <p><strong>Opção 2 — URL externa:</strong> no código-fonte, procure <code>PRINTER_IMAGE_OVERRIDES</code> perto do início da tag <code>&lt;script&gt;</code> e cole a URL da imagem no id correspondente.</p>
+      <p><strong>Opção 2 — URL externa:</strong> abra o arquivo <code>catalogo.js</code> (fica junto do index.html no repositório), procure <code>PRINTER_IMAGE_OVERRIDES</code> e cole a URL da imagem no id correspondente.</p>
     </div>
     </div>
   </div>
@@ -739,6 +745,13 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+  import {
+    CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS,
+    LINKS_AFILIADO_IMPRESSORA as LINKS_COMPRAR_IMPRESSORA,
+    LINKS_AFILIADO_PECA as LINKS_COMPRAR_PECA,
+    LINKS_AFILIADO_FILAMENTO,
+    PRINTER_IMAGE_OVERRIDES,
+  } from './catalogo.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyBw3QJS_NAVy0e0tFkvLtPoG7vCA2XfQA4",
@@ -996,41 +1009,10 @@
   }
 
   // ============ SELETOR DE IMPRESSORA (com fotos reais opcionais) ============
-  // TROQUE AQUI: cole uma URL de imagem para usar em vez de arquivo local em images/printers/
-  const PRINTER_IMAGE_OVERRIDES = {
-    // ender3v3se: 'https://exemplo.com/ender3.jpg',
-    // kobra3: '',
-    // mk4s: '',
-    // a1mini: '',
-    // a1: '',
-    // p1s: '',
-    // x1c: '',
-  };
+  // Catálogo, peças e links de afiliado agora vêm todos de catalogo.js —
+  // ver esse arquivo pra adicionar/editar itens.
   const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'webp'];
 
-  // ============ LINKS DE "COMPRAR" (só editável aqui, não tem campo no site) ============
-  // Cole a URL do marketplace (Mercado Livre, Amazon, loja oficial, etc.) no id
-  // correspondente. Deixe em branco/comentado pra não mostrar o link "Comprar"
-  // naquele item. Isso vale pra impressoras do catálogo (ids fixos abaixo) e
-  // pras peças de manutenção (ids fixos: hotend, bico, mesa, filtro, graxa).
-  const LINKS_COMPRAR_IMPRESSORA = {
-    // ender3v3se: 'https://...',
-    // kobra3: 'https://...',
-    // mk4s: 'https://...',
-    // crealityhi: 'https://...',
-    // a1mini: 'https://...',
-    // a1: 'https://...',
-    // p1s: 'https://...',
-    // x1c: 'https://...',
-    // k2: 'https://...',
-  };
-  const LINKS_COMPRAR_PECA = {
-    // hotend: 'https://...',
-    // bico: 'https://...',
-    // mesa: 'https://...',
-    // filtro: 'https://...',
-    // graxa: 'https://...',
-  };
   // Filamentos e impressoras cadastradas à mão não têm id fixo (nome é livre),
   // então esses dois usam busca automática no Mercado Livre pelo nome digitado,
   // em vez de link fixo por item.
@@ -1039,27 +1021,24 @@
   }
   // Pra impressoras cadastradas em "Dados da impressora": se o nome bate com um
   // modelo do catálogo (ex: veio do "Preencher com modelo"), usa o link fixo
-  // configurado ali em cima; senão cai pra busca automática pelo nome.
+  // configurado em catalogo.js; senão cai pra busca automática pelo nome.
   function linkComprarImpressoraPorNome(nome){
     const catalogo = PRINTERS.find(p => p.name === nome);
     if (catalogo && LINKS_COMPRAR_IMPRESSORA[catalogo.id]) return LINKS_COMPRAR_IMPRESSORA[catalogo.id];
     return linkBuscaMercadoLivre(nome);
   }
+  // Mesma lógica, mas pra filamentos: bate o nome com o catálogo sugerido.
+  function linkComprarFilamentoPorNome(nome){
+    const catalogo = CATALOGO_FILAMENTOS.find(f => f.nome === nome);
+    if (catalogo && LINKS_AFILIADO_FILAMENTO[catalogo.id]) return LINKS_AFILIADO_FILAMENTO[catalogo.id];
+    return linkBuscaMercadoLivre(nome);
+  }
 
-  // Potências médias DURANTE A IMPRESSÃO (não o pico de aquecimento), a partir de
-  // specs do fabricante e medições de wattímetro da comunidade. Variam com material,
-  // temperatura de mesa e se a câmara é fechada — ajuste manualmente se souber seu valor real.
+  // Potências médias DURANTE A IMPRESSÃO (não o pico de aquecimento) — ver
+  // catalogo.js pra adicionar mais modelos ou editar os existentes.
   const PRINTERS = [
     { id:'custom', name:'Personalizado', spec:'digite o valor manualmente', watts:null, icon:'edit' },
-    { id:'ender3v3se', name:'Creality Ender 3 V3 SE', spec:'aberta · fonte 350 W', watts:110, icon:'bedslinger' },
-    { id:'kobra3', name:'Anycubic Kobra 3', spec:'aberta · fonte 400 W', watts:130, icon:'bedslinger' },
-    { id:'mk4s', name:'Prusa MK4S', spec:'aberta · fonte 240 W', watts:90, icon:'bedslinger' },
-    { id:'crealityhi', name:'Creality Hi', spec:'aberta · pico 390 W (110V)', watts:120, icon:'bedslinger' },
-    { id:'a1mini', name:'Bambu Lab A1 mini', spec:'aberta compacta · fonte 150 W', watts:70, icon:'corexy' },
-    { id:'a1', name:'Bambu Lab A1', spec:'aberta · pico 350 W (110V)', watts:120, icon:'corexy' },
-    { id:'p1s', name:'Bambu Lab P1S', spec:'fechada · pico 350 W (110V)', watts:130, icon:'enclosed' },
-    { id:'x1c', name:'Bambu Lab X1 Carbon', spec:'fechada + AMS · pico 350 W (110V)', watts:140, icon:'enclosedAms' },
-    { id:'k2', name:'Creality K2', spec:'fechada · pico 450 W (+20 W do CFS)', watts:150, icon:'enclosed' },
+    ...CATALOGO_IMPRESSORAS,
   ];
 
   function printerIconSvg(type){
@@ -1276,9 +1255,17 @@
     }
   });
 
+  const filTemplate = document.getElementById('filTemplate');
   const filNome = document.getElementById('filNome');
   const filPreco = document.getElementById('filPreco');
   const filLista = document.getElementById('filLista');
+
+  filTemplate.innerHTML += CATALOGO_FILAMENTOS
+    .map(f => `<option value="${f.id}">${f.nome}</option>`).join('');
+  filTemplate.addEventListener('change', () => {
+    const f = CATALOGO_FILAMENTOS.find(x => x.id === filTemplate.value);
+    if (f){ filNome.value = f.nome; filPreco.value = f.precoKg; }
+  });
 
   function renderFilamentos(){
     const list = lsGet(LS_FILS, []);
@@ -1288,7 +1275,7 @@
         <div class="nome">${escapeHtml(f.nome)}</div>
         <div class="info">R$ ${f.precoKg.toFixed(2)}/kg</div>
         <div class="actions">
-          <a href="${linkBuscaMercadoLivre(f.nome)}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
+          <a href="${linkComprarFilamentoPorNome(f.nome)}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
           <button type="button" class="danger" data-delfil="${f.id}">Excluir</button>
         </div>
       </div>
@@ -1302,6 +1289,7 @@
     const list = lsGet(LS_FILS, []);
     list.unshift({ id: Date.now().toString(36), nome, precoKg: preco });
     lsSet(LS_FILS, list);
+    filTemplate.value = '';
     filNome.value = ''; filPreco.value = '';
     renderFilamentos();
   });
@@ -1741,14 +1729,9 @@
 
   // Peças de desgaste comuns — cada uma com custo de reposição e o intervalo
   // (em horas de impressão) até precisar trocar. É referência/planejamento,
-  // não entra automaticamente no cálculo do resultado principal.
-  const PECAS_MANUTENCAO = [
-    { id:'hotend', nome:'Hotend' },
-    { id:'bico', nome:'Bico' },
-    { id:'mesa', nome:'Placa da mesa' },
-    { id:'filtro', nome:'Filtro de ar' },
-    { id:'graxa', nome:'Graxa' },
-  ];
+  // não entra automaticamente no cálculo do resultado principal. Lista vem
+  // de catalogo.js — edite lá pra adicionar mais tipos de peça.
+  const PECAS_MANUTENCAO = CATALOGO_PECAS;
 
   // Valores recomendados de partida — baseados em dados gerais de mercado
   // (preço médio + vida útil típica por peça, majoritariamente independente
