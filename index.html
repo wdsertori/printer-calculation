@@ -53,26 +53,20 @@
 
   .wrap{max-width:520px; margin:0 auto;}
 
-  header{margin-bottom:26px;}
+  header{margin:0; text-align:center;}
   .eyebrow{
     font-family:'IBM Plex Mono', monospace;
-    font-size:12px;
+    font-size:10.5px;
     color:var(--accent);
-    letter-spacing:0.06em;
+    letter-spacing:0.1em;
     font-weight:500;
   }
   h1{
-    font-size:25px;
-    font-weight:600;
-    margin:8px 0 6px;
-    line-height:1.25;
-    letter-spacing:-0.01em;
-  }
-  header p{
-    color:var(--text-dim);
-    font-size:14.5px;
-    margin:0;
-    line-height:1.55;
+    font-size:30px;
+    font-weight:700;
+    margin:0 0 5px;
+    line-height:1.15;
+    letter-spacing:-0.02em;
   }
 
   .card{
@@ -107,6 +101,7 @@
     gap:8px;
   }
   .card h2 .n{color:var(--accent);}
+  .card h2{flex-wrap:wrap;}
   .opt-tag{font-size:10px; color:var(--text-dim); background:var(--surface-2); border:1px solid var(--border); border-radius:2px; padding:2px 6px; font-weight:400; letter-spacing:0; text-transform:none;}
   .card-desc{font-size:13px; color:var(--text-dim); margin:-8px 0 14px; line-height:1.55;}
 
@@ -395,20 +390,20 @@
 
   footer{ text-align:center; color:var(--text-dim); font-size:12px; margin-top:26px; font-family:'IBM Plex Mono', monospace; }
 
-  .top-bar{display:flex; gap:14px; align-items:flex-start; margin-bottom:8px;}
-  .nav-dock{display:flex; flex-direction:column; gap:9px; flex-shrink:0; position:relative; z-index:20;}
+  .top-bar{display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:22px;}
+  .nav-dock{display:flex; flex-direction:row; gap:8px; position:relative; z-index:20;}
   .dock-icon{
-    width:48px; height:48px; border-radius:50%; background:var(--surface); border:1.5px solid var(--border);
+    width:34px; height:34px; border-radius:50%; background:var(--surface); border:1.5px solid var(--border);
     color:var(--text-dim); cursor:pointer; display:flex; align-items:center; justify-content:center;
     padding:0; flex-shrink:0;
   }
-  .dock-icon svg{width:26px; height:26px; display:block;}
+  .dock-icon svg{width:18px; height:18px; display:block;}
   .dock-icon:hover{color:var(--accent); border-color:var(--accent);}
   .dock-icon.active{color:var(--accent); border-color:var(--accent); background:var(--accent-soft);}
 
   .dock-avatar-wrap{position:relative;}
   .dock-avatar{overflow:hidden; color:var(--text-dim);}
-  .dock-avatar svg{width:22px; height:22px;}
+  .dock-avatar svg{width:16px; height:16px;}
   .dock-avatar img{width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;}
   .dock-avatar.status-loading{border-color:var(--text-dim);}
   .dock-avatar.status-saving{border-color:var(--accent);}
@@ -416,7 +411,7 @@
   .dock-avatar.status-error{border-color:var(--danger);}
 
   .auth-popover{
-    position:absolute; top:0; left:58px; z-index:30; min-width:180px;
+    position:absolute; top:42px; left:0; z-index:30; min-width:180px;
     background:var(--surface-2); border:1px solid var(--border); border-radius:4px;
     padding:12px 14px; box-shadow:0 14px 30px rgba(4,14,28,0.45);
   }
@@ -435,6 +430,25 @@
   .glossary dt{font-size:13.5px; color:var(--accent); font-family:'IBM Plex Mono',monospace; margin-top:14px;}
   .glossary dt:first-child{margin-top:0;}
   .glossary dd{font-size:13px; color:var(--text-dim); line-height:1.6; margin:4px 0 0;}
+
+  .help-icon{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:17px; height:17px; border-radius:50%; flex-shrink:0;
+    border:1px solid var(--border); color:var(--text-dim);
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600;
+    text-decoration:none; line-height:1;
+  }
+  .help-icon:hover{color:var(--accent); border-color:var(--accent);}
+  .help-inline-link{color:var(--accent); text-decoration:none;}
+  .help-inline-link:hover{text-decoration:underline;}
+
+  .mkt-row{display:flex; justify-content:space-between; align-items:baseline; gap:10px; padding:10px 0; border-top:1px dashed var(--grid-line);}
+  .mkt-row:first-child{border-top:none;}
+  .mkt-nome{font-size:12.5px; color:var(--text); line-height:1.35;}
+  .mkt-taxa{display:block; font-size:10.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; margin-top:2px;}
+  .mkt-preco{font-family:'IBM Plex Mono',monospace; font-size:14px; color:var(--accent); font-weight:600; white-space:nowrap;}
+  .help-destaque{border-color:var(--accent) !important; box-shadow:0 0 0 3px rgba(230,126,51,0.18); transition:box-shadow .4s ease, border-color .4s ease;}
+  .mkt-nota{font-size:10.5px; color:var(--text-dim); line-height:1.55; margin:12px 0 4px; font-style:italic;}
 </style>
 </head>
 <body>
@@ -450,7 +464,7 @@
         </div>
       </div>
       <button type="button" class="dock-icon" id="navHome" aria-label="Calculadora">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="16" y1="15" x2="16" y2="15"/><line x1="8" y1="19" x2="8" y2="19"/><line x1="12" y1="19" x2="12" y2="19"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="16" y1="15" x2="16" y2="15"/></svg>
       </button>
       <button type="button" class="dock-icon" id="openSettings" aria-label="Configurações">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -460,17 +474,15 @@
       </button>
     </div>
     <header>
-      <div class="eyebrow">FICHA TÉCNICA · CUSTO DE IMPRESSÃO</div>
-      <h1>Calculadora de Impressão 3D</h1>
-      <p>Preencha os campos abaixo. O resultado é recalculado em tempo real e fica salvo neste navegador.</p>
+      <h1>Precifica 3D</h1>
+      <div class="eyebrow">CUSTO E PREÇO DE IMPRESSÃO 3D</div>
     </header>
   </div>
 
   <div id="mainScreen" class="screen">
 
   <div class="card">
-    <h2><span class="n">00</span> Estimativa rápida por STL <span class="opt-tag">opcional</span></h2>
-    <p class="card-desc">Suba o arquivo antes de fatiar pra ter uma noção de peso e custo de material.</p>
+    <h2><span class="n">00</span> Estimativa por STL <span class="opt-tag">opcional</span> <a href="#" class="help-icon" data-help="ajuda-stl" title="Como funciona a estimativa por STL">?</a></h2>
     <label class="file-drop" id="stlDrop">
       <input type="file" id="stlInput" accept=".stl" hidden>
       <span id="stlDropText">Toque para escolher um arquivo .STL</span>
@@ -509,12 +521,12 @@
 
       <div class="line"><span>Peso (100% sólido)</span><span id="stlPesoSolido">—</span></div>
       <div class="line total"><span>Peso estimado (com preenchimento)</span><span id="stlPesoInfill">—</span></div>
-      <p class="stl-note">O peso acima preenche sozinho o campo "Peso da peça" no bloco Material logo abaixo (o custo de material já sai de lá, sem calcular duas vezes) — pode editar na mão se quiser ajustar. Aproximação: considera uma casca equivalente a ~20% do volume fora do preenchimento e presume malha fechada (manifold). STL não guarda unidade — se o tamanho não bater com a peça real, arraste o slider até a medida certa que você conhece.</p>
+
     </div>
   </div>
 
   <div class="card" id="materialCard">
-    <h2><span class="n">01</span> Material</h2>
+    <h2><span class="n">01</span> Material <a href="#" class="help-icon" data-help="ajuda-material">?</a></h2>
     <div class="field">
       <label>Peso da peça<span class="hint">por unidade, sem suporte</span></label>
       <div class="input-box"><span class="unit">g</span><input type="number" id="pesoPeca" placeholder="ex: 50" step="1"></div>
@@ -548,7 +560,7 @@
     </details>
   </div>
   <div class="card" id="printerCard">
-    <h2><span class="n">02</span> Impressão</h2>
+    <h2><span class="n">02</span> Impressão <a href="#" class="help-icon" data-help="ajuda-impressao">?</a></h2>
     <div class="field no-prefix time-field">
       <label>Tempo de impressão<span class="hint">duração total do lote</span></label>
       <div class="time-inputs">
@@ -576,7 +588,7 @@
     </div>
   </div>
   <div class="card">
-    <h2><span class="n">03</span> Mão de obra &amp; margem</h2>
+    <h2><span class="n">03</span> Mão de obra &amp; margem <a href="#" class="help-icon" data-help="ajuda-margem">?</a></h2>
     <div class="field no-prefix time-field">
       <label>Trabalho manual<span class="hint">setup + pós-processamento, lote</span></label>
       <div class="time-inputs">
@@ -613,6 +625,17 @@
       <span class="value" id="rLucro">—</span>
     </div>
   </div>
+
+  <details class="card">
+    <summary>
+      Marketplaces — preço mínimo de anúncio
+      <a href="#" class="help-icon" data-help="ajuda-margem">?</a>
+      <span class="summary-chevron">▾</span>
+    </summary>
+    <p class="card-desc">Quanto anunciar em cada plataforma pra receber líquido o preço sugerido por peça.</p>
+    <div id="marketplacesTabela"></div>
+  </details>
+
   <details class="card">
     <summary>
       <span class="n">04</span> Orçamentos salvos
@@ -674,7 +697,7 @@
 
     <div class="card">
       <h2>Dados da impressora</h2>
-      <p class="card-desc">Suas impressoras. Toque numa pra abrir e editar tudo — potência, preço, vida útil e peças de reposição.</p>
+      <p class="card-desc">Toque numa impressora pra editar. <a href="#" class="help-inline-link" data-help="ajuda-impressora-dados">Como preencher?</a></p>
       <div class="text-field">
         <label for="mpTemplate">Começar a partir de um modelo do catálogo (opcional)</label>
         <select id="mpTemplate" class="mp-template-select">
@@ -690,52 +713,83 @@
     <h1 class="screen-title">Ajuda</h1>
     <p class="screen-desc">Guia rápido pra quem tá começando na impressão 3D.</p>
 
-    <div class="card">
-      <h2>Sobre a estimativa por STL</h2>
-      <p class="help-text">O card "Estimativa rápida por STL" é só uma <strong>referência</strong>, calculada a partir do volume geométrico do arquivo. Duas coisas importantes que ele <strong>não</strong> leva em conta:</p>
-      <p class="help-text"><strong>Tempo de impressão</strong> — depende da velocidade, altura de camada, número de paredes e outras configurações do seu fatiador (slicer). Não dá pra saber só olhando a geometria do arquivo. Sempre fatie de verdade no seu programa de impressão pra pegar o tempo real.</p>
-      <p class="help-text"><strong>Multicor / troca de filamento</strong> — se a peça usa mais de uma cor ou material, cada troca gasta tempo extra e geralmente um pouco de filamento de purga (a "torre de purga"). A estimativa por STL não sabe se a peça é multicor, então não soma nada disso.</p>
-      <p class="help-text">Use o peso e o custo de material como ponto de partida, mas ajuste tempo e energia na mão depois de fatiar de verdade.</p>
+    <div class="card" id="ajuda-stl">
+      <h2>Estimativa por STL</h2>
+      <p class="help-text">Serve só como <strong>referência</strong>: o peso sai do volume geométrico do arquivo. O valor calculado preenche sozinho o campo "Peso da peça" no bloco Material — dá pra editar na mão depois.</p>
+      <p class="help-text"><strong>Não calcula tempo de impressão.</strong> Tempo depende de velocidade, altura de camada, número de paredes e outras configurações do seu fatiador. Não dá pra saber só pela geometria — sempre fatie de verdade pra pegar o tempo real.</p>
+      <p class="help-text"><strong>Não considera multicor.</strong> Cada troca de cor gasta tempo extra e filamento de purga (a "torre de purga"). A estimativa não sabe se a peça é multicor.</p>
+      <p class="help-text"><strong>Aproximação usada:</strong> considera uma casca equivalente a ~20% do volume fora do preenchimento, e presume malha fechada (manifold).</p>
+      <p class="help-text"><strong>Tamanho errado?</strong> STL não guarda unidade de medida — o mesmo arquivo pode abrir em mm, cm ou polegada. Se as dimensões não baterem com a peça real, arraste o slider até a medida que você conhece.</p>
     </div>
 
-    <div class="card">
-      <h2>O que significa cada campo</h2>
+    <div class="card" id="ajuda-material">
+      <h2>Material</h2>
       <dl class="glossary">
+        <dt>Peso da peça</dt>
+        <dd>Quanto de filamento uma unidade consome, sem contar suportes. Vem do STL automaticamente ou você digita (o fatiador mostra esse número).</dd>
+        <dt>Quantidade no lote</dt>
+        <dd>Peças impressas juntas na mesma leva. Material multiplica pela quantidade, mas tempo e depreciação não — é por isso que imprimir em lote sai mais barato por peça.</dd>
+        <dt>Preço do filamento</dt>
+        <dd>Valor por quilo. Cadastrando filamentos em Configurações, basta selecionar um e o preço entra sozinho.</dd>
         <dt>Desperdício / falha</dt>
-        <dd>Uma margem em cima do peso da peça pra cobrir purga de filamento, primeira camada que não colou, ou reimpressões. 5% é um chute razoável pra começar; ajuste com sua experiência.</dd>
-
+        <dd>Margem em cima do peso pra cobrir purga, primeira camada que não colou, e reimpressões. 5% é um ponto de partida razoável.</dd>
         <dt>Preenchimento (infill)</dt>
-        <dd>Percentual do interior da peça que fica preenchido com uma estrutura, em vez de oco. Baixo (10-20%) é o padrão pra peças decorativas; mais alto (40%+) pra peças que precisam aguentar força.</dd>
+        <dd>Quanto do interior da peça fica preenchido em vez de oco. 10–20% serve pra peça decorativa; 40%+ pra peça que aguenta esforço.</dd>
+      </dl>
+    </div>
 
-        <dt>Potência da impressora</dt>
-        <dd>O consumo médio em Watts <em>durante</em> a impressão — não o pico de aquecimento da mesa/bico, que é bem mais alto só nos primeiros minutos.</dd>
+    <div class="card" id="ajuda-impressao">
+      <h2>Impressão</h2>
+      <dl class="glossary">
+        <dt>Tempo de impressão</dt>
+        <dd>Duração total do lote, não de uma peça. Pegue do seu fatiador depois de fatiar.</dd>
+        <dt>Impressora</dt>
+        <dd>Escolher a impressora define potência (custo de energia), preço de compra e vida útil (depreciação) e as peças de reposição. Sem impressora escolhida, energia e depreciação ficam zeradas.</dd>
+        <dt>Potência</dt>
+        <dd>Consumo médio em Watts <em>durante</em> a impressão — não o pico de aquecimento da mesa e do bico, que é bem mais alto só nos primeiros minutos.</dd>
+        <dt>Depreciação</dt>
+        <dd>Quanto de desgaste da máquina cada hora de impressão "consome". Soma duas coisas: preço de compra ÷ vida útil, e o custo das peças de reposição por hora.</dd>
+      </dl>
+    </div>
 
+    <div class="card" id="ajuda-impressora-dados">
+      <h2>Cadastrar impressora</h2>
+      <dl class="glossary">
         <dt>Vida útil estimada</dt>
-        <dd>Quantas horas de uso você espera tirar da impressora até trocar ou considerar o investimento "pago". Usado só pra ratear o custo da máquina ao longo do tempo (depreciação) — não é uma garantia do fabricante.</dd>
+        <dd>Quantas horas de uso você espera tirar da máquina antes de trocar ou considerar o investimento pago. Serve só pra ratear o custo ao longo do tempo — não é garantia do fabricante.</dd>
+        <dt>Intervalo de manutenção</dt>
+        <dd>De quantos em quantos dias você faz uma revisão geral. O selo colorido na lista avisa quando está chegando ou atrasando.</dd>
+        <dt>Peças de reposição</dt>
+        <dd>Custo de cada peça e de quantas em quantas horas de impressão ela precisa ser trocada. O site divide um pelo outro pra achar o custo de manutenção por hora, que entra na depreciação. Os valores que já vêm preenchidos são médias de mercado — ajuste com o que você paga de verdade.</dd>
+      </dl>
+    </div>
 
-        <dt>Margem de lucro</dt>
-        <dd>Um markup percentual em cima do custo total, aplicado só se você for vender as peças. Zere se for uso pessoal.</dd>
+    <div class="card" id="ajuda-margem">
+      <h2>Mão de obra, margem e marketplaces</h2>
+      <dl class="glossary">
+        <dt>Trabalho manual</dt>
+        <dd>Tempo gasto por você, não pela máquina: preparar o arquivo, tirar da mesa, limpar suportes, lixar, embalar. Por lote.</dd>
+        <dt>Valor da sua hora</dt>
+        <dd>Quanto vale o seu tempo. Zere se for uso pessoal e você não quiser cobrar isso.</dd>
+        <dt>Margem de lucro (não confundir com markup)</dt>
+        <dd><strong>Margem</strong> é quanto sobra do preço final: com 40% de margem, R$ 40 de cada R$ 100 vendidos são lucro. A conta é <em>preço = custo ÷ (1 − margem)</em>. Já <strong>markup</strong> é quanto você acrescenta em cima do custo: 40% de markup sobre R$ 100 de custo dá R$ 140, o que equivale a só 28,6% de margem. Este site usa margem de verdade.</dd>
+        <dt>Marketplaces</dt>
+        <dd>A tabela mostra quanto você precisa anunciar em cada plataforma pra <strong>receber líquido</strong> o preço calculado, já descontando comissão e taxa fixa. As taxas são médias de setembro/2026 e variam muito por categoria — confirme no simulador oficial da plataforma antes de anunciar. Frete e impostos não entram na conta.</dd>
       </dl>
     </div>
 
     <div class="card">
-      <h2>Como usar fotos reais das impressoras</h2>
-    <div class="howto-body">
-      <p><strong>Opção 1 — arquivo local (mais simples):</strong> crie uma pasta <code>images/printers/</code> ao lado deste HTML e salve uma imagem quadrada (300×300px+, fundo neutro) com o nome exato do modelo:</p>
-      <ul>
-        <li><code>ender3v3se.jpg</code> — Creality Ender 3 V3 SE</li>
-        <li><code>kobra3.jpg</code> — Anycubic Kobra 3</li>
-        <li><code>mk4s.jpg</code> — Prusa MK4S</li>
-        <li><code>crealityhi.jpg</code> — Creality Hi</li>
-        <li><code>a1mini.jpg</code> — Bambu Lab A1 mini</li>
-        <li><code>a1.jpg</code> — Bambu Lab A1</li>
-        <li><code>p1s.jpg</code> — Bambu Lab P1S</li>
-        <li><code>x1c.jpg</code> — Bambu Lab X1 Carbon</li>
-        <li><code>k2.jpg</code> — Creality K2</li>
-      </ul>
-      <p>Aceita <code>.jpg</code>, <code>.png</code> ou <code>.webp</code> — o site testa sozinho, nessa ordem. Sem o arquivo, continua mostrando o ícone.</p>
-      <p><strong>Opção 2 — URL externa:</strong> abra o arquivo <code>catalogo.js</code> (fica junto do index.html no repositório), procure <code>PRINTER_IMAGE_OVERRIDES</code> e cole a URL da imagem no id correspondente.</p>
+      <h2>Onde ficam salvos os dados</h2>
+      <p class="help-text">Sem login, tudo fica salvo só no navegador deste aparelho — outra pessoa que abrir o site não vê nada do que você cadastrou, e você mesmo não vê no celular o que cadastrou no computador.</p>
+      <p class="help-text">Entrando com a conta Google (ícone no topo), os dados passam a seguir você entre aparelhos. O círculo em volta da sua foto muda de cor pra indicar o status: laranja salvando, verde sincronizado, vermelho erro.</p>
     </div>
+
+    <div class="card">
+      <h2>Fotos reais das impressoras</h2>
+      <div class="howto-body">
+        <p><strong>Opção 1 — arquivo local:</strong> crie a pasta <code>images/printers/</code> ao lado do index.html e salve uma imagem quadrada (300×300px+, fundo neutro) com o id do modelo como nome: <code>ender3v3se.jpg</code>, <code>kobra3.jpg</code>, <code>crealityhi.jpg</code>, <code>a1mini.jpg</code>, <code>a1.jpg</code>, <code>p1s.jpg</code>, <code>x1c.jpg</code>, <code>k2.jpg</code>. Aceita <code>.jpg</code>, <code>.png</code> ou <code>.webp</code>.</p>
+        <p><strong>Opção 2 — URL externa:</strong> no arquivo <code>catalogo.js</code>, procure <code>PRINTER_IMAGE_OVERRIDES</code> e cole a URL no id correspondente.</p>
+      </div>
     </div>
   </div>
 
@@ -746,7 +800,7 @@
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
   import {
-    CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS, CATALOGO_TIPOS_FILAMENTO,
+    CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS, CATALOGO_TIPOS_FILAMENTO, MARKETPLACES,
     LINKS_AFILIADO_IMPRESSORA as LINKS_COMPRAR_IMPRESSORA,
     LINKS_AFILIADO_PECA as LINKS_COMPRAR_PECA,
     LINKS_AFILIADO_FILAMENTO,
@@ -815,7 +869,10 @@
 
     const custoLote = material + energia + deprec + maoObra;
     const custoPeca = custoLote / qtd;
-    const precoPeca = custoPeca * (1 + markup / 100);
+    // MARGEM (não markup): a margem é a fatia do PREÇO que sobra como lucro,
+    // então divide-se pelo complemento. Markup seria custo * (1 + pct).
+    const margemFrac = Math.min(Math.max(markup, 0), 95) / 100;
+    const precoPeca = custoPeca / (1 - margemFrac);
     const precoLote = precoPeca * qtd;
     const lucroPeca = precoPeca - custoPeca;
 
@@ -828,6 +885,48 @@
     out.precoPeca.textContent = fmt(precoPeca);
     out.precoLote.textContent = qtd > 1 ? `Lote de ${qtd} peças: ${fmt(precoLote)}` : 'Peça única';
     out.lucro.textContent = fmt(lucroPeca);
+    renderMarketplaces(precoPeca);
+  }
+
+  // ============ MARKETPLACES ============
+  // Dado o líquido que você quer receber, calcula por quanto anunciar:
+  //   preço = (líquido + taxa fixa) / (1 - comissão)
+  // Taxa fixa que só vale abaixo de um limite (caso do Mercado Livre) é
+  // reavaliada: se o preço já passou do limite, ela deixa de ser cobrada.
+  function precoMinimoMarketplace(mp, liquido){
+    if (mp.netPrice) return liquido;
+    const pct = (mp.percentual || 0) / 100;
+    if (pct >= 1) return Infinity;
+    const comFixa = (liquido + (mp.taxaFixa || 0)) / (1 - pct);
+    if (mp.fixaAbaixoDe && comFixa >= mp.fixaAbaixoDe){
+      const semFixa = liquido / (1 - pct);
+      if (semFixa >= mp.fixaAbaixoDe) return semFixa;
+    }
+    return comFixa;
+  }
+
+  function renderMarketplaces(liquidoDesejado){
+    const box = document.getElementById('marketplacesTabela');
+    if (!box) return;
+    if (!liquidoDesejado || !isFinite(liquidoDesejado)){
+      box.innerHTML = '<div class="empty-hint">Preencha a calculadora pra ver os preços.</div>';
+      return;
+    }
+    const linhas = MARKETPLACES.map(mp => {
+      const preco = precoMinimoMarketplace(mp, liquidoDesejado);
+      const taxaTxt = mp.netPrice
+        ? 'você define o líquido'
+        : `${mp.percentual}%${mp.taxaFixa ? ' + ' + fmt(mp.taxaFixa) : ''}${mp.fixaAbaixoDe ? ' (fixa só abaixo de ' + fmt(mp.fixaAbaixoDe) + ')' : ''}`;
+      return `
+        <div class="mkt-row">
+          <span class="mkt-nome">${mp.nome}
+            <span class="mkt-taxa">${taxaTxt}</span>
+          </span>
+          <span class="mkt-preco">${isFinite(preco) ? fmt(preco) : '—'}</span>
+        </div>`;
+    }).join('');
+    box.innerHTML = linhas +
+      '<p class="mkt-nota">Taxas médias de setembro/2026 — variam por categoria, peso e reputação. Frete e impostos não entram nesta conta.</p>';
   }
 
   // ============ BANCO DE DADOS LOCAL (localStorage) ============
@@ -998,6 +1097,20 @@
   navHome.addEventListener('click', () => showScreen('main'));
   navSettingsIcon.addEventListener('click', () => showScreen('settings'));
   navHelpIcon.addEventListener('click', () => showScreen('help'));
+
+  // Qualquer "?" ou link de ajuda abre a tela de Ajuda já na seção certa.
+  document.addEventListener('click', e => {
+    const gatilho = e.target.closest('[data-help]');
+    if (!gatilho) return;
+    e.preventDefault();
+    showScreen('help');
+    const alvo = document.getElementById(gatilho.dataset.help);
+    if (alvo){
+      alvo.scrollIntoView({ behavior:'smooth', block:'start' });
+      alvo.classList.add('help-destaque');
+      setTimeout(() => alvo.classList.remove('help-destaque'), 1800);
+    }
+  });
   showScreen('main');
 
   function saveFieldsToStorage(){

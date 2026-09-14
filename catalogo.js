@@ -173,3 +173,31 @@ export const LINKS_AFILIADO_FILAMENTO = {
 export const PRINTER_IMAGE_OVERRIDES = {
   // ender3v3se: 'https://exemplo.com/ender3.jpg',
 };
+
+// ----------------------------------------------------------------------------
+// MARKETPLACES — taxas usadas pra sugerir o preço mínimo de anúncio.
+//
+// Levantadas em setembro/2026. Comissão varia MUITO por categoria, então
+// usei a média prática de cada plataforma — confirme no simulador oficial
+// antes de anunciar de verdade. Edite aqui pra ajustar.
+//
+// percentual ..... comissão em % sobre o preço de venda
+// taxaFixa ....... valor fixo em R$ cobrado por unidade vendida
+// fixaAbaixoDe ... se preenchido, a taxa fixa só vale abaixo desse preço
+// netPrice ....... true = plataforma onde você informa o líquido que quer
+//                  receber (Temu), então o preço mínimo é o próprio líquido
+// ----------------------------------------------------------------------------
+export const MARKETPLACES = [
+  { nome:'Mercado Livre · Clássico', percentual:13, taxaFixa:6.50, fixaAbaixoDe:79,
+    obs:'10–14% por categoria; taxa por unidade só abaixo de R$ 79' },
+  { nome:'Mercado Livre · Premium', percentual:17, taxaFixa:6.50, fixaAbaixoDe:79,
+    obs:'15–19%; embute parcelamento sem juros' },
+  { nome:'Shopee · até R$ 79,99', percentual:20, taxaFixa:4,
+    obs:'14% + 6% do frete grátis obrigatório; CPF paga R$ 7 de fixa' },
+  { nome:'Shopee · R$ 80 ou mais', percentual:14, taxaFixa:26,
+    obs:'taxa fixa sobe por faixa de preço (R$ 4 a R$ 26)' },
+  { nome:'Amazon', percentual:15, taxaFixa:0,
+    obs:'8–15% por categoria, sem taxa fixa por item; exige CNPJ' },
+  { nome:'Temu · Net Price', percentual:0, taxaFixa:0, netPrice:true,
+    obs:'você informa o líquido desejado e a Temu define o preço final' },
+];
