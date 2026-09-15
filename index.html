@@ -468,13 +468,37 @@
   .bnav-item.active{color:var(--accent); background:var(--accent-soft);}
 
   /* No desktop sobra espaço, então a barra vira uma "pílula" centralizada e flutuante */
-  @media (min-width: 720px){
+  /* Desktop: a barra sai de baixo e vira uma coluna fixa na lateral esquerda.
+     Só os ícones ficam visíveis; o texto aparece ao passar o mouse, expandindo
+     a barra pra direita (por isso o position:fixed + width de transição). */
+  @media (min-width: 900px){
     .bottom-nav{
-      left:50%; right:auto; transform:translateX(-50%);
-      bottom:20px; border-radius:999px; border:1px solid var(--border);
-      padding:6px 10px; gap:6px; box-shadow:0 10px 30px rgba(4,14,28,0.5);
+      top:50%; bottom:auto; left:14px; right:auto;
+      transform:translateY(-50%);
+      flex-direction:column; justify-content:center;
+      gap:6px; padding:8px;
+      width:56px; overflow:hidden;
+      border:1px solid var(--border); border-radius:14px;
+      box-shadow:0 10px 30px rgba(4,14,28,0.45);
+      transition:width .18s ease;
     }
-    .bnav-item{min-width:104px; border-radius:999px;}
+    .bottom-nav:hover{width:190px;}
+
+    .bnav-item{
+      flex:none; max-width:none; width:100%;
+      flex-direction:row; justify-content:flex-start;
+      gap:12px; padding:10px; border-radius:10px;
+      white-space:nowrap;
+    }
+    .bnav-item svg{flex-shrink:0; margin-left:2px;}
+    .bnav-item span{
+      font-size:13px; opacity:0;
+      transition:opacity .18s ease;
+    }
+    .bottom-nav:hover .bnav-item span{opacity:1;}
+
+    /* barra flutua sobre a margem vazia, conteúdo segue centralizado */
+    body{padding-bottom:64px;}
   }
 </style>
 </head>
