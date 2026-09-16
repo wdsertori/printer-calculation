@@ -498,7 +498,20 @@
     .bottom-nav:hover .bnav-item span{opacity:1;}
 
     /* barra flutua sobre a margem vazia, conteúdo segue centralizado */
-    body{padding-bottom:64px;}
+    body{padding-bottom:64px; padding-left:86px;}
+
+    /* Duas colunas: entradas à esquerda, resultado à direita. O resultado
+       fica "colado" no topo enquanto você rola os campos. */
+    .wrap{max-width:1040px;}
+    #mainScreen{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      align-items:start;
+    }
+    .col-output{position:sticky; top:20px;}
+    /* Configurações e Ajuda seguem em coluna única, mais confortável de ler */
+    #settingsScreen, #helpScreen{max-width:560px; margin:0 auto;}
   }
 </style>
 </head>
@@ -520,7 +533,7 @@
   </div>
 
   <div id="mainScreen" class="screen">
-
+  <div class="col-inputs">
   <div class="card">
     <h2><span class="n">00</span> Estimativa por STL <span class="opt-tag">opcional</span> <a href="#" class="help-icon" data-help="ajuda-stl" title="Como funciona a estimativa por STL">?</a></h2>
     <label class="file-drop" id="stlDrop">
@@ -645,6 +658,9 @@
     </details>
   </div>
 
+  </div>
+
+  <div class="col-output">
   <div class="results">
     <h2>Resultado do lote</h2>
     <div class="line"><span>Material</span><span id="rMaterial">—</span></div>
@@ -689,6 +705,7 @@
     <div id="orcamentosLista"></div>
   </details>
   <footer>CUSTO = MATERIAL + ENERGIA + DEPRECIAÇÃO + MÃO DE OBRA</footer>
+  </div>
   </div>
 
   <div id="settingsScreen" class="screen" hidden>
