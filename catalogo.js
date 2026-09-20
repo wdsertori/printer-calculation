@@ -148,7 +148,34 @@ export const LINKS_AFILIADO_IMPRESSORA = {
   // x1c: 'https://seulink.com/...',
 };
 
+// Peças são específicas de cada impressora (o hotend da Ender não serve na
+// X1 Carbon), então aqui é um link por IMPRESSORA e por PEÇA.
+//
+// Estrutura:  id_da_impressora: { id_da_peca: 'url' }
+//
+// Pode preencher só o que tiver — peça sem link cai na busca automática do
+// Mercado Livre ("peça + modelo + fabricante"). Ver links-afiliado.csv no
+// repositório pra checklist completa.
 export const LINKS_AFILIADO_PECA = {
+  ender3v3se: {
+    // hotend: 'https://seulink.com/...',
+    // bico: 'https://seulink.com/...',
+    // mesa: 'https://seulink.com/...',
+    // graxa: 'https://seulink.com/...',
+  },
+  kobra3: {},
+  crealityhi: {},
+  a1mini: {},
+  a1: {},
+  k2: {},
+  p1s: {},
+  x1c: {},
+};
+
+// Usado quando a impressora não é do catálogo (cadastrada à mão pelo usuário)
+// e nenhum link específico foi encontrado. Serve como último recurso antes
+// da busca automática.
+export const LINKS_AFILIADO_PECA_GENERICA = {
   // hotend: 'https://seulink.com/...',
   // bico: 'https://seulink.com/...',
   // mesa: 'https://seulink.com/...',

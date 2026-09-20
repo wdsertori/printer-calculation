@@ -874,6 +874,7 @@
     CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS, CATALOGO_TIPOS_FILAMENTO, MARKETPLACES,
     LINKS_AFILIADO_IMPRESSORA as LINKS_COMPRAR_IMPRESSORA,
     LINKS_AFILIADO_PECA as LINKS_COMPRAR_PECA,
+    LINKS_AFILIADO_PECA_GENERICA,
     LINKS_AFILIADO_FILAMENTO,
     PRINTER_IMAGE_OVERRIDES,
   } from './catalogo.js';
@@ -1209,9 +1210,21 @@
     if (p.catalogoId && LINKS_COMPRAR_IMPRESSORA[p.catalogoId]) return LINKS_COMPRAR_IMPRESSORA[p.catalogoId];
     return linkBuscaMercadoLivre(`${p.fabricante} ${p.modelo} impressora 3D`);
   }
+  // Link da peça, em ordem de prioridade:
+  //   1. link específico daquela peça NAQUELA impressora do catálogo
+  //   2. link genérico da peça (vale pra impressora cadastrada à mão)
+  //   3. busca automática no Mercado Livre com peça + modelo + fabricante
   function linkComprarPeca(pecaNome, impressora){
     const pm = PECAS_MANUTENCAO.find(x => x.nome === pecaNome);
-    if (pm && LINKS_COMPRAR_PECA[pm.id]) return LINKS_COMPRAR_PECA[pm.id];
+    if (pm && impressora){
+      // Impressora do catálogo tem id direto; cadastrada à mão, tenta casar
+      // fabricante + modelo com algum modelo do catálogo.
+      const catId = impressora.catalogoId || (CATALOGO_IMPRESSORAS.find(x =>
+        x.fabricante === impressora.fabricante && x.modelo === impressora.modelo) || {}).id;
+      const doModelo = catId && LINKS_COMPRAR_PECA[catId];
+      if (doModelo && doModelo[pm.id]) return doModelo[pm.id];
+    }
+    if (pm && LINKS_AFILIADO_PECA_GENERICA[pm.id]) return LINKS_AFILIADO_PECA_GENERICA[pm.id];
     const sufixo = impressora ? ` ${impressora.modelo} ${impressora.fabricante}` : ' impressora 3D';
     return linkBuscaMercadoLivre(pecaNome + sufixo);
   }
