@@ -138,14 +138,14 @@ export const CATALOGO_FILAMENTOS = [
 // "peça + modelo + fabricante" (ex: "Bico Ender 3 V3 SE Creality").
 // ============================================================================
 export const LINKS_AFILIADO_IMPRESSORA = {
-  // ender3v3se: 'https://seulink.com/ender3v3se?afiliado=SEUCODIGO',
-  // kobra3: 'https://seulink.com/...',
-  // crealityhi: 'https://seulink.com/...',
-  // a1mini: 'https://seulink.com/...',
-  // a1: 'https://seulink.com/...',
-  // k2: 'https://seulink.com/...',
-  // p1s: 'https://seulink.com/...',
-  // x1c: 'https://seulink.com/...',
+  ender3v3se: 'https://meli.la/18PS7HW',
+  kobra3: 'https://meli.la/1cFHWte',
+  crealityhi: 'https://meli.la/1M8w8XM',
+  a1mini: 'https://meli.la/2Zndd4d',
+  a1: 'https://meli.la/26Vafxw',
+  k2: 'https://meli.la/14oppcG',
+  p1s: 'https://meli.la/2JqwQqc',
+  // x1c: '',
 };
 
 // Peças são específicas de cada impressora (o hotend da Ender não serve na
@@ -158,16 +158,31 @@ export const LINKS_AFILIADO_IMPRESSORA = {
 // repositório pra checklist completa.
 export const LINKS_AFILIADO_PECA = {
   ender3v3se: {
-    // hotend: 'https://seulink.com/...',
-    // bico: 'https://seulink.com/...',
-    // mesa: 'https://seulink.com/...',
-    // graxa: 'https://seulink.com/...',
+    hotend: 'https://meli.la/1fw459W',
+    bico: 'https://meli.la/1Q4Ncj2',
+    mesa: 'https://meli.la/1nBGu9x',
+    graxa: 'https://meli.la/2E2amjP',
   },
-  kobra3: {},
-  crealityhi: {},
+  kobra3: {
+    hotend: 'https://meli.la/1sYkQib',
+    bico: 'https://meli.la/11gsqPU',
+    mesa: 'https://meli.la/3153uaM',
+    graxa: 'https://meli.la/1H9xkxv',
+  },
+  crealityhi: {
+    hotend: 'https://meli.la/2qevE3y',
+    bico: 'https://meli.la/1VYQZnR',
+  },
   a1mini: {},
-  a1: {},
-  k2: {},
+  a1: {
+    graxa: 'https://meli.la/2E2amjP',
+  },
+  k2: {
+    bico: 'https://meli.la/1VYQZnR',
+    mesa: 'https://meli.la/2TW4Npj',
+    filtro: 'https://meli.la/317PVFH',
+    graxa: 'https://meli.la/2E2amjP',
+  },
   p1s: {},
   x1c: {},
 };
@@ -176,19 +191,19 @@ export const LINKS_AFILIADO_PECA = {
 // e nenhum link específico foi encontrado. Serve como último recurso antes
 // da busca automática.
 export const LINKS_AFILIADO_PECA_GENERICA = {
-  // hotend: 'https://seulink.com/...',
-  // bico: 'https://seulink.com/...',
-  // mesa: 'https://seulink.com/...',
-  // filtro: 'https://seulink.com/...',
-  // graxa: 'https://seulink.com/...',
+  // hotend: '',
+  // bico: '',
+  // mesa: '',
+  // filtro: '',
+  graxa: 'https://meli.la/2E2amjP',
 };
 
 export const LINKS_AFILIADO_FILAMENTO = {
-  // pla_generico: 'https://seulink.com/...',
-  // petg_generico: 'https://seulink.com/...',
-  // abs_generico: 'https://seulink.com/...',
-  // tpu_generico: 'https://seulink.com/...',
-  // nylon_generico: 'https://seulink.com/...',
+  pla_generico: 'https://meli.la/1pfsNGu',
+  petg_generico: 'https://meli.la/1dh4qDG',
+  abs_generico: 'https://meli.la/23YsFFU',
+  tpu_generico: 'https://meli.la/1dmqCmV',
+  nylon_generico: 'https://meli.la/1VUqyxa',
 };
 
 
