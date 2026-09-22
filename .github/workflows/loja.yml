@@ -1,0 +1,41 @@
+name: Atualiza a loja
+
+# Roda quando o links.txt muda, e também dá pra disparar na mão
+# pela aba Actions do GitHub (botão "Run workflow").
+on:
+  push:
+    paths:
+      - 'loja/links.txt'
+      - 'loja/processador.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instala dependências
+        run: pip install -r loja/requirements.txt
+
+      - name: Busca título, descrição e foto de cada link
+        run: python loja/processador.py
+
+      - name: Publica o loja.json atualizado
+        run: |
+          if git diff --quiet loja.json; then
+            echo "Nada mudou no loja.json."
+            exit 0
+          fi
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add loja.json
+          git commit -m "Atualiza loja.json a partir do links.txt"
+          git push
