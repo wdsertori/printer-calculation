@@ -1,0 +1,21 @@
+# ============================================================================
+# LOJA DO PRECIFICA 3D — uma linha por produto.
+#
+# Formato:   categoria | link de afiliado | título opcional | descrição opcional
+#
+# Só categoria e link são obrigatórios. O processador busca título, descrição
+# e foto sozinho a partir do link (mesma técnica da prévia do WhatsApp).
+#
+# Preencha o título à mão quando o automático vier ruim — é o caso da Amazon,
+# que devolve só "Amazon.com.br" para robôs de prévia.
+#
+# Categorias válidas (escreva igual):
+#   Impressoras | Filamentos | Peças de reposição | Ferramentas | Aprenda 3D
+#
+# Linha começando com # é comentário e é ignorada.
+#
+# Exemplos (apague e ponha os seus):
+# Impressoras | https://meli.la/xxxxxxx
+# Filamentos | https://meli.la/xxxxxxx | PLA Preto 1kg | Boa aderência, fácil de imprimir
+# Aprenda 3D | https://amzn.to/xxxxxxx | Impressão 3D para Iniciantes | Livro introdutório
+# ============================================================================

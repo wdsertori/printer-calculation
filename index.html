@@ -481,6 +481,18 @@
   .modal-confirmar{background:var(--accent); border:1px solid var(--accent); color:#1a1a1a; font-weight:600;}
   .modal-confirmar:disabled{opacity:0.6; cursor:wait;}
 
+  .shop-aviso{font-size:11.5px; color:var(--text-dim); line-height:1.6; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:4px; padding:11px 13px; margin:0 0 20px;}
+  .shop-cat{font-size:12px; font-family:'IBM Plex Mono',monospace; color:var(--accent); letter-spacing:0.05em; margin:24px 0 10px;}
+  .shop-cat:first-child{margin-top:0;}
+  .shop-item{display:flex; gap:12px; align-items:flex-start; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:11px; margin-bottom:9px; text-decoration:none;}
+  .shop-item:hover{border-color:var(--accent);}
+  .shop-foto{width:74px; height:74px; flex-shrink:0; border-radius:4px; background:var(--surface-2); object-fit:contain;}
+  .shop-foto-vazia{width:74px; height:74px; flex-shrink:0; border-radius:4px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; color:var(--text-dim); font-size:20px;}
+  .shop-info{flex:1; min-width:0;}
+  .shop-titulo{font-size:13.5px; color:var(--text); line-height:1.35; margin-bottom:4px;}
+  .shop-desc{font-size:11.5px; color:var(--text-dim); line-height:1.5; margin-bottom:6px;}
+  .shop-loja{font-size:10.5px; font-family:'IBM Plex Mono',monospace; color:var(--accent);}
+
   .creditos{text-align:center; font-size:11.5px; color:var(--text-dim); line-height:1.7; margin:28px 0 8px; padding-top:18px; border-top:1px solid var(--grid-line);}
   .creditos-nome{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text); letter-spacing:0.04em;}
   .creditos a{color:var(--accent); text-decoration:none;}
@@ -762,6 +774,13 @@
   </div>
   </div>
 
+  <div id="shopScreen" class="screen" hidden>
+    <h1 class="screen-title">Shopping</h1>
+    <p class="screen-desc">Itens que uso e recomendo pra impressão 3D.</p>
+    <p class="shop-aviso">Os links abaixo são de afiliado: se você comprar por eles, eu recebo uma comissão da loja — sem nenhum custo extra pra você.</p>
+    <div id="shopLista"><div class="empty-hint">Carregando...</div></div>
+  </div>
+
   <div id="settingsScreen" class="screen" hidden>
     <h1 class="screen-title">Configurações</h1>
     <p class="screen-desc">Valores que normalmente não mudam a cada peça — configure uma vez e esqueça.</p>
@@ -954,6 +973,10 @@
   <button type="button" class="bnav-item" id="navHome">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="16" y1="15" x2="16" y2="15"/></svg>
     <span>Calculadora</span>
+  </button>
+  <button type="button" class="bnav-item" id="openShop">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    <span>Shopping</span>
   </button>
   <button type="button" class="bnav-item" id="openSettings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1317,15 +1340,20 @@
   const mainScreen = document.getElementById('mainScreen');
   const settingsScreen = document.getElementById('settingsScreen');
   const helpScreen = document.getElementById('helpScreen');
+  const shopScreen = document.getElementById('shopScreen');
   const navHome = document.getElementById('navHome');
   const navSettingsIcon = document.getElementById('openSettings');
   const navHelpIcon = document.getElementById('openHelp');
+  const navShopIcon = document.getElementById('openShop');
 
   function showScreen(nome){
     mainScreen.hidden = nome !== 'main';
     settingsScreen.hidden = nome !== 'settings';
     helpScreen.hidden = nome !== 'help';
+    shopScreen.hidden = nome !== 'shop';
     navHome.classList.toggle('active', nome === 'main');
+    navShopIcon.classList.toggle('active', nome === 'shop');
+    if (nome === 'shop') carregarLoja();
     navSettingsIcon.classList.toggle('active', nome === 'settings');
     navHelpIcon.classList.toggle('active', nome === 'help');
     window.scrollTo(0, 0);
@@ -1333,6 +1361,52 @@
   navHome.addEventListener('click', () => showScreen('main'));
   navSettingsIcon.addEventListener('click', () => showScreen('settings'));
   navHelpIcon.addEventListener('click', () => showScreen('help'));
+  navShopIcon.addEventListener('click', () => showScreen('shop'));
+
+  // ============ GUIA SHOPPING ============
+  // Lê o loja.json gerado pelo processador (loja/processador.py, rodado pela
+  // GitHub Action). Nada é buscado do marketplace pelo navegador: título,
+  // descrição e foto já vêm prontos no arquivo.
+  const ORDEM_CATEGORIAS = ['Impressoras','Filamentos','Peças de reposição','Ferramentas','Aprenda 3D'];
+  let lojaCarregada = false;
+
+  async function carregarLoja(){
+    if (lojaCarregada) return;
+    const box = document.getElementById('shopLista');
+    try {
+      const r = await fetch('loja.json', { cache: 'no-cache' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const dados = await r.json();
+      const produtos = (dados.produtos || []).filter(p => p.link);
+      if (!produtos.length){
+        box.innerHTML = '<div class="empty-hint">Nenhum item cadastrado ainda.</div>';
+        lojaCarregada = true;
+        return;
+      }
+      let html = '';
+      ORDEM_CATEGORIAS.forEach(cat => {
+        const doGrupo = produtos.filter(p => p.categoria === cat);
+        if (!doGrupo.length) return;
+        html += `<div class="shop-cat">${cat.toUpperCase()}</div>`;
+        html += doGrupo.map(p => `
+          <a class="shop-item" href="${p.link}" target="_blank" rel="noopener sponsored">
+            ${p.imagem
+              ? `<img class="shop-foto" src="${p.imagem}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\'shop-foto-vazia\'>?</div>'">`
+              : '<div class="shop-foto-vazia">?</div>'}
+            <span class="shop-info">
+              <span class="shop-titulo">${escapeHtml(p.titulo || '')}</span>
+              ${p.descricao ? `<span class="shop-desc">${escapeHtml(p.descricao)}</span>` : ''}
+              <span class="shop-loja">Comprar${p.marketplace ? ' · ' + escapeHtml(p.marketplace) : ''} ↗</span>
+            </span>
+          </a>`).join('');
+      });
+      box.innerHTML = html;
+      lojaCarregada = true;
+    } catch(err){
+      console.error('loja.json:', err);
+      box.innerHTML = '<div class="empty-hint">Não consegui carregar a lista agora.</div>';
+    }
+  }
 
   // Qualquer "?" ou link de ajuda abre a tela de Ajuda já na seção certa.
   document.addEventListener('click', e => {
