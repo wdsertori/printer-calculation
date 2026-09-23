@@ -482,6 +482,9 @@
   .modal-confirmar:disabled{opacity:0.6; cursor:wait;}
 
   .shop-aviso{font-size:11.5px; color:var(--text-dim); line-height:1.6; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:4px; padding:11px 13px; margin:0 0 20px;}
+  .shop-cat-n{color:var(--text-dim); font-size:10.5px;}
+  .shop-vermais{width:100%; background:transparent; border:1px dashed var(--border); color:var(--text-dim); border-radius:6px; padding:10px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; cursor:pointer; margin-bottom:4px;}
+  .shop-vermais:hover{color:var(--accent); border-color:var(--accent);}
   .shop-cat{font-size:12px; font-family:'IBM Plex Mono',monospace; color:var(--accent); letter-spacing:0.05em; margin:24px 0 10px;}
   .shop-cat:first-child{margin-top:0;}
   .shop-item{display:flex; gap:12px; align-items:flex-start; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:11px; margin-bottom:9px; text-decoration:none;}
@@ -1370,6 +1373,18 @@
   const ORDEM_CATEGORIAS = ['Impressoras','Filamentos','Peças de reposição','Ferramentas','Acessórios','Aprenda 3D'];
   let lojaCarregada = false;
 
+  // Abre/fecha o restante de uma categoria na guia Shopping.
+  document.getElementById('shopLista').addEventListener('click', e => {
+    const btn = e.target.closest('[data-resto]');
+    if (!btn) return;
+    const bloco = document.getElementById(btn.dataset.resto);
+    if (!bloco) return;
+    const abrindo = bloco.hidden;
+    bloco.hidden = !abrindo;
+    const n = bloco.children.length;
+    btn.textContent = abrindo ? 'Ver menos ↑' : `Ver mais ${n} ${n === 1 ? 'item' : 'itens'} ↓`;
+  });
+
   async function carregarLoja(){
     if (lojaCarregada) return;
     const box = document.getElementById('shopLista');
@@ -1383,12 +1398,9 @@
         lojaCarregada = true;
         return;
       }
-      let html = '';
-      ORDEM_CATEGORIAS.forEach(cat => {
-        const doGrupo = produtos.filter(p => p.categoria === cat);
-        if (!doGrupo.length) return;
-        html += `<div class="shop-cat">${cat.toUpperCase()}</div>`;
-        html += doGrupo.map(p => `
+      // Cada categoria mostra só o primeiro item; o resto fica num bloco
+      // escondido que abre no "Ver mais", pra tela não virar uma lista enorme.
+      const cartao = p => `
           <a class="shop-item" href="${p.link}" target="_blank" rel="noopener sponsored">
             ${p.imagem
               ? `<img class="shop-foto" src="${p.imagem}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\'shop-foto-vazia\'>?</div>'">`
@@ -1398,7 +1410,19 @@
               ${p.descricao ? `<span class="shop-desc">${escapeHtml(p.descricao)}</span>` : ''}
               <span class="shop-loja">Comprar${p.marketplace ? ' · ' + escapeHtml(p.marketplace) : ''} ↗</span>
             </span>
-          </a>`).join('');
+          </a>`;
+
+      let html = '';
+      ORDEM_CATEGORIAS.forEach((cat, i) => {
+        const doGrupo = produtos.filter(p => p.categoria === cat);
+        if (!doGrupo.length) return;
+        const resto = doGrupo.slice(1);
+        html += `<div class="shop-cat">${cat.toUpperCase()} <span class="shop-cat-n">${doGrupo.length}</span></div>`;
+        html += cartao(doGrupo[0]);
+        if (resto.length){
+          html += `<div class="shop-resto" id="shopResto${i}" hidden>${resto.map(cartao).join('')}</div>`;
+          html += `<button type="button" class="shop-vermais" data-resto="shopResto${i}">Ver mais ${resto.length} ${resto.length === 1 ? 'item' : 'itens'} ↓</button>`;
+        }
       });
       box.innerHTML = html;
       lojaCarregada = true;
