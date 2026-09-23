@@ -380,6 +380,7 @@ CATEGORIAS = [
     "Filamentos",
     "Peças de reposição",
     "Ferramentas",
+    "Acessórios",
     "Aprenda 3D",
 ]
 

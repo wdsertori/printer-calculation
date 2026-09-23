@@ -10,7 +10,7 @@
 # que devolve só "Amazon.com.br" para robôs de prévia.
 #
 # Categorias válidas (escreva igual):
-#   Impressoras | Filamentos | Peças de reposição | Ferramentas | Aprenda 3D
+#   Impressoras | Filamentos | Peças de reposição | Ferramentas | Acessórios | Aprenda 3D
 #
 # Linha começando com # é comentário e é ignorada.
 #

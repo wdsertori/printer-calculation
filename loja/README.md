@@ -11,7 +11,7 @@ categoria | link de afiliado | título opcional | descrição opcional
 ```
 
 Categorias válidas (escreva exatamente assim):
-`Impressoras` · `Filamentos` · `Peças de reposição` · `Ferramentas` · `Aprenda 3D`
+`Impressoras` · `Filamentos` · `Peças de reposição` · `Ferramentas` · `Acessórios` · `Aprenda 3D`
 
 Ao dar commit nesse arquivo, uma GitHub Action roda o processador, busca
 título/descrição/foto de cada link e regrava o `loja.json`, que é o arquivo
