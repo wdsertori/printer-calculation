@@ -28,14 +28,14 @@ jobs:
       - name: Busca título, descrição e foto de cada link
         run: python loja/processador.py
 
-      - name: Publica o loja.json atualizado
+      - name: Publica as alterações
         run: |
-          if git diff --quiet loja.json; then
-            echo "Nada mudou no loja.json."
+          if git diff --quiet loja.json loja/links.txt; then
+            echo "Nada mudou."
             exit 0
           fi
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add loja.json
-          git commit -m "Atualiza loja.json a partir do links.txt"
+          git add loja.json loja/links.txt
+          git commit -m "Atualiza loja.json e anota titulos no links.txt"
           git push
