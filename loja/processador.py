@@ -401,6 +401,12 @@ def read_items(path: Path) -> list[dict]:
             if not line or line.startswith("#"):
                 continue
 
+            # Anotação automática no fim da linha (" # título do produto"):
+            # serve só para você reconhecer a linha depois. O espaço antes do
+            # "#" evita cortar URLs que tenham # de fragmento.
+            if " #" in line:
+                line = line.split(" #", 1)[0].strip()
+
             partes = [p.strip() for p in line.split("|")]
 
             if len(partes) < 2 or not partes[1]:
@@ -414,6 +420,7 @@ def read_items(path: Path) -> list[dict]:
                 categoria = "Ferramentas"
 
             items.append({
+                "linha": numero,
                 "categoria": categoria,
                 "link": partes[1],
                 "titulo_manual": partes[2] if len(partes) > 2 else "",
@@ -438,6 +445,43 @@ def load_cache(path: Path) -> dict:
         for p in dados.get("produtos", [])
         if p.get("link") and p.get("imagem")
     }
+
+
+def anotar_links(path: Path, items: list[dict], produtos: list[dict]) -> bool:
+    """Escreve o título encontrado como comentário no fim de cada linha.
+
+    Só serve para leitura humana — na próxima execução esse trecho é
+    descartado. Comentários, linhas em branco e o cabeçalho ficam intactos.
+    """
+    titulo_por_linha = {}
+
+    for item, produto in zip(items, produtos):
+        titulo = produto.get("titulo", "")
+
+        if titulo and titulo != "(sem título)":
+            # "|" e "#" quebrariam a leitura da linha na próxima execução.
+            titulo_por_linha[item["linha"]] = titulo.replace("|", "/").replace("#", "")
+
+    linhas = path.read_text(encoding="utf-8-sig").splitlines()
+    mudou = False
+
+    for indice, bruta in enumerate(linhas):
+        numero = indice + 1
+
+        if numero not in titulo_por_linha:
+            continue
+
+        base = bruta.split(" #", 1)[0].rstrip()
+        nova = f"{base}  # {titulo_por_linha[numero]}"
+
+        if nova != bruta:
+            linhas[indice] = nova
+            mudou = True
+
+    if mudou:
+        path.write_text("\n".join(linhas) + "\n", encoding="utf-8")
+
+    return mudou
 
 
 def main() -> int:
@@ -517,6 +561,11 @@ def main() -> int:
             "imagem": dados["imagem"],
             "marketplace": dados["marketplace"],
         })
+
+    # Anota os títulos no links.txt enquanto a ordem ainda espelha o arquivo
+    # (depois do sort abaixo, a correspondência linha x produto se perde).
+    if anotar_links(input_file, items, produtos):
+        print(f"Títulos anotados em: {input_file}")
 
     # Mantém a ordem das categorias como definida em CATEGORIAS.
     produtos.sort(key=lambda p: CATEGORIAS.index(p["categoria"]) if p["categoria"] in CATEGORIAS else 99)

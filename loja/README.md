@@ -33,6 +33,21 @@ Pelos testes com links reais:
 Então **produto da Amazon precisa de título escrito à mão** na terceira coluna.
 Nos outros, preencha só se quiser um texto melhor que o do anúncio.
 
+## Anotação automática dos títulos
+
+Depois de rodar, o processador reescreve o `links.txt` acrescentando o título
+encontrado como comentário no fim de cada linha:
+
+```
+Peças de reposição | https://meli.la/xxxxx  # Bico MK8 0.4mm para Impressora 3D
+```
+
+Serve só pra você reconhecer o produto na hora de excluir ou trocar de
+categoria, já que o link de afiliado sozinho não diz nada. Na leitura da
+execução seguinte esse pedaço é descartado.
+
+Por isso a Action commita **dois** arquivos: `loja.json` e `loja/links.txt`.
+
 ## Cache
 
 Link que já foi resolvido antes é reaproveitado do `loja.json` e não gera nova

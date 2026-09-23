@@ -14,6 +14,11 @@
 #
 # Linha começando com # é comentário e é ignorada.
 #
+# Depois de cada execução, o processador escreve o título encontrado no fim
+# da linha, depois de um "#", só pra você reconhecer o produto:
+#     Ferramentas | https://meli.la/xxxxx  # Espátula Flexível Aço Inox
+# Esse trecho é ignorado na leitura — não precisa mexer nem apagar.
+#
 # Exemplos (apague e ponha os seus):
 # Impressoras | https://meli.la/xxxxxxx
 # Filamentos | https://meli.la/xxxxxxx | PLA Preto 1kg | Boa aderência, fácil de imprimir
