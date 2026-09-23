@@ -24,23 +24,23 @@
 # Filamentos | https://meli.la/xxxxxxx | PLA Preto 1kg | Boa aderência, fácil de imprimir
 # Aprenda 3D | https://amzn.to/xxxxxxx | Impressão 3D para Iniciantes | Livro introdutório
 # ============================================================================
-Acessórios | https://meli.la/2dUxJZB
-Impressoras | https://meli.la/2Zndd4d
-Impressoras | https://meli.la/1miPkfX
-Impressoras | https://meli.la/1uuBbZ2
-Ferramentas | https://meli.la/21Eev5C
-Acessórios | https://meli.la/2HUQUuD
-Filamentos | https://meli.la/2AxzeSn
-Ferramentas | https://meli.la/2WYMCg9
-Impressoras | https://meli.la/1kRC7Vp
-Ferramentas | https://meli.la/1wzLfuN
-Ferramentas | https://meli.la/1E1EzB7
-Filamentos | https://meli.la/1GaoYvK
-Peças de reposição | https://meli.la/2NH77Zz
-Peças de reposição | https://meli.la/2duG94U
-Peças de reposição | https://meli.la/2CXrTTT
-Peças de reposição | https://meli.la/335Wmjc
-Peças de reposição | https://meli.la/2L7g7ff
-Ferramentas | https://meli.la/2E2amjP
-Peças de reposição | https://meli.la/2BSRA43
+Acessórios | https://meli.la/2dUxJZB  # Pc Gamer Fácil Pulse Amd Ryzen 7 5700g Radeon Vega 8 Ssd 480gb 16gb Ddr4 Fonte 500w - Pgf-0150pu
+Impressoras | https://meli.la/2Zndd4d  # Impressora 3d Bambu Lab A1 Mini Sem Ams
+Impressoras | https://meli.la/1miPkfX  # Impressora 3d Branca Multicolorida Bamboo Lab A1 Combo Ams Branco
+Impressoras | https://meli.la/1uuBbZ2  # Impressora 3d Anycubic Kobra 3 V2 Combo Fdm Multicolorida Cinza
+Ferramentas | https://meli.la/21Eev5C  # Kit 47 Ferramentas Impressão 3d Acabamento Rebarbador Preto
+Acessórios | https://meli.la/2HUQUuD  # Caixa de secador de 2 filamentos Sovol Sh01 Pla+, petg, tpu, abs, cor branca
+Filamentos | https://meli.la/2AxzeSn  # Filamento Pla 1,75mm 1kg Para Impressora 3d Branco Ou Preto
+Ferramentas | https://meli.la/2WYMCg9  # Kit 54 Peças Completo de Ferramentas Manuais para Impressão 3D, Alicate, Pinças, Estilete, Agulhas Inox para Limpeza de Bico
+Impressoras | https://meli.la/1kRC7Vp  # Creality impressora 3d hi combo com sistema multicolor
+Ferramentas | https://meli.la/1wzLfuN  # Graxa P/ Lubrificar Eixo Impressora 3d Ptfe Anti Atrito 60g
+Ferramentas | https://meli.la/1E1EzB7  # Kit Acabamento Impressão 3d Limas Alicate Escovas 11 Peças Amarelo
+Filamentos | https://meli.la/1GaoYvK  # Filamento 3d Sunlu Printer Filament Pla +silk De 1.75mm 1kg Dourado
+Peças de reposição | https://meli.la/2NH77Zz  # Nozzle Bico Hotend Aço Impressora Bambu A1 A1 Mini Original
+Peças de reposição | https://meli.la/2duG94U  # Hotend Bico Aço Bambu Lab A1 A1 Mini 0,2mm 0,4mm 0,6mm 0,8mm 0.2mm
+Peças de reposição | https://meli.la/2CXrTTT  # Kit Bico Cerâmico Troca Rápida Para Creality K1/k1c/k1 Max
+Peças de reposição | https://meli.la/335Wmjc  # Bico De Troca Rápida Unicorn 0,4mm K1 E Ender-3 V3 Series
+Peças de reposição | https://meli.la/2L7g7ff  # Bico Nozzle Creality Hi Creality K2 Plus K2 Pro K2 0,2-0,8mm Bico 0.4mm
+Ferramentas | https://meli.la/2E2amjP  # Creality Graxa Lubrificante Para Impressora 3d, 10g Original
+Peças de reposição | https://meli.la/2BSRA43  # Bico Para Kobra Bimetálico X S1 0.25/0.4/0.6 /0.8 Nozzle Bico 0.4
 
