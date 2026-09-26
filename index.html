@@ -106,6 +106,11 @@
   .opt-tag{font-size:10px; color:var(--text-dim); background:var(--surface-2); border:1px solid var(--border); border-radius:2px; padding:2px 6px; font-weight:400; letter-spacing:0; text-transform:none;}
   .card-desc{font-size:13px; color:var(--text-dim); margin:-8px 0 14px; line-height:1.55;}
 
+  .modo-toggle{display:flex; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:4px; margin-bottom:16px; gap:4px;}
+  .modo-btn{flex:1; background:transparent; border:none; border-radius:5px; padding:10px 8px; font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; font-weight:500; color:var(--text-dim); cursor:pointer;}
+  .modo-btn.active{background:var(--accent); color:#1a1a1a;}
+  .modo-btn:not(.active):hover{color:var(--text);}
+
   .subsection{margin-top:2px; border-top:1px solid var(--grid-line);}
   .subsection summary{cursor:pointer; padding:13px 0; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-dim); letter-spacing:.02em; list-style:none; display:flex; align-items:center; gap:7px; user-select:none;}
   .subsection summary::-webkit-details-marker{display:none;}
@@ -587,6 +592,11 @@
     </div>
   </div>
 
+  <div class="modo-toggle" id="modoToggle">
+    <button type="button" class="modo-btn active" data-modo="fdm">Filamento (FDM)</button>
+    <button type="button" class="modo-btn" data-modo="resina">Resina</button>
+  </div>
+
   <div id="mainScreen" class="screen">
   <div class="col-inputs">
   <div class="card">
@@ -613,7 +623,7 @@
       <div class="line"><span>Dimensões finais</span><span id="stlDims">—</span></div>
       <div class="line"><span>Volume</span><span id="stlVolume">—</span></div>
 
-      <div class="field-inline">
+      <div class="field-inline" id="stlDensityField">
         <label>Material</label>
         <div class="chip-group" id="materialChips">
           <button type="button" class="chip active" data-density="1.24">PLA</button>
@@ -627,36 +637,66 @@
         <input type="range" id="stlInfill" min="0" max="100" value="15" step="5">
       </div>
 
-      <div class="line"><span>Peso (100% sólido)</span><span id="stlPesoSolido">—</span></div>
-      <div class="line total"><span>Peso estimado (com preenchimento)</span><span id="stlPesoInfill">—</span></div>
+      <div class="line"><span id="stlLabelSolido">Peso (100% sólido)</span><span id="stlPesoSolido">—</span></div>
+      <div class="line total"><span id="stlLabelInfill">Peso estimado (com preenchimento)</span><span id="stlPesoInfill">—</span></div>
 
     </div>
   </div>
 
   <div class="card" id="materialCard">
-    <h2><span class="n">01</span> Material <a href="#" class="help-icon" data-help="ajuda-material">?</a></h2>
-    <div class="field">
-      <label>Peso da peça<span class="hint">por unidade, sem suporte</span></label>
-      <div class="input-box"><span class="unit">g</span><input type="number" id="pesoPeca" placeholder="ex: 50" step="1"></div>
+    <h2><span class="n">01</span> <span id="materialTitulo">Material</span> <a href="#" class="help-icon" data-help="ajuda-material">?</a></h2>
+
+    <div id="materialFdm">
+      <div class="field">
+        <label>Peso da peça<span class="hint">por unidade, sem suporte</span></label>
+        <div class="input-box"><span class="unit">g</span><input type="number" id="pesoPeca" placeholder="ex: 50" step="1"></div>
+      </div>
     </div>
+
+    <div id="materialResina" hidden>
+      <div class="field">
+        <label>Volume da peça<span class="hint">por unidade, sem suporte</span></label>
+        <div class="input-box"><span class="unit">mL</span><input type="number" id="volumePeca" placeholder="ex: 12" step="1"></div>
+      </div>
+    </div>
+
     <div class="field no-prefix">
       <label>Quantidade no lote<span class="hint">peças impressas juntas</span></label>
       <div class="input-box"><input type="number" id="qtd" value="1" step="1" min="1"></div>
     </div>
 
-    <div class="picker-wrap" id="filamentWrap">
-      <div class="picker-caption">Filamento ativo — toque pra trocar</div>
-      <button type="button" class="picker-trigger" id="filamentTrigger" aria-haspopup="listbox" aria-expanded="false">
-        <span class="picker-icon" id="filamentIcon"></span>
-        <span class="picker-label" id="filamentLabel">Personalizado</span>
-        <span class="picker-chevron">▾</span>
-      </button>
-      <div class="picker-panel" id="filamentPanel" hidden></div>
+    <div id="materialFdm2">
+      <div class="picker-wrap" id="filamentWrap">
+        <div class="picker-caption">Filamento ativo — toque pra trocar</div>
+        <button type="button" class="picker-trigger" id="filamentTrigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="picker-icon" id="filamentIcon"></span>
+          <span class="picker-label" id="filamentLabel">Personalizado</span>
+          <span class="picker-chevron">▾</span>
+        </button>
+        <div class="picker-panel" id="filamentPanel" hidden></div>
+      </div>
+      <div class="active-filament-info" id="activeFilamentInfo" hidden></div>
+      <div class="field" id="precoKgCustomField">
+        <label>Preço do filamento<span class="hint">por quilo</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
+      </div>
     </div>
-    <div class="active-filament-info" id="activeFilamentInfo" hidden></div>
-    <div class="field" id="precoKgCustomField">
-      <label>Preço do filamento<span class="hint">por quilo</span></label>
-      <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1"></div>
+
+    <div id="materialResina2" hidden>
+      <div class="picker-wrap" id="resinaWrap">
+        <div class="picker-caption">Resina ativa — toque pra trocar</div>
+        <button type="button" class="picker-trigger" id="resinaTrigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="picker-icon" id="resinaIcon"></span>
+          <span class="picker-label" id="resinaLabel">Personalizado</span>
+          <span class="picker-chevron">▾</span>
+        </button>
+        <div class="picker-panel" id="resinaPanel" hidden></div>
+      </div>
+      <div class="active-filament-info" id="activeResinaInfo" hidden></div>
+      <div class="field" id="precoLitroCustomField">
+        <label>Preço da resina<span class="hint">por litro</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoLitro" value="180" step="10"></div>
+      </div>
     </div>
 
     <details class="subsection">
@@ -706,8 +746,12 @@
     </div>
     <details class="subsection">
       <summary>Configurações de mão de obra</summary>
+      <div class="field">
+        <label>Miscelâneos<span class="hint">álcool, cola, tinta — valor do lote inteiro</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="miscelaneos" value="0" step="1"></div>
+      </div>
       <div class="field no-prefix suffix">
-        <label>Margem de lucro<span class="hint">markup sobre o custo</span></label>
+        <label>Margem de lucro<span class="hint">fatia do preço final que é lucro</span></label>
         <div class="input-box"><input type="number" id="markup" value="40" step="5"><span class="unit-suffix">%</span></div>
       </div>
     </details>
@@ -813,6 +857,30 @@
     </div>
 
     <div class="card">
+      <h2>Dados da resina</h2>
+      <div class="text-field">
+        <label for="resTemplate">Preencher com resina sugerida (opcional)</label>
+        <select id="resTemplate" class="mp-template-select">
+          <option value="">— nenhum, preencher na mão —</option>
+        </select>
+      </div>
+      <div class="text-field">
+        <label for="resNome">Nome da resina</label>
+        <input type="text" id="resNome" placeholder="ex: Resina Cinza Elegoo">
+      </div>
+      <div class="text-field">
+        <label for="resTipo">Tipo</label>
+        <select id="resTipo" class="mp-template-select"></select>
+      </div>
+      <div class="field">
+        <label>Preço por litro<span class="hint">pra cadastrar na lista</span></label>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="resPreco" step="10"></div>
+      </div>
+      <button type="button" class="save-btn" id="resAddBtn">Adicionar resina</button>
+      <div id="resLista"></div>
+    </div>
+
+    <div class="card">
       <h2>Energia</h2>
       <div class="field">
         <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
@@ -847,6 +915,13 @@
     <div class="card">
       <h2>Dados da impressora</h2>
       <p class="card-desc">Toque numa impressora pra editar. <a href="#" class="help-inline-link" data-help="ajuda-impressora-dados">Como preencher?</a></p>
+      <div class="text-field">
+        <label for="mpTipo">Tipo de impressora</label>
+        <select id="mpTipo" class="mp-template-select">
+          <option value="fdm">Filamento (FDM)</option>
+          <option value="resina">Resina</option>
+        </select>
+      </div>
       <div class="text-field">
         <label for="mpTemplate">Começar a partir de um modelo do catálogo (opcional)</label>
         <select id="mpTemplate" class="mp-template-select">
@@ -887,6 +962,18 @@
       </dl>
     </div>
 
+    <div class="card" id="ajuda-resina">
+      <h2>Modo Resina</h2>
+      <dl class="glossary">
+        <dt>Por que mL em vez de g?</dt>
+        <dd>Resina é vendida por litro, e o fatiador (ChiTuBox, Lychee) já mostra o consumo em mL — então não precisa converter por densidade como no filamento. O volume que o STL calcula já é o número certo.</dd>
+        <dt>Preenchimento em resina</dt>
+        <dd>No fatiador de resina isso normalmente aparece como "esvaziar peça" com uma espessura de parede, não uma porcentagem. Aqui simplificamos pra um slider de % igual ao do filamento — é uma aproximação, ajuste o volume na mão se o seu fatiador já te der o número exato.</dd>
+        <dt>Tela, filme FEP e cuba</dt>
+        <dd>Substituem hotend/bico/mesa/filtro do modo FDM como peças de desgaste. A tela costuma ser a mais cara e a que menos gasta (milhares de horas); o filme FEP é barato mas gasta rápido (algumas centenas de impressões).</dd>
+      </dl>
+    </div>
+
     <div class="card" id="ajuda-impressao">
       <h2>Impressão</h2>
       <dl class="glossary">
@@ -920,6 +1007,8 @@
         <dd>Tempo gasto por você, não pela máquina: preparar o arquivo, tirar da mesa, limpar suportes, lixar, embalar. Por lote.</dd>
         <dt>Valor da sua hora</dt>
         <dd>Quanto vale o seu tempo. Zere se for uso pessoal e você não quiser cobrar isso.</dd>
+        <dt>Miscelâneos</dt>
+        <dd>Um valor único em reais pro lote inteiro, pra cobrir álcool isopropílico, cola, tinta, embalagem — qualquer coisa que não tenha campo próprio. Divide pela quantidade igual mão de obra.</dd>
         <dt>Margem de lucro (não confundir com markup)</dt>
         <dd><strong>Margem</strong> é quanto sobra do preço final: com 40% de margem, R$ 40 de cada R$ 100 vendidos são lucro. A conta é <em>preço = custo ÷ (1 − margem)</em>. Já <strong>markup</strong> é quanto você acrescenta em cima do custo: 40% de markup sobre R$ 100 de custo dá R$ 140, o que equivale a só 28,6% de margem. Este site usa margem de verdade.</dd>
         <dt>Marketplaces</dt>
@@ -995,11 +1084,13 @@
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
   import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
   import {
-    CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS, CATALOGO_TIPOS_FILAMENTO, MARKETPLACES,
+    CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS, CATALOGO_TIPOS_FILAMENTO,
+    CATALOGO_RESINAS, CATALOGO_TIPOS_RESINA, MARKETPLACES,
     LINKS_AFILIADO_IMPRESSORA as LINKS_COMPRAR_IMPRESSORA,
     LINKS_AFILIADO_PECA as LINKS_COMPRAR_PECA,
     LINKS_AFILIADO_PECA_GENERICA,
     LINKS_AFILIADO_FILAMENTO,
+    LINKS_AFILIADO_RESINA,
     PRINTER_IMAGE_OVERRIDES,
   } from './catalogo.js';
 
@@ -1019,7 +1110,7 @@
   let cloudSyncTimer = null;
   let aplicandoDadosDaNuvem = false; // trava pra não reenviar pra nuvem o que acabou de baixar dela
   // ============ CAMPOS PRINCIPAIS ============
-  const ids = ['precoKg','pesoPeca','qtd','desperdicio','tempoHoras','tempoMinutos','precoKwh','tempoManualHoras','tempoManualMinutos','valorHora','markup'];
+  const ids = ['precoKg','pesoPeca','volumePeca','precoLitro','qtd','desperdicio','tempoHoras','tempoMinutos','precoKwh','tempoManualHoras','tempoManualMinutos','valorHora','markup','miscelaneos'];
   const el = {};
   ids.forEach(id => {
     el[id] = document.getElementById(id);
@@ -1042,8 +1133,6 @@
   const num = id => parseFloat(el[id].value) || 0;
 
   function calc(){
-    const precoKg = num('precoKg');
-    const pesoPeca = num('pesoPeca');
     const qtd = Math.max(1, num('qtd'));
     const desperdicio = num('desperdicio');
     const tempoImpressao = (parseFloat(el.tempoHoras.value) || 0) + (parseFloat(el.tempoMinutos.value) || 0) / 60;
@@ -1057,13 +1146,29 @@
     const tempoManual = (parseFloat(el.tempoManualHoras.value) || 0) + (parseFloat(el.tempoManualMinutos.value) || 0) / 60;
     const valorHora = num('valorHora');
     const markup = num('markup');
+    const miscelaneos = num('miscelaneos');
 
-    const material = (pesoPeca * qtd / 1000) * precoKg * (1 + desperdicio / 100);
+    // Material: filamento é vendido por PESO (kg) mas a peça é medida em
+    // gramas; resina é vendida por VOLUME (litro) e a peça sai do fatiador
+    // já em mL — não precisa converter por densidade nenhuma.
+    let material, pesoOuVolume;
+    if (modoAtual === 'resina'){
+      const volumePeca = num('volumePeca');
+      const precoLitro = num('precoLitro');
+      material = (volumePeca * qtd / 1000) * precoLitro * (1 + desperdicio / 100);
+      pesoOuVolume = volumePeca;
+    } else {
+      const precoKg = num('precoKg');
+      const pesoPeca = num('pesoPeca');
+      material = (pesoPeca * qtd / 1000) * precoKg * (1 + desperdicio / 100);
+      pesoOuVolume = pesoPeca;
+    }
+
     const energia = tempoImpressao * (potencia / 1000) * precoKwh;
     const deprec = ((valorImpressora / vidaUtil) + custoManutencaoHora) * tempoImpressao;
     const maoObra = tempoManual * valorHora;
 
-    const custoLote = material + energia + deprec + maoObra;
+    const custoLote = material + energia + deprec + maoObra + miscelaneos;
     const custoPeca = custoLote / qtd;
     // MARGEM (não markup): a margem é a fatia do PREÇO que sobra como lucro,
     // então divide-se pelo complemento. Markup seria custo * (1 + pct).
@@ -1081,13 +1186,14 @@
     out.precoPeca.textContent = fmt(precoPeca);
     out.precoLote.textContent = qtd > 1 ? `Lote de ${qtd} peças: ${fmt(precoLote)}` : 'Peça única';
     out.lucro.textContent = fmt(lucroPeca);
-    ultimoCalculo = { precoPeca, qtd, pesoPeca, tempoImpressao };
+    ultimoCalculo = { precoPeca, qtd, pesoPeca: pesoOuVolume, modo: modoAtual, tempoImpressao };
     renderMarketplaces(precoPeca);
     renderPizza({
       material: material / qtd,
       energia: energia / qtd,
       deprec: deprec / qtd,
       maoObra: maoObra / qtd,
+      miscelaneos: miscelaneos / qtd,
       lucro: lucroPeca,
     });
   }
@@ -1097,11 +1203,12 @@
   // então cada fatia usa a própria porcentagem como stroke-dasharray, e o
   // dashoffset negativo acumulado posiciona onde ela começa.
   const PIZZA_PARTES = [
-    { chave:'material', nome:'Material',    cor:'#E67E33' },
-    { chave:'energia',  nome:'Energia',     cor:'#6FA8DC' },
-    { chave:'deprec',   nome:'Depreciação', cor:'#4FAE93' },
-    { chave:'maoObra',  nome:'Mão de obra', cor:'#B88BD1' },
-    { chave:'lucro',    nome:'Lucro',       cor:'#D9B24C' },
+    { chave:'material',    nome:'Material',     cor:'#E67E33' },
+    { chave:'energia',     nome:'Energia',      cor:'#6FA8DC' },
+    { chave:'deprec',      nome:'Depreciação',  cor:'#4FAE93' },
+    { chave:'maoObra',     nome:'Mão de obra',  cor:'#B88BD1' },
+    { chave:'miscelaneos', nome:'Miscelâneos',  cor:'#8AA0B8' },
+    { chave:'lucro',       nome:'Lucro',        cor:'#D9B24C' },
   ];
 
   function renderPizza(valores){
@@ -1191,6 +1298,52 @@
   const LS_FILS = 'c3d_filamentos';
   const LS_EMPRESA = 'c3d_empresa';
   const LS_ORC_SEQ = 'c3d_orc_seq';
+  const LS_MODO = 'c3d_modo';                       // 'fdm' | 'resina'
+  const LS_PRINTER_RESINA = 'c3d_printerId_resina'; // seleção de impressora separada por modo
+  const LS_RESINAS = 'c3d_resinas';
+  const LS_RESINA_ID = 'c3d_resinaId';
+  let modoAtual = lsGet(LS_MODO, 'fdm');
+  // Peças relevantes pra um tipo de impressora ('fdm'/'resina') — 'ambos' (ex: graxa) sempre entra.
+  function pecasParaTipo(tipo){
+    return CATALOGO_PECAS.filter(pm => pm.tipo === tipo || pm.tipo === 'ambos');
+  }
+  function printerStorageKey(){ return modoAtual === 'resina' ? LS_PRINTER_RESINA : LS_PRINTER; }
+
+  // Troca entre os modos Filamento/Resina: alterna qual bloco do card 01
+  // aparece, os rótulos do STL, e qual impressora fica ativa (cada modo
+  // lembra a própria seleção — ver printerStorageKey()).
+  function aplicarModo(novoModo, opts){
+    opts = opts || {};
+    modoAtual = novoModo === 'resina' ? 'resina' : 'fdm';
+    if (!opts.pulando) lsSet(LS_MODO, modoAtual);
+
+    document.querySelectorAll('.modo-btn').forEach(b => b.classList.toggle('active', b.dataset.modo === modoAtual));
+
+    const ehResina = modoAtual === 'resina';
+    document.getElementById('materialFdm').hidden = ehResina;
+    document.getElementById('materialFdm2').hidden = ehResina;
+    document.getElementById('materialResina').hidden = !ehResina;
+    document.getElementById('materialResina2').hidden = !ehResina;
+    document.getElementById('materialTitulo').textContent = ehResina ? 'Resina' : 'Filamento';
+
+    const stlDensityField = document.getElementById('stlDensityField');
+    if (stlDensityField) stlDensityField.hidden = ehResina;
+    const labelSolido = document.getElementById('stlLabelSolido');
+    const labelInfill = document.getElementById('stlLabelInfill');
+    if (labelSolido) labelSolido.textContent = ehResina ? 'Volume (100% sólido)' : 'Peso (100% sólido)';
+    if (labelInfill) labelInfill.textContent = ehResina ? 'Volume estimado (com preenchimento)' : 'Peso estimado (com preenchimento)';
+    // Se já tem um STL carregado, refaz o cálculo com a unidade certa (mL x g).
+    if (typeof stlVolumeCm3Original !== 'undefined' && stlVolumeCm3Original) updateStlDerived();
+
+    // Reidrata a impressora selecionada PARA ESSE MODO — cada modo lembra a sua.
+    const savedId = lsGet(printerStorageKey(), '');
+    setTriggerDisplay(todasImpressoras().find(p => p.id === savedId && p.tipo === modoAtual) || null);
+    renderActivePrinterInfo();
+    calc();
+  }
+  document.querySelectorAll('#modoToggle .modo-btn').forEach(btn => {
+    btn.addEventListener('click', () => aplicarModo(btn.dataset.modo));
+  });
   var ultimoCalculo = null;       // números do último calc(), usados no PDF
   var stlDimsFinaisAtual = null;  // [x,y,z] mm do STL carregado, se houver
   var ocultarGizmo = false;       // true só enquanto captura a imagem pro PDF
@@ -1236,12 +1389,16 @@
     if (!currentUser) return;
     const payload = {
       campos: lsGet(LS_CAMPOS, {}),
+      modo: modoAtual,
       printerId: lsGet(LS_PRINTER, 'custom'),
+      printerIdResina: lsGet(LS_PRINTER_RESINA, ''),
       filamentoId: lsGet(LS_FILAMENT_ID, 'custom'),
+      resinaId: lsGet(LS_RESINA_ID, 'custom'),
       favoritos: lsGet(LS_FAVS, []),
       orcamentos: lsGet(LS_ORC, []),
       minhasImpressoras: lsGet('c3d_minhas_impressoras', []),
       filamentos: lsGet(LS_FILS, []),
+      resinas: lsGet(LS_RESINAS, []),
       empresa: lsGet(LS_EMPRESA, {}),
       orcSeq: lsGet(LS_ORC_SEQ, 0),
       atualizadoEm: new Date().toISOString(),
@@ -1262,26 +1419,32 @@
         const data = snap.data();
         aplicandoDadosDaNuvem = true;
         if (data.campos) lsSetRaw(LS_CAMPOS, data.campos);
+        if (data.modo) lsSetRaw(LS_MODO, data.modo);
         if (data.printerId) lsSetRaw(LS_PRINTER, data.printerId);
+        if (data.printerIdResina) lsSetRaw(LS_PRINTER_RESINA, data.printerIdResina);
         if (data.filamentoId) lsSetRaw(LS_FILAMENT_ID, data.filamentoId);
+        if (data.resinaId) lsSetRaw(LS_RESINA_ID, data.resinaId);
         if (data.favoritos) lsSetRaw(LS_FAVS, data.favoritos);
         if (data.orcamentos) lsSetRaw(LS_ORC, data.orcamentos);
         if (data.minhasImpressoras) lsSetRaw('c3d_minhas_impressoras', data.minhasImpressoras);
         if (data.filamentos) lsSetRaw(LS_FILS, data.filamentos);
+        if (data.resinas) lsSetRaw(LS_RESINAS, data.resinas);
         if (data.empresa) lsSetRaw(LS_EMPRESA, data.empresa);
         if (data.orcSeq) lsSetRaw(LS_ORC_SEQ, data.orcSeq);
         aplicandoDadosDaNuvem = false;
 
         loadFieldsFromStorage();
-        const savedPrinterId = lsGet(LS_PRINTER, '');
-        setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || null);
+        modoAtual = lsGet(LS_MODO, 'fdm');
+        aplicarModo(modoAtual, { pulando:true });
         const savedFilamentId = lsGet(LS_FILAMENT_ID, 'custom');
         setFilamentDisplay(todosFilamentos().find(f => f.id === savedFilamentId) || todosFilamentos()[0]);
+        const savedResinaId = lsGet(LS_RESINA_ID, 'custom');
+        setResinaDisplay(todasResinas().find(r => r.id === savedResinaId) || todasResinas()[0]);
         renderOrcamentos();
         renderMinhasImpressoras();
         renderFilamentos();
+        renderResinas();
         carregarEmpresa();
-        renderActivePrinterInfo();
         calc();
         setStatusVisual('synced', 'sincronizado ✓');
       } else {
@@ -1514,6 +1677,8 @@
         return `<svg ${a}><rect x="7" y="11" width="26" height="22" rx="2"/><path d="M25 11v22"/><circle cx="22.3" cy="23" r="1.3" fill="currentColor" stroke="none"/><path d="M11 30h10"/><rect x="7" y="7" width="26" height="5" rx="1" fill="currentColor" fill-opacity="0.22" stroke-opacity="0.5"/></svg>`;
       case 'minha':
         return `<svg ${a}><path d="M20 5l3.5 7.5L31 14l-5.5 5.5L27 27l-7-4-7 4 1.5-7.5L9 14l7.5-1.5z"/></svg>`;
+      case 'resina':
+        return `<svg ${a}><path d="M11 8h18l-2.5 21a2 2 0 0 1-2 1.8h-9a2 2 0 0 1-2-1.8z"/><path d="M20 14l3 5a3 3 0 1 1-6 0z" fill="currentColor" stroke="none" fill-opacity="0.55"/></svg>`;
       default: return '';
     }
   }
@@ -1525,6 +1690,7 @@
     const doCatalogo = CATALOGO_IMPRESSORAS.map(c => ({
       id: c.id,
       catalogoId: c.id,
+      tipo: c.tipo || 'fdm',
       fabricante: c.fabricante,
       modelo: c.modelo,
       name: `${c.fabricante} ${c.modelo}`,
@@ -1539,12 +1705,13 @@
     const meus = lsGet(LS_MEUS, []).map(item => ({
       id: 'meu_' + item.id,
       minhaImpressoraId: item.id,
+      tipo: item.tipo || 'fdm',
       fabricante: item.fabricante || '',
       modelo: item.modelo || '',
       name: `${item.fabricante || ''} ${item.modelo || ''}`.trim() || 'Sem nome',
       spec: `minha · ${item.potencia || 0} W`,
       watts: item.potencia || 0,
-      icon: 'minha',
+      icon: item.tipo === 'resina' ? 'resina' : 'minha',
       precoCompra: item.precoCompra || 0,
       vidaUtil: item.vidaUtil || 0,
       intervaloDias: item.intervaloDias || 90,
@@ -1609,7 +1776,7 @@
 
   function orderedPrinters(){
     const favs = lsGet(LS_FAVS, []);
-    const todas = todasImpressoras();
+    const todas = todasImpressoras().filter(p => p.tipo === modoAtual);
     const favd = todas.filter(p => favs.includes(p.id));
     const other = todas.filter(p => !favs.includes(p.id));
     return [...favd, ...other];
@@ -1687,7 +1854,7 @@
     if (selBtn){
       const p = todasImpressoras().find(x => x.id === selBtn.dataset.select);
       setTriggerDisplay(p);
-      lsSet(LS_PRINTER, p.id);
+      lsSet(printerStorageKey(), p.id);
       renderActivePrinterInfo();
       calc();
       closePanel();
@@ -1765,6 +1932,132 @@
     }
   });
 
+  // ============ SELETOR DE RESINA (mesmo padrão do seletor de filamento) ============
+  function linkComprarResinaPorNome(nome){
+    const catalogo = CATALOGO_RESINAS.find(r => r.nome === nome);
+    if (catalogo && LINKS_AFILIADO_RESINA[catalogo.id]) return LINKS_AFILIADO_RESINA[catalogo.id];
+    return linkBuscaMercadoLivre(nome + ' resina impressora 3D');
+  }
+
+  function todasResinas(){
+    const custom = { id:'custom', nome:'Personalizado', precoLitro:null };
+    return [custom, ...lsGet(LS_RESINAS, [])];
+  }
+
+  const resinaWrap = document.getElementById('resinaWrap');
+  const resinaTrigger = document.getElementById('resinaTrigger');
+  const resinaIconEl = document.getElementById('resinaIcon');
+  const resinaLabelEl = document.getElementById('resinaLabel');
+  const resinaPanel = document.getElementById('resinaPanel');
+  let currentResinaId = 'custom';
+
+  function renderResinaPanel(){
+    const list = todasResinas();
+    resinaPanel.innerHTML = list.map(r => `
+      <div class="printer-opt${r.id === currentResinaId ? ' selected' : ''}" data-id="${r.id}">
+        <button type="button" class="printer-opt-main" data-selectres="${r.id}">
+          <span class="picker-icon">${r.id === 'custom' ? printerIconSvg('edit') : printerIconSvg('resina')}</span>
+          <span class="meta"><span class="name">${r.nome}</span></span>
+          <span class="watts">${r.precoLitro !== null ? 'R$ ' + r.precoLitro.toFixed(2) + '/L' : ''}</span>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  function setResinaDisplay(r){
+    resinaIconEl.innerHTML = r.id === 'custom' ? printerIconSvg('edit') : printerIconSvg('resina');
+    resinaLabelEl.textContent = r.nome;
+    currentResinaId = r.id;
+
+    const infoEl = document.getElementById('activeResinaInfo');
+    const precoField = document.getElementById('precoLitroCustomField');
+    if (r.id === 'custom'){
+      infoEl.hidden = true;
+      precoField.hidden = false; // sem resina cadastrada: digita o preço na mão
+    } else {
+      infoEl.hidden = false;
+      precoField.hidden = true;  // preço vem da resina selecionada
+      infoEl.innerHTML = `<span>${escapeHtml(r.nome)} — R$ ${r.precoLitro.toFixed(2)}/L</span>
+        <a href="${linkComprarResinaPorNome(r.nome)}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a>`;
+    }
+  }
+
+  function openResinaPanel(){ renderResinaPanel(); resinaPanel.hidden = false; resinaTrigger.setAttribute('aria-expanded', 'true'); }
+  function closeResinaPanel(){ resinaPanel.hidden = true; resinaTrigger.setAttribute('aria-expanded', 'false'); }
+
+  resinaTrigger.addEventListener('click', () => { resinaPanel.hidden ? openResinaPanel() : closeResinaPanel(); });
+  document.addEventListener('click', e => { if (!resinaWrap.contains(e.target)) closeResinaPanel(); });
+
+  resinaPanel.addEventListener('click', e => {
+    const selBtn = e.target.closest('[data-selectres]');
+    if (selBtn){
+      const r = todasResinas().find(x => x.id === selBtn.dataset.selectres);
+      setResinaDisplay(r);
+      lsSet(LS_RESINA_ID, r.id);
+      if (r.precoLitro !== null){ el.precoLitro.value = r.precoLitro; calc(); saveFieldsToStorage(); }
+      closeResinaPanel();
+    }
+  });
+
+  el.precoLitro.addEventListener('input', () => {
+    const current = todasResinas().find(x => x.id === currentResinaId);
+    if (current && current.precoLitro !== null && Number(el.precoLitro.value) !== current.precoLitro){
+      setResinaDisplay(todasResinas()[0]);
+      lsSet(LS_RESINA_ID, 'custom');
+    }
+  });
+
+  const resTemplate = document.getElementById('resTemplate');
+  const resNome = document.getElementById('resNome');
+  const resTipo = document.getElementById('resTipo');
+  const resPreco = document.getElementById('resPreco');
+  const resLista = document.getElementById('resLista');
+
+  resTipo.innerHTML = CATALOGO_TIPOS_RESINA
+    .map(t => `<option value="${t}">${t}</option>`).join('');
+
+  resTemplate.innerHTML += CATALOGO_RESINAS
+    .map(r => `<option value="${r.id}">${r.nome}</option>`).join('');
+  resTemplate.addEventListener('change', () => {
+    const r = CATALOGO_RESINAS.find(x => x.id === resTemplate.value);
+    if (r){ resNome.value = r.nome; resPreco.value = r.precoLitro; if (r.tipo) resTipo.value = r.tipo; }
+  });
+
+  function renderResinas(){
+    const list = lsGet(LS_RESINAS, []);
+    if (!list.length){ resLista.innerHTML = '<div class="empty-hint">Nenhuma resina cadastrada ainda.</div>'; return; }
+    resLista.innerHTML = list.map(r => `
+      <div class="saved-item" data-id="${r.id}">
+        <div class="nome">${escapeHtml(r.nome)}${r.tipo ? ` <span class="badge neutral">${escapeHtml(r.tipo)}</span>` : ''}</div>
+        <div class="info">R$ ${r.precoLitro.toFixed(2)}/L</div>
+        <div class="actions">
+          <a href="${linkComprarResinaPorNome(r.nome)}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
+          <button type="button" class="danger" data-delres="${r.id}">Excluir</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('resAddBtn').addEventListener('click', () => {
+    const nome = resNome.value.trim();
+    const preco = parseFloat(resPreco.value) || 0;
+    if (!nome || preco <= 0) { resNome.focus(); return; }
+    const list = lsGet(LS_RESINAS, []);
+    list.unshift({ id: Date.now().toString(36), nome, tipo: resTipo.value, precoLitro: preco });
+    lsSet(LS_RESINAS, list);
+    resTemplate.value = '';
+    resNome.value = ''; resPreco.value = '';
+    renderResinas();
+  });
+
+  resLista.addEventListener('click', e => {
+    const delBtn = e.target.closest('[data-delres]');
+    if (delBtn){
+      lsSet(LS_RESINAS, lsGet(LS_RESINAS, []).filter(x => x.id !== delBtn.dataset.delres));
+      renderResinas();
+    }
+  });
+
   const filTemplate = document.getElementById('filTemplate');
   const filNome = document.getElementById('filNome');
   const filTipo = document.getElementById('filTipo');
@@ -1823,8 +2116,10 @@
   function currentFieldsSnapshot(){
     const snap = {};
     ids.forEach(id => snap[id] = el[id].value);
+    snap.modo = modoAtual;
     snap.printerId = currentPrinterId;
     snap.filamentoId = currentFilamentId;
+    snap.resinaId = currentResinaId;
     return snap;
   }
 
@@ -1874,12 +2169,16 @@
       const item = list.find(x => x.id === loadBtn.dataset.load);
       if (item){
         ids.forEach(id => { if (item.campos[id] !== undefined) el[id].value = item.campos[id]; });
-        const p = todasImpressoras().find(x => x.id === item.campos.printerId) || PRINTERS[0];
+        aplicarModo(item.campos.modo || 'fdm', { pulando:true });
+        const p = todasImpressoras().find(x => x.id === item.campos.printerId) || null;
         setTriggerDisplay(p);
-        lsSet(LS_PRINTER, p.id);
+        lsSet(printerStorageKey(), p ? p.id : '');
         const f = todosFilamentos().find(x => x.id === item.campos.filamentoId) || todosFilamentos()[0];
         setFilamentDisplay(f);
         lsSet(LS_FILAMENT_ID, f.id);
+        const r = todasResinas().find(x => x.id === item.campos.resinaId) || todasResinas()[0];
+        setResinaDisplay(r);
+        lsSet(LS_RESINA_ID, r.id);
         renderActivePrinterInfo();
         calc();
         saveFieldsToStorage();
@@ -1993,7 +2292,9 @@
     try {
       const seq = (Number(lsGet(LS_ORC_SEQ, 0)) || 0) + 1;
       lsSet(LS_ORC_SEQ, seq);
-      const filamento = todosFilamentos().find(f => f.id === currentFilamentId);
+      const material = modoAtual === 'resina'
+        ? todasResinas().find(r => r.id === currentResinaId)
+        : todosFilamentos().find(f => f.id === currentFilamentId);
       const calcAtual = ultimoCalculo || {};
       const dims = stlDimsFinaisAtual && !stlResult.hidden
         ? stlDimsFinaisAtual.map(v => v.toFixed(0)).join(' × ') + ' mm' : '';
@@ -2011,9 +2312,10 @@
         obs: pdfCampo('pdfObs').value.trim(),
         especificacoes: {
           dimensoes: dims,
-          material: filamento && filamento.id !== 'custom'
-            ? `${filamento.nome}${filamento.tipo ? ' (' + filamento.tipo + ')' : ''}` : '',
+          material: material && material.id !== 'custom'
+            ? `${material.nome}${material.tipo ? ' (' + material.tipo + ')' : ''}` : '',
           pesoPeca: calcAtual.pesoPeca || 0,
+          unidadePeso: modoAtual === 'resina' ? 'mL' : 'g',
           tempoImpressao: calcAtual.tempoImpressao || 0,
         },
         // cópia dos dados da empresa no momento da emissão, pra reemitir igual depois
@@ -2135,7 +2437,8 @@
     const specs = [
       ['DIMENSÕES', esp.dimensoes],
       ['MATERIAL', esp.material],
-      ['PESO POR PEÇA', esp.pesoPeca ? `${Math.round(esp.pesoPeca)} g` : ''],
+      [esp.unidadePeso === 'mL' ? 'VOLUME POR PEÇA' : 'PESO POR PEÇA',
+        esp.pesoPeca ? `${Math.round(esp.pesoPeca)} ${esp.unidadePeso || 'g'}` : ''],
       ['TEMPO DE IMPRESSÃO', formatarTempo(esp.tempoImpressao)],
     ].filter(s => s[1]);
     if (imagem || specs.length){
@@ -2460,16 +2763,30 @@
     stlInfillValue.textContent = `${infillPct}%`;
     const infillFrac = Math.max(0, Math.min(100, infillPct)) / 100;
 
-    const pesoSolido = volumeFinal * stlDensity;
-    const pesoInfill = pesoSolido * (infillFrac + (1 - infillFrac) * SHELL_FACTOR);
+    if (modoAtual === 'resina'){
+      // Resina é vendida por volume, não por peso — sem densidade nenhuma,
+      // o próprio volume (em cm³ = mL) já é a grandeza que interessa.
+      const volumeSolido = volumeFinal;
+      const volumeComOco = volumeSolido * (infillFrac + (1 - infillFrac) * SHELL_FACTOR);
 
-    stlPesoSolido.textContent = `${pesoSolido.toFixed(1)} g`;
-    stlPesoInfill.textContent = `${pesoInfill.toFixed(1)} g`;
+      stlPesoSolido.textContent = `${volumeSolido.toFixed(1)} mL`;
+      stlPesoInfill.textContent = `${volumeComOco.toFixed(1)} mL`;
 
-    // Preenche direto o campo da calculadora principal — continua editável.
-    el.pesoPeca.value = pesoInfill.toFixed(1);
-    el.pesoPeca.classList.add('flash');
-    setTimeout(() => el.pesoPeca.classList.remove('flash'), 500);
+      el.volumePeca.value = volumeComOco.toFixed(1);
+      el.volumePeca.classList.add('flash');
+      setTimeout(() => el.volumePeca.classList.remove('flash'), 500);
+    } else {
+      const pesoSolido = volumeFinal * stlDensity;
+      const pesoInfill = pesoSolido * (infillFrac + (1 - infillFrac) * SHELL_FACTOR);
+
+      stlPesoSolido.textContent = `${pesoSolido.toFixed(1)} g`;
+      stlPesoInfill.textContent = `${pesoInfill.toFixed(1)} g`;
+
+      // Preenche direto o campo da calculadora principal — continua editável.
+      el.pesoPeca.value = pesoInfill.toFixed(1);
+      el.pesoPeca.classList.add('flash');
+      setTimeout(() => el.pesoPeca.classList.remove('flash'), 500);
+    }
     calc();
     saveFieldsToStorage();
   }
@@ -2555,50 +2872,67 @@
 
   // ============ DADOS DA IMPRESSORA (cadastro e edição) ============
   const LS_MEUS = 'c3d_minhas_impressoras';
+  const mpTipo = document.getElementById('mpTipo');
   const mpTemplate = document.getElementById('mpTemplate');
   const mpLista = document.getElementById('mpLista');
 
   // Lista de peças vem de catalogo.js.
   const PECAS_MANUTENCAO = CATALOGO_PECAS;
 
-  mpTemplate.innerHTML += CATALOGO_IMPRESSORAS
-    .map(p => `<option value="${p.id}">${p.fabricante} ${p.modelo}</option>`).join('');
+  // O catálogo do template só mostra modelos do MESMO tipo escolhido acima
+  // (não faz sentido oferecer uma impressora de resina pra quem tá cadastrando FDM).
+  function popularMpTemplate(){
+    const tipo = mpTipo.value;
+    mpTemplate.innerHTML = '<option value="">— em branco, copiando meus maiores valores —</option>' +
+      CATALOGO_IMPRESSORAS.filter(p => (p.tipo || 'fdm') === tipo)
+        .map(p => `<option value="${p.id}">${p.fabricante} ${p.modelo}</option>`).join('');
+  }
+  mpTipo.addEventListener('change', popularMpTemplate);
+  popularMpTemplate();
 
   // Nova impressora em branco: copia os MAIORES valores das que você já tem
-  // (se errar, que erre pra cima). Sem nenhuma cadastrada, usa o topo do catálogo.
-  function valoresIniciaisNovaImpressora(){
-    const meus = lsGet(LS_MEUS, []);
-    const base = meus.length ? meus : CATALOGO_IMPRESSORAS;
+  // DO MESMO TIPO (se errar, que erre pra cima). Sem nenhuma cadastrada
+  // daquele tipo, usa o topo do catálogo daquele tipo.
+  function valoresIniciaisNovaImpressora(tipo){
+    tipo = tipo || 'fdm';
+    const meusDoTipo = lsGet(LS_MEUS, []).filter(x => (x.tipo || 'fdm') === tipo);
+    const catalogoDoTipo = CATALOGO_IMPRESSORAS.filter(p => (p.tipo || 'fdm') === tipo);
+    const base = meusDoTipo.length ? meusDoTipo : catalogoDoTipo;
     const maior = campo => Math.max(...base.map(x => Number(x[campo]) || 0), 0);
+    const relevantes = pecasParaTipo(tipo);
     const pecas = {};
-    PECAS_MANUTENCAO.forEach(pm => {
+    relevantes.forEach(pm => {
       pecas[pm.id] = {
         custo: Math.max(...base.map(x => (x.pecas && x.pecas[pm.id] ? Number(x.pecas[pm.id].custo) || 0 : 0)), 0),
         horas: Math.max(...base.map(x => (x.pecas && x.pecas[pm.id] ? Number(x.pecas[pm.id].horas) || 0 : 0)), 0),
       };
     });
     return {
+      tipo,
       fabricante: '', modelo: '',
       potencia: maior('potencia') || maior('watts'),
       precoCompra: maior('precoCompra'),
-      vidaUtil: maior('vidaUtil') || 5000,
-      intervaloDias: maior('intervaloDias') || 90,
+      vidaUtil: maior('vidaUtil') || (tipo === 'resina' ? 3000 : 5000),
+      intervaloDias: maior('intervaloDias') || (tipo === 'resina' ? 60 : 90),
       pecas,
     };
   }
 
+  // Só as peças do TIPO daquela impressora entram (hotend não aparece numa
+  // de resina, tela não aparece numa FDM) — graxa é 'ambos' e entra nas duas.
   function pecasDoItem(item){
     const p = item.pecas || {};
+    const relevantes = pecasParaTipo(item.tipo || 'fdm');
     const out = {};
-    PECAS_MANUTENCAO.forEach(pm => { out[pm.id] = p[pm.id] || { custo:0, horas:0 }; });
+    relevantes.forEach(pm => { out[pm.id] = p[pm.id] || { custo:0, horas:0 }; });
     return out;
   }
 
   function custoManutencaoPorHora(item){
     const pecas = pecasDoItem(item);
     let total = 0;
-    PECAS_MANUTENCAO.forEach(pm => {
-      const d = pecas[pm.id];
+    Object.keys(pecas).forEach(id => {
+      const d = pecas[id];
       if (d.custo > 0 && d.horas > 0) total += d.custo / d.horas;
     });
     return total;
@@ -2621,10 +2955,11 @@
       const st = statusManutencao(item);
       const ultima = item.ultimaManutencao ? new Date(item.ultimaManutencao).toLocaleDateString('pt-BR') : 'nunca';
       const pecas = pecasDoItem(item);
+      const pecasRelevantes = pecasParaTipo(item.tipo || 'fdm');
       const favId = 'meu_' + item.id;
       const favorita = favs.includes(favId);
       const nomeExib = `${item.fabricante || ''} ${item.modelo || ''}`.trim() || 'Impressora sem nome';
-      const linhasPecas = PECAS_MANUTENCAO.map(pm => `
+      const linhasPecas = pecasRelevantes.map(pm => `
         <div class="peca-row">
           <span class="peca-nome">${pm.nome} <a href="${linkComprarPeca(pm.nome, item)}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a></span>
           <div class="peca-inputs">
@@ -2685,15 +3020,16 @@
     let nova;
     const modelo = CATALOGO_IMPRESSORAS.find(x => x.id === mpTemplate.value);
     if (modelo){
-      // Partiu de um modelo do catálogo: copia os dados dele.
+      // Partiu de um modelo do catálogo: copia os dados dele (inclusive o tipo).
       nova = {
+        tipo: modelo.tipo || 'fdm',
         fabricante: modelo.fabricante, modelo: modelo.modelo,
         potencia: modelo.watts, precoCompra: modelo.precoCompra,
         vidaUtil: modelo.vidaUtil, intervaloDias: modelo.intervaloDias,
         pecas: JSON.parse(JSON.stringify(modelo.pecas)),
       };
     } else {
-      nova = valoresIniciaisNovaImpressora();
+      nova = valoresIniciaisNovaImpressora(mpTipo.value);
     }
     nova.id = Date.now().toString(36);
     nova.ultimaManutencao = null;
@@ -2734,7 +3070,7 @@
       // Se a excluída era a selecionada, limpa a seleção.
       if (currentPrinterId === 'meu_' + delBtn.dataset.delmp){
         setTriggerDisplay(null);
-        lsSet(LS_PRINTER, '');
+        lsSet(printerStorageKey(), '');
       }
       renderMinhasImpressoras();
       renderActivePrinterInfo();
@@ -2751,8 +3087,10 @@
       item.precoCompra = parseFloat(box.querySelector('.mp-f-preco').value) || 0;
       item.vidaUtil = parseFloat(box.querySelector('.mp-f-vidautil').value) || 0;
       item.intervaloDias = parseFloat(box.querySelector('.mp-f-intervalo').value) || 90;
+      // Só lê as peças que de fato foram renderizadas no accordion desse
+      // item (as do tipo dele) — as outras nem existem no DOM aqui dentro.
       const novasPecas = {};
-      PECAS_MANUTENCAO.forEach(pm => {
+      pecasParaTipo(item.tipo || 'fdm').forEach(pm => {
         const c = box.querySelector(`.peca-custo[data-peca="${pm.id}"]`);
         const h = box.querySelector(`.peca-horas[data-peca="${pm.id}"]`);
         novasPecas[pm.id] = { custo: parseFloat(c.value) || 0, horas: parseFloat(h.value) || 0 };
@@ -2780,14 +3118,15 @@
 
   // ============ INICIALIZAÇÃO ============
   loadFieldsFromStorage();
-  const savedPrinterId = lsGet(LS_PRINTER, '');
-  setTriggerDisplay(todasImpressoras().find(p => p.id === savedPrinterId) || null);
+  aplicarModo(modoAtual, { pulando:true });
   const savedFilamentId = lsGet(LS_FILAMENT_ID, 'custom');
   setFilamentDisplay(todosFilamentos().find(f => f.id === savedFilamentId) || todosFilamentos()[0]);
+  const savedResinaId = lsGet(LS_RESINA_ID, 'custom');
+  setResinaDisplay(todasResinas().find(r => r.id === savedResinaId) || todasResinas()[0]);
   renderOrcamentos();
   renderMinhasImpressoras();
   renderFilamentos();
-  renderActivePrinterInfo();
+  renderResinas();
   calc();
 </script>
 </body>
