@@ -1083,7 +1083,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
   import {
     CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS, CATALOGO_TIPOS_FILAMENTO,
     CATALOGO_RESINAS, CATALOGO_TIPOS_RESINA, MARKETPLACES,
@@ -1384,6 +1384,15 @@
     setStatusVisual('saving', 'salvando...');
     clearTimeout(cloudSyncTimer);
     cloudSyncTimer = setTimeout(pushToCloud, 900);
+  }
+
+  // Contador interno de uso — visível só no Firestore Console por enquanto
+  // (doc/users não leem isso, e o app também não). Cresce de 1 em 1, sem
+  // dado nenhum de quem clicou; regra do Firestore só deixa incrementar.
+  function incrementarContador(campo){
+    if (!currentUser) return; // precisa estar logado, é o que a regra exige
+    setDoc(doc(db, 'stats', 'contadores'), { [campo]: increment(1) }, { merge: true })
+      .catch(e => console.warn('contador não incrementou:', e));
   }
 
   async function pushToCloud(){
@@ -2336,6 +2345,7 @@
       });
       lsSet(LS_ORC, list);
       renderOrcamentos();
+      incrementarContador('pdfsGerados'); // só pra controle interno — ver Firestore Console
 
       await gerarPdf(emissao, capturarImagemStl());
       fecharModalPdf();
