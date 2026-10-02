@@ -312,7 +312,7 @@ export const LINKS_AFILIADO_FILAMENTO = {
 export const LINKS_AFILIADO_RESINA = {
   resina_padrao: 'https://meli.la/1VawycB',
   resina_abslike: 'https://meli.la/1UMfUwE',
-  // resina_lavavel: '',
+  resina_lavavel: 'https://meli.la/33Y5FFn',
   resina_flexivel: 'https://meli.la/2Z2bqXQ',
 };
 
