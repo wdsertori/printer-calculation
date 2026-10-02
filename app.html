@@ -352,6 +352,12 @@
   .saved-item .actions button:hover{color:var(--text); border-color:var(--accent);}
   .saved-item .actions button.danger:hover{color:var(--danger); border-color:var(--danger);}
   .empty-hint{font-size:12.5px; color:var(--text-dim); padding:10px 0; font-style:italic;}
+  .filtro-status{display:flex; gap:6px; flex-wrap:wrap; margin:16px 0 2px;}
+  .filtro-status .chip{padding:6px 10px; font-size:11px;}
+  .status-linha{display:flex; align-items:center; gap:10px; margin-top:9px; flex-wrap:wrap;}
+  .status-linha select{background:var(--surface-2); border:1px solid var(--border); border-radius:999px; padding:6px 12px; font-family:'IBM Plex Sans',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;}
+  .status-linha select option{background:var(--surface-2); color:var(--text);}
+  .status-linha .desde{font-size:11px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace;}
   .badge{font-size:10px; padding:3px 8px; border-radius:10px; font-family:'IBM Plex Mono',monospace; white-space:nowrap;}
   .badge.ok{background:var(--teal-soft); color:var(--teal);}
   .badge.warn{background:var(--accent-soft); color:var(--accent);}
@@ -818,6 +824,7 @@
       <button type="button" class="save-btn" id="salvarOrcamentoBtn">Salvar orçamento</button>
       <button type="button" class="save-btn pdf-btn" id="gerarPdfBtn">Gerar PDF para o cliente</button>
     </div>
+    <div class="filtro-status" id="filtroOrc"></div>
     <div id="orcamentosLista"></div>
   </details>
   <footer>CUSTO = MATERIAL + ENERGIA + DEPRECIAÇÃO + MÃO DE OBRA</footer>
@@ -1021,6 +1028,7 @@
 
     <div class="card">
       <h2>Onde ficam salvos os dados</h2>
+      <p class="help-text"><strong>Status do orçamento.</strong> Todo orçamento que você emite em PDF nasce como "Enviado". Conforme o cliente responde, troque pra Aprovado, Em produção, Entregue ou Recusado — a lista tem um filtro por status, e a data de cada mudança fica guardada.</p>
       <p class="help-text">Sem login, tudo fica salvo só no navegador deste aparelho — outra pessoa que abrir o site não vê nada do que você cadastrou, e você mesmo não vê no celular o que cadastrou no computador.</p>
       <p class="help-text">Entrando com a conta Google (ícone no topo), os dados passam a seguir você entre aparelhos. O círculo em volta da sua foto muda de cor pra indicar o status: laranja salvando, verde sincronizado, vermelho erro.</p>
     </div>
@@ -1187,7 +1195,7 @@
     out.precoPeca.textContent = fmt(precoPeca);
     out.precoLote.textContent = qtd > 1 ? `Lote de ${qtd} peças: ${fmt(precoLote)}` : 'Peça única';
     out.lucro.textContent = fmt(lucroPeca);
-    ultimoCalculo = { precoPeca, qtd, pesoPeca: pesoOuVolume, modo: modoAtual, tempoImpressao };
+    ultimoCalculo = { precoPeca, custoPeca, custoLote, qtd, pesoPeca: pesoOuVolume, modo: modoAtual, tempoImpressao };
     renderMarketplaces(precoPeca);
     renderPizza({
       material: material / qtd,
@@ -2183,21 +2191,95 @@
     return d.innerHTML;
   }
 
+  // Acompanhamento dos orçamentos EMITIDOS (os que geram PDF pro cliente).
+  // Quem foi emitido antes de o status existir conta como "enviado".
+  const STATUS_ORC = [
+    { id:'enviado',  nome:'Enviado',     cor:'#6FA8DC' },
+    { id:'aprovado', nome:'Aprovado',    cor:'#D9B24C' },
+    { id:'producao', nome:'Em produção', cor:'#E67E33' },
+    { id:'entregue', nome:'Entregue',    cor:'#4FAE93' },
+    { id:'recusado', nome:'Recusado',    cor:'#E0685C' },
+  ];
+  const statusDe = item => (item.emissao && item.emissao.status) || 'enviado';
+  let filtroOrc = 'todos';
+  const filtroOrcEl = document.getElementById('filtroOrc');
+
   function renderOrcamentos(){
     const list = lsGet(LS_ORC, []);
-    if (!list.length){ orcamentosLista.innerHTML = '<div class="empty-hint">Nenhum orçamento salvo ainda.</div>'; return; }
-    orcamentosLista.innerHTML = list.map(item => `
+    if (!list.length){
+      filtroOrcEl.innerHTML = '';
+      orcamentosLista.innerHTML = '<div class="empty-hint">Nenhum orçamento salvo ainda.</div>';
+      return;
+    }
+    const emitidos = list.filter(i => i.emissao);
+    if (!emitidos.length) filtroOrc = 'todos';
+
+    // filtro por status: só aparece quando existe ao menos um orçamento emitido
+    if (emitidos.length){
+      const cont = {}; STATUS_ORC.forEach(st => cont[st.id] = 0);
+      emitidos.forEach(i => { cont[statusDe(i)] = (cont[statusDe(i)] || 0) + 1; });
+      filtroOrcEl.innerHTML =
+        `<button type="button" class="chip${filtroOrc === 'todos' ? ' active' : ''}" data-filtro="todos">Todos (${list.length})</button>` +
+        STATUS_ORC.map(st => `<button type="button" class="chip${filtroOrc === st.id ? ' active' : ''}" data-filtro="${st.id}">${st.nome} (${cont[st.id]})</button>`).join('');
+    } else {
+      filtroOrcEl.innerHTML = '';
+    }
+
+    const visiveis = filtroOrc === 'todos' ? list : list.filter(i => i.emissao && statusDe(i) === filtroOrc);
+    if (!visiveis.length){
+      orcamentosLista.innerHTML = '<div class="empty-hint">Nenhum orçamento com esse status.</div>';
+      return;
+    }
+    orcamentosLista.innerHTML = visiveis.map(item => {
+      let linhaStatus = '';
+      if (item.emissao){
+        const atual = statusDe(item);
+        const def = STATUS_ORC.find(st => st.id === atual) || STATUS_ORC[0];
+        const hist = item.emissao.historico || [];
+        const ult = hist.length ? hist[hist.length - 1].em : item.emissao.data;
+        linhaStatus = `<div class="status-linha">
+          <select data-status="${item.id}" style="color:${def.cor}; border-color:${def.cor}" aria-label="Status do orçamento">
+            ${STATUS_ORC.map(st => `<option value="${st.id}"${st.id === atual ? ' selected' : ''}>${st.nome}</option>`).join('')}
+          </select>
+          <span class="desde">desde ${new Date(ult).toLocaleDateString('pt-BR')}</span>
+        </div>`;
+      }
+      return `
       <div class="saved-item" data-id="${item.id}">
         <div class="nome">${escapeHtml(item.nome)}</div>
         <div class="info">${new Date(item.savedAt).toLocaleDateString('pt-BR')} · ${item.emissao ? `nº ${String(item.emissao.numero).padStart(4,'0')} · ${item.emissao.qtd} × ${fmt(item.emissao.precoUnit)}${item.emissao.cliente ? ' · ' + escapeHtml(item.emissao.cliente) : ''}` : `total ${item.custoTotal} · sugerido ${item.precoPeca}`}</div>
+        ${linhaStatus}
         <div class="actions">
           <button type="button" data-load="${item.id}">Carregar</button>
           ${item.emissao ? `<button type="button" data-pdf="${item.id}">PDF</button>` : ''}
           <button type="button" class="danger" data-del="${item.id}">Excluir</button>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
   }
+
+  filtroOrcEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-filtro]');
+    if (!b) return;
+    filtroOrc = b.dataset.filtro;
+    renderOrcamentos();
+  });
+
+  // Troca de status: grava a data no histórico (vai alimentar o resumo do mês).
+  orcamentosLista.addEventListener('change', e => {
+    const sel = e.target.closest('[data-status]');
+    if (!sel) return;
+    const list = lsGet(LS_ORC, []);
+    const item = list.find(x => x.id === sel.dataset.status);
+    if (!item || !item.emissao) return;
+    const novo = sel.value;
+    if (novo === statusDe(item)) return;
+    if (!item.emissao.historico) item.emissao.historico = [{ s: 'enviado', em: item.emissao.data }];
+    item.emissao.status = novo;
+    item.emissao.historico.push({ s: novo, em: new Date().toISOString() });
+    lsSet(LS_ORC, list);
+    renderOrcamentos();
+  });
 
   document.getElementById('salvarOrcamentoBtn').addEventListener('click', () => {
     const nome = orcamentoNomeInput.value.trim() || `Orçamento ${new Date().toLocaleDateString('pt-BR')}`;
@@ -2374,6 +2456,12 @@
         },
         // cópia dos dados da empresa no momento da emissão, pra reemitir igual depois
         empresa: { ...lsGet(LS_EMPRESA, {}) },
+        // acompanhamento: o orçamento nasce "enviado"; cada mudança entra no histórico (com data)
+        status: 'enviado',
+        historico: [{ s: 'enviado', em: new Date().toISOString() }],
+        // custo por peça como NÚMERO, pra calcular o lucro real depois (preço cobrado - custo)
+        custoUnit: Number(calcAtual.custoPeca) || 0,
+        modo: modoAtual,
       };
 
       // Salva junto com o orçamento (sincroniza na conta, já que está logado).
