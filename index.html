@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-tema="claro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Precifica 3D — calculadora de custo e preço de impressão 3D</title>
-<meta name="description" content="Calcule o custo real de cada peça impressa em 3D (filamento ou resina) e veja o preço certo pra vender no Mercado Livre, Shopee e Amazon. Grátis, sem cadastro.">
-<meta name="theme-color" content="#0E2A47">
+<meta name="description" content="Descubra o custo real de cada peça impressa em 3D (filamento ou resina) e o preço certo pra vender no Mercado Livre, Shopee e Amazon. Grátis, sem cadastro.">
+<meta name="theme-color" content="#F6FAFE">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Precifica 3D — saiba quanto cobrar por cada peça">
 <meta property="og:description" content="Custo real de material, energia, desgaste da máquina e mão de obra, com preço sugerido por marketplace. Filamento e resina.">
@@ -14,264 +14,451 @@
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
-  // App instalado (tela inicial / Play Store) abre direto na calculadora,
-  // sem passar pela landing.
-  if ((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone) {
-    location.replace('app.html');
-  }
+  // 1) App instalado (tela inicial / Play Store) abre direto na calculadora.
+  // 2) Tema: claro por padrão; quem escolheu o escuro fica com ele.
+  // 3) Marca a página como "com JavaScript" (as animações de entrada só se
+  //    escondem nesse caso — sem JS, tudo aparece normalmente).
+  (function () {
+    if ((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone) {
+      location.replace('app.html');
+      return;
+    }
+    var d = document.documentElement;
+    d.classList.add('js');
+    var t = 'claro';
+    try { t = localStorage.getItem('p3d_tema_landing') === 'escuro' ? 'escuro' : 'claro'; } catch (e) {}
+    d.setAttribute('data-tema', t);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', t === 'escuro' ? '#0E2A47' : '#F6FAFE');
+  })();
 </script>
 <style>
   :root{
-    --bg:#0E2A47; --surface:#143459; --surface-2:#1B3F6B;
-    --grid-line:rgba(150,196,235,0.10); --border:rgba(150,196,235,0.22);
-    --text:#EDF3F8; --text-dim:#93AEC7; --accent:#E67E33; --teal:#4FAE93;
+    --bg:#F6FAFE; --bg-faixa:#EAF2FA; --surface:#FFFFFF;
+    --border:rgba(14,42,71,0.12);
+    --text:#10253F; --text-dim:#4C6580;
+    --accent:#E67E33; --accent-forte:#A84708; --teal:#4FAE93; --teal-forte:#23755D;
+    --marca:rgba(230,126,51,0.32);
+    --sombra:0 16px 40px rgba(14,42,71,0.12); --sombra-suave:0 4px 16px rgba(14,42,71,0.07);
+    --topo-bg:rgba(246,250,254,0.86);
+    --blob1:rgba(230,126,51,0.20); --blob2:rgba(79,174,147,0.18);
+    --final-bg:#0E2A47; --icone-bg:rgba(230,126,51,0.14);
+  }
+  [data-tema="escuro"]{
+    --bg:#0E2A47; --bg-faixa:#0B2340; --surface:#143459;
+    --border:rgba(150,196,235,0.22);
+    --text:#EDF3F8; --text-dim:#9FB8CF;
+    --accent-forte:#F5A262; --teal-forte:#6CCBB0;
+    --marca:rgba(230,126,51,0.38);
+    --sombra:0 18px 44px rgba(0,0,0,0.38); --sombra-suave:0 4px 16px rgba(0,0,0,0.25);
+    --topo-bg:rgba(14,42,71,0.86);
+    --blob1:rgba(230,126,51,0.13); --blob2:rgba(79,174,147,0.12);
+    --final-bg:#143459; --icone-bg:rgba(245,162,98,0.15);
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
   body{
-    margin:0; color:var(--text); font-family:'IBM Plex Sans',sans-serif; line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-    background:
-      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
-      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0/28px 28px,
-      var(--bg);
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    line-height:1.65; -webkit-font-smoothing:antialiased;
+    transition:background .35s ease, color .35s ease;
   }
-  a{color:var(--accent);}
-  .wrap{max-width:1040px; margin:0 auto; padding:0 20px;}
+  a{color:var(--accent-forte);}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 22px;}
 
-  /* topo */
-  .topo{display:flex; align-items:center; justify-content:space-between; padding:16px 0; gap:12px;}
-  .marca{display:flex; align-items:center; gap:10px; white-space:nowrap; text-decoration:none; color:var(--text); font-weight:600; font-size:17px;}
-  .marca img{width:34px; height:34px; border-radius:8px;}
-  .nav{display:none; gap:22px;}
-  .nav a{color:var(--text-dim); text-decoration:none; font-size:14px;}
+  /* ---------- topo ---------- */
+  .topo-faixa{position:sticky; top:0; z-index:20; background:var(--topo-bg); -webkit-backdrop-filter:saturate(1.4) blur(12px); backdrop-filter:saturate(1.4) blur(12px);}
+  .topo{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0;}
+  .marca{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); font-weight:800; font-size:18px; letter-spacing:-0.01em; white-space:nowrap;}
+  .marca img{width:36px; height:36px; border-radius:10px; display:block;}
+  .nav{display:none; gap:26px;}
+  .nav a{color:var(--text-dim); text-decoration:none; font-size:14.5px; font-weight:500; transition:color .2s;}
   .nav a:hover{color:var(--text);}
-  @media (min-width:760px){ .nav{display:flex;} }
+  @media (min-width:800px){ .nav{display:flex;} }
+  .acoes-topo{display:flex; align-items:center; gap:10px;}
+  .tema-btn{display:inline-flex; align-items:center; gap:8px; background:transparent; border:1px solid var(--border); color:var(--text-dim); border-radius:999px; padding:8px 11px; font:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:border-color .2s, color .2s;}
+  .tema-btn:hover{border-color:var(--accent); color:var(--text);}
+  .tema-btn svg{width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+  .tema-btn .rotulo{display:none;}
+  @media (min-width:560px){ .tema-btn .rotulo{display:inline;} }
+  [data-tema="claro"] .ico-sol{display:none;}
+  [data-tema="escuro"] .ico-lua{display:none;}
 
-  .btn{display:inline-block; background:var(--accent); color:#1a1a1a; font-weight:600; font-size:15px; text-decoration:none; padding:12px 22px; border-radius:8px; border:1px solid var(--accent);}
-  .btn:hover{filter:brightness(1.08);}
-  .btn.sec{background:transparent; color:var(--text); border-color:var(--border); font-weight:500;}
-  .btn.sec:hover{border-color:var(--accent); color:var(--accent); filter:none;}
-  .btn.peq{padding:9px 16px; font-size:13.5px;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; background:var(--accent); color:#1a1a1a; font-weight:700; font-size:15px; text-decoration:none; padding:13px 26px; border-radius:999px; border:1px solid var(--accent); box-shadow:0 6px 18px rgba(230,126,51,0.28); transition:transform .2s ease, box-shadow .2s ease;}
+  .btn:hover{transform:translateY(-2px); box-shadow:0 12px 26px rgba(230,126,51,0.36);}
+  .btn.sec{background:transparent; color:var(--text); border-color:var(--border); box-shadow:none; font-weight:600;}
+  .btn.sec:hover{border-color:var(--accent); box-shadow:none;}
+  .btn.peq{padding:9px 18px; font-size:13.5px; box-shadow:none;}
 
-  /* hero */
-  .hero{text-align:center; padding:46px 0 34px;}
-  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--accent); letter-spacing:0.09em;}
-  h1{font-size:clamp(28px,6.4vw,46px); line-height:1.15; margin:12px auto 16px; max-width:760px; letter-spacing:-0.02em;}
-  .sub{color:var(--text-dim); font-size:clamp(15px,3.6vw,18px); max-width:640px; margin:0 auto 26px;}
-  .hero .acoes{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
-  .nota{font-size:12.5px; color:var(--text-dim); margin-top:14px; font-family:'IBM Plex Mono',monospace;}
+  /* ---------- hero ---------- */
+  .hero-faixa{
+    background:
+      radial-gradient(60% 60% at 10% 0%, var(--blob1), transparent 70%),
+      radial-gradient(55% 55% at 94% 6%, var(--blob2), transparent 70%);
+    overflow:hidden;
+  }
+  .hero{text-align:center; padding:46px 0 36px;}
+  @media (min-width:900px){ .hero{padding-bottom:78px;} }
+  .pill{display:inline-flex; align-items:center; gap:9px; background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:7px 15px; font-size:13px; color:var(--text-dim); box-shadow:var(--sombra-suave);}
+  .pill .ponto{width:8px; height:8px; border-radius:50%; background:var(--teal); box-shadow:0 0 0 4px rgba(79,174,147,0.22);}
+  h1{font-size:clamp(31px,6.6vw,56px); line-height:1.1; font-weight:800; letter-spacing:-0.03em; margin:20px auto 16px; max-width:840px;}
+  h1 mark{background:linear-gradient(transparent 60%, var(--marca) 60%); color:inherit; padding:0 0.12em; border-radius:4px;}
+  .sub{color:var(--text-dim); font-size:clamp(15.5px,3.7vw,19px); max-width:660px; margin:0 auto 28px;}
+  .hero .acoes{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+  .nota{font-size:13.5px; color:var(--text-dim); margin-top:16px;}
 
-  /* prints */
-  .prints{display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; padding:8px 4px 18px; margin-top:26px; justify-content:flex-start;}
-  @media (min-width:760px){ .prints{justify-content:center; overflow:visible;} }
-  .print{flex:0 0 auto; width:210px; margin:0; scroll-snap-align:center;}
-  .print .moldura{aspect-ratio:9/19; min-height:380px; border-radius:22px; border:2px solid var(--border); background:var(--surface); overflow:hidden; position:relative; box-shadow:0 18px 40px rgba(0,0,0,0.35);}
-  .print img{width:100%; height:100%; object-fit:cover; object-position:top; display:block;}
-  .print.doc{width:300px;}
-  .print.doc .moldura{aspect-ratio:210/297; min-height:0; border-radius:6px; background:#fff; border-color:rgba(255,255,255,0.35);}
-  .print.vazio .moldura{border-style:dashed; display:flex; align-items:center; justify-content:center;}
-  .print.vazio .moldura::after{content:'print em breve'; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-dim);}
-  .print figcaption{text-align:center; font-size:12.5px; color:var(--text-dim); margin-top:10px;}
+  /* vitrine no computador */
+  .vitrine{display:none; position:relative; max-width:1000px; margin:48px auto 0;}
+  @media (min-width:900px){ .vitrine{display:block;} .prints-cel{display:none !important;} }
+  .janela{border-radius:16px; overflow:hidden; border:1px solid var(--border); background:var(--surface); box-shadow:0 34px 80px rgba(14,42,71,0.24); text-align:left;}
+  .janela-barra{display:flex; align-items:center; gap:7px; padding:11px 15px; background:var(--surface); border-bottom:1px solid var(--border);}
+  .janela-barra i{width:11px; height:11px; border-radius:50%; display:inline-block;}
+  .janela-barra i:nth-child(1){background:#ff5f57;} .janela-barra i:nth-child(2){background:#febc2e;} .janela-barra i:nth-child(3){background:#28c840;}
+  .janela-barra span{margin-left:12px; font-size:12px; color:var(--text-dim); background:var(--bg); border:1px solid var(--border); border-radius:999px; padding:3px 16px;}
+  .janela img{display:block; width:100%; height:auto;}
+  .celular{position:absolute; right:-28px; bottom:-48px; width:20%; min-width:168px;}
+  .flutua{margin:0; animation:flutua 6.5s ease-in-out infinite;}
+  @keyframes flutua{0%,100%{transform:translateY(0) rotate(3deg);} 50%{transform:translateY(-12px) rotate(3deg);}}
+  .moldura-cel{aspect-ratio:9/19; border-radius:26px; border:3px solid #0E2A47; background:#0E2A47; overflow:hidden; box-shadow:0 26px 56px rgba(14,42,71,0.38);}
+  .moldura-cel img{width:100%; height:100%; object-fit:cover; object-position:top; display:block;}
 
-  /* secoes */
-  .secao{padding:54px 0 6px; scroll-margin-top:12px;}
-  .secao h2{font-size:clamp(22px,5vw,30px); margin:0 0 8px; letter-spacing:-0.01em;}
-  .secao .lead{color:var(--text-dim); margin:0 0 26px; max-width:620px;}
-  .grade{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px;}
-  .cartao{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px;}
-  .cartao .n{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--accent); letter-spacing:0.06em;}
-  .cartao h3{font-size:16.5px; margin:6px 0 6px;}
-  .cartao p{margin:0; font-size:14px; color:var(--text-dim);}
-  .cartao ul{margin:8px 0 0; padding-left:18px; color:var(--text-dim); font-size:14px;}
-  .cartao li{margin-bottom:5px;}
-  .cartao li strong, .cartao p strong{color:var(--text);}
-  .cartao.destaque{border-color:var(--accent);}
+  /* celulares no telefone */
+  .prints-cel{display:flex; gap:18px; overflow-x:auto; scroll-snap-type:x mandatory; padding:34px 8px 18px; justify-content:flex-start;}
+  @media (min-width:560px){ .prints-cel{justify-content:center;} }
+  .cel{flex:0 0 auto; width:216px; margin:0; scroll-snap-align:center;}
+  .cel figcaption{text-align:center; font-size:13px; color:var(--text-dim); margin-top:12px;}
 
-  /* numeros (escondido ate passar do minimo) */
-  .numeros{display:flex; gap:14px; flex-wrap:wrap; justify-content:center;}
-  .num{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 28px; text-align:center;}
-  .num strong{display:block; font-family:'IBM Plex Mono',monospace; font-size:30px; color:var(--accent);}
-  .num span{font-size:13px; color:var(--text-dim);}
+  /* ---------- secoes ---------- */
+  .secao{padding:76px 0 0; scroll-margin-top:60px;}
+  .secao h2{font-size:clamp(25px,4.8vw,37px); font-weight:800; letter-spacing:-0.02em; line-height:1.15; margin:0 0 10px;}
+  .secao .lead{color:var(--text-dim); margin:0 0 30px; max-width:620px; font-size:16.5px;}
+  .faixa{background:var(--bg-faixa); margin-top:84px; padding:6px 0 76px; transition:background .35s ease;}
+  .faixa .secao{padding-top:66px;}
+  .grade{display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:18px;}
+  .cartao{background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:26px; box-shadow:var(--sombra-suave); transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .35s ease;}
+  .cartao:hover{transform:translateY(-5px); box-shadow:var(--sombra); border-color:var(--accent);}
+  .cartao h3{font-size:17.5px; font-weight:700; margin:0 0 7px; letter-spacing:-0.01em;}
+  .cartao p{margin:0; font-size:15px; color:var(--text-dim);}
+  .cartao ul{margin:10px 0 0; padding-left:19px; color:var(--text-dim); font-size:15px;}
+  .cartao li{margin-bottom:7px;}
+  .cartao strong, .cartao p strong{color:var(--text);}
+  .cartao.destaque{border-color:var(--accent); box-shadow:0 0 0 4px rgba(230,126,51,0.13), var(--sombra-suave);}
+  .icone{width:48px; height:48px; border-radius:15px; display:grid; place-items:center; background:var(--icone-bg); color:var(--accent-forte); margin-bottom:16px;}
+  .icone.teal{background:rgba(79,174,147,0.17); color:var(--teal-forte);}
+  .icone.azul{background:rgba(111,168,220,0.20); color:#2B6CA3;}
+  [data-tema="escuro"] .icone.azul{color:#8FC0EE;}
+  .icone svg{width:24px; height:24px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+  .bolinha{width:40px; height:40px; border-radius:50%; background:var(--accent); color:#1a1a1a; font-weight:800; font-size:17px; display:grid; place-items:center; margin-bottom:14px;}
+
+  /* orcamento em pdf */
+  .duas{display:grid; grid-template-columns:1fr; gap:40px; align-items:center;}
+  @media (min-width:860px){ .duas{grid-template-columns:1.05fr 0.95fr; gap:60px;} }
+  .checks{list-style:none; padding:0; margin:22px 0 0;}
+  .checks li{position:relative; padding-left:36px; margin-bottom:14px; color:var(--text-dim); font-size:15.5px;}
+  .checks li::before{content:'✓'; position:absolute; left:0; top:0; width:24px; height:24px; border-radius:50%; background:rgba(79,174,147,0.2); color:var(--teal-forte); font-size:13px; font-weight:800; display:grid; place-items:center;}
+  .mini{font-size:13.5px; color:var(--text-dim); margin-top:6px;}
+  .papel{margin:0; text-align:center;}
+  .folha{aspect-ratio:210/297; max-width:390px; margin:0 auto; border-radius:8px; background:#fff; overflow:hidden; border:1px solid rgba(14,42,71,0.12); box-shadow:0 30px 64px rgba(14,42,71,0.26); rotate:1.5deg; transition:rotate .4s ease;}
+  .folha:hover{rotate:0deg;}
+  .folha img{width:100%; height:100%; display:block; object-fit:cover; object-position:top;}
+  .papel figcaption{font-size:13px; color:var(--text-dim); margin-top:16px;}
+
+  /* numeros (escondidos ate passar do minimo) */
+  .numeros{display:flex; gap:16px; flex-wrap:wrap; justify-content:center;}
+  .num{background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:20px 32px; text-align:center; box-shadow:var(--sombra-suave);}
+  .num strong{display:block; font-size:34px; font-weight:800; color:var(--accent-forte); letter-spacing:-0.02em;}
+  .num span{font-size:14px; color:var(--text-dim);}
 
   /* faq */
-  details{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0 18px; margin-bottom:10px;}
-  summary{cursor:pointer; padding:15px 0; font-weight:500; list-style:none; display:flex; justify-content:space-between; gap:12px;}
+  details{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:0 22px; margin-bottom:12px; transition:box-shadow .25s ease, background .35s ease;}
+  details[open]{box-shadow:var(--sombra-suave);}
+  summary{cursor:pointer; padding:17px 0; font-weight:600; font-size:16px; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:14px;}
   summary::-webkit-details-marker{display:none;}
-  summary::after{content:'+'; color:var(--accent); font-family:'IBM Plex Mono',monospace;}
-  details[open] summary::after{content:'−';}
-  details p{margin:0 0 16px; color:var(--text-dim); font-size:14.5px;}
+  summary::after{content:'+'; color:var(--accent-forte); font-size:22px; font-weight:500; line-height:1; transition:transform .25s ease;}
+  details[open] summary::after{transform:rotate(45deg);}
+  details p{margin:0 0 18px; color:var(--text-dim); font-size:15.5px;}
 
-  /* cta final + rodape */
-  .final{text-align:center; margin:56px 0 0; padding:38px 22px; background:var(--surface); border:1px solid var(--border); border-radius:14px;}
-  .final h2{margin:0 0 8px; font-size:clamp(21px,5vw,28px);}
-  .final p{color:var(--text-dim); margin:0 0 20px;}
-  footer{text-align:center; color:var(--text-dim); font-size:12px; font-family:'IBM Plex Mono',monospace; padding:36px 0 44px; line-height:1.9;}
-  footer a{color:var(--text-dim);}
-  footer a:hover{color:var(--accent);}
+  /* chamada final e rodape */
+  .final{margin:90px 0 0; background:var(--final-bg); color:#fff; border-radius:30px; padding:58px 24px; text-align:center; position:relative; overflow:hidden;}
+  .final::before{content:''; position:absolute; inset:-40% -10% auto auto; width:420px; height:420px; background:radial-gradient(closest-side, rgba(230,126,51,0.35), transparent); pointer-events:none;}
+  .final h2{margin:0 0 10px; font-size:clamp(24px,5vw,34px); font-weight:800; letter-spacing:-0.02em; position:relative;}
+  .final p{color:rgba(255,255,255,0.8); margin:0 0 26px; position:relative;}
+  .final .btn{position:relative;}
+  .rodape{text-align:center; color:var(--text-dim); font-size:13.5px; padding:42px 0 54px; line-height:2;}
+  .rodape a{color:var(--text-dim);}
+  .rodape a:hover{color:var(--accent-forte);}
+
+  /* ---------- entrada suave ao rolar ---------- */
+  .js .revela{
+    opacity:0; translate:0 24px;
+    transition:opacity .75s ease var(--atraso,0s), translate .75s cubic-bezier(.2,.7,.2,1) var(--atraso,0s),
+               transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .35s ease;
+  }
+  .js .revela.visivel{opacity:1; translate:0 0;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .js .revela{opacity:1; translate:none; transition:none;}
+    .flutua{animation:none; transform:rotate(3deg);}
+    .btn, .cartao, .folha{transition:none;}
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <header class="topo">
-    <a class="marca" href="./"><img src="icon-192.png" alt="" width="34" height="34">Precifica 3D</a>
+<header class="topo-faixa">
+  <div class="wrap topo">
+    <a class="marca" href="./"><img src="icon-192.png" alt="" width="36" height="36">Precifica 3D</a>
     <nav class="nav" aria-label="Seções">
       <a href="#recursos">Recursos</a>
+      <a href="#orcamento">Orçamento</a>
       <a href="#como-funciona">Como funciona</a>
-      <a href="#faq">Perguntas</a>
+      <a href="#faq">Dúvidas</a>
     </nav>
-    <a class="btn peq" href="app.html">Abrir calculadora</a>
-  </header>
-
-  <section class="hero">
-    <div class="eyebrow">CALCULADORA DE IMPRESSÃO 3D</div>
-    <h1>Saiba quanto cobrar por cada peça que você imprime</h1>
-    <p class="sub">Calcule o custo real — material, energia, desgaste da máquina e o seu tempo — e veja o preço certo pra anunciar no Mercado Livre, Shopee e Amazon. Filamento ou resina, direto no celular.</p>
-    <div class="acoes">
-      <a class="btn" href="app.html">Abrir calculadora</a>
-      <a class="btn sec" href="#recursos">Ver recursos</a>
+    <div class="acoes-topo">
+      <button type="button" class="tema-btn" id="alternaTema" aria-label="Alternar entre tema claro e escuro">
+        <svg class="ico-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="ico-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="1.5" x2="12" y2="3.5"/><line x1="12" y1="20.5" x2="12" y2="22.5"/><line x1="4.6" y1="4.6" x2="6" y2="6"/><line x1="18" y1="18" x2="19.4" y2="19.4"/><line x1="1.5" y1="12" x2="3.5" y2="12"/><line x1="20.5" y1="12" x2="22.5" y2="12"/><line x1="4.6" y1="19.4" x2="6" y2="18"/><line x1="18" y1="6" x2="19.4" y2="4.6"/></svg>
+        <span class="rotulo" id="rotuloTema">Modo escuro</span>
+      </button>
+      <a class="btn peq" href="app.html">Abrir calculadora</a>
     </div>
-    <div class="nota">Grátis · sem cadastro pra calcular</div>
+  </div>
+</header>
 
-    <div class="prints" aria-label="Telas do aplicativo">
-      <figure class="print">
-        <div class="moldura"><img src="images/landing/calculadora.jpg" alt="Tela da calculadora" loading="lazy" onerror="this.closest('.print').classList.add('vazio'); this.remove();"></div>
-        <figcaption>Calculadora</figcaption>
-      </figure>
-      <figure class="print">
-        <div class="moldura"><img src="images/landing/resultado.jpg" alt="Resultado com custo, preço sugerido e gráfico" loading="lazy" onerror="this.closest('.print').classList.add('vazio'); this.remove();"></div>
-        <figcaption>Custo, preço e gráfico</figcaption>
-      </figure>
-      <figure class="print doc">
-        <div class="moldura"><img src="images/landing/orcamento-pdf.jpg" alt="Exemplo de orçamento em PDF para o cliente, com dados fictícios" loading="lazy" onerror="this.closest('.print').classList.add('vazio'); this.remove();"></div>
-        <figcaption>Orçamento em PDF</figcaption>
-      </figure>
-    </div>
-  </section>
+<main>
+
+  <div class="hero-faixa">
+    <section class="wrap hero">
+      <span class="pill revela"><i class="ponto"></i>Grátis · sem cadastro pra calcular</span>
+      <h1 class="revela" style="--atraso:.08s">Saiba <mark>quanto cobrar</mark> por cada peça que você imprime</h1>
+      <p class="sub revela" style="--atraso:.16s">Descubra o custo real de cada peça — material, energia, desgaste da máquina e o seu tempo — e o preço certo pra vender no Mercado Livre, Shopee e Amazon. Vale pra filamento e pra resina, direto do celular ou do computador.</p>
+      <div class="acoes revela" style="--atraso:.24s">
+        <a class="btn" href="app.html">Abrir calculadora</a>
+        <a class="btn sec" href="#recursos">Ver o que ela faz</a>
+      </div>
+
+      <!-- no computador -->
+      <div class="vitrine revela" style="--atraso:.32s">
+        <figure class="janela" style="margin:0">
+          <div class="janela-barra"><i></i><i></i><i></i><span>Precifica 3D</span></div>
+          <img src="images/landing/desktop.jpg" width="1280" height="720" alt="Calculadora do Precifica 3D no computador, com a estimativa por STL, o custo do lote e o preço sugerido">
+        </figure>
+        <div class="celular">
+          <figure class="flutua">
+            <div class="moldura-cel"><img src="images/landing/calculadora.jpg" width="560" height="1154" alt="A mesma calculadora no celular" loading="lazy"></div>
+          </figure>
+        </div>
+      </div>
+
+      <!-- no celular -->
+      <div class="prints-cel revela" style="--atraso:.32s" aria-label="Telas do aplicativo">
+        <figure class="cel">
+          <div class="moldura-cel"><img src="images/landing/calculadora.jpg" width="560" height="1154" alt="Tela da calculadora no celular" loading="lazy"></div>
+          <figcaption>Você preenche</figcaption>
+        </figure>
+        <figure class="cel">
+          <div class="moldura-cel"><img src="images/landing/resultado.jpg" width="560" height="1145" alt="Resultado com custo, preço sugerido e gráfico" loading="lazy"></div>
+          <figcaption>E vê o preço na hora</figcaption>
+        </figure>
+      </div>
+    </section>
+  </div>
 
   <!-- Só aparece quando passar do mínimo (ver script no fim da página). -->
-  <section class="secao" id="numeros" hidden>
+  <section class="wrap secao" id="numeros" hidden>
     <div class="numeros">
       <div class="num" id="numUsuarios" hidden><strong>—</strong><span>pessoas já usam</span></div>
       <div class="num" id="numPdfs" hidden><strong>—</strong><span>orçamentos em PDF gerados</span></div>
     </div>
   </section>
 
-  <section class="secao" id="recursos">
-    <h2>O que o Precifica 3D faz por você</h2>
-    <p class="lead">Feito por quem imprime e vende. Cada número do cálculo aparece aberto, pra você saber de onde vem o preço.</p>
+  <section class="wrap secao" id="recursos">
+    <h2 class="revela">O que o Precifica 3D faz por você</h2>
+    <p class="lead revela">Feito por quem imprime e vende. Cada número do cálculo fica à vista, pra você entender de onde vem o preço.</p>
     <div class="grade">
       <div class="cartao">
-        <div class="n">01</div>
+        <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
         <h3>Filamento e resina</h3>
         <p>Dois modos de cálculo: filamento por peso, resina por volume (mL). Catálogo de impressoras com as peças que se desgastam — bico, mesa, tela LCD, filme FEP.</p>
       </div>
       <div class="cartao">
-        <div class="n">02</div>
+        <div class="icone teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
         <h3>Estimativa por arquivo STL</h3>
         <p>Envie o <strong>.stl</strong> e o app calcula volume, dimensões e peso estimado, com uma vista da peça. Você ajusta o preenchimento e a escala.</p>
       </div>
       <div class="cartao">
-        <div class="n">03</div>
+        <div class="icone azul"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
         <h3>Preço por marketplace</h3>
         <p>Margem de lucro de verdade (não markup) e o preço mínimo pra anunciar em cada plataforma, já descontando comissão e taxa fixa.</p>
       </div>
       <div class="cartao">
-        <div class="n">04</div>
+        <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div>
         <h3>Pra onde vai cada centavo</h3>
         <p>Um gráfico mostra quanto do preço é material, energia, depreciação da máquina, mão de obra, miscelâneos e lucro.</p>
       </div>
       <div class="cartao">
-        <div class="n">05</div>
+        <div class="icone teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
         <h3>Orçamento em PDF</h3>
         <p>Gere um orçamento limpo pro cliente, com a sua marca e as suas condições — <strong>sem mostrar seu custo nem seu lucro</strong>. Pede login com Google.</p>
       </div>
       <div class="cartao">
-        <div class="n">06</div>
+        <div class="icone azul"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div>
         <h3>Seus dados em qualquer aparelho</h3>
-        <p>Entre com o Google e suas impressoras, filamentos e orçamentos sincronizam entre o celular e o computador.</p>
+        <p>Entre com o Google e suas impressoras, filamentos e orçamentos acompanham você entre o celular e o computador.</p>
       </div>
     </div>
   </section>
 
-  <section class="secao" id="como-funciona">
-    <h2>Como funciona</h2>
-    <p class="lead">Três passos, e menos de um minuto na primeira peça.</p>
-    <div class="grade">
-      <div class="cartao"><div class="n">PASSO 1</div><h3>Escolha o modo e a impressora</h3><p>Filamento ou resina, e o modelo da sua máquina. Se ela não estiver no catálogo, cadastre com os seus valores.</p></div>
-      <div class="cartao"><div class="n">PASSO 2</div><h3>Informe a peça</h3><p>Digite o peso (ou o volume) e o tempo de impressão — ou envie o STL e deixe o app estimar.</p></div>
-      <div class="cartao"><div class="n">PASSO 3</div><h3>Veja o preço e emita o orçamento</h3><p>Custo por peça, preço sugerido, preço em cada marketplace e, se quiser, o PDF pro cliente.</p></div>
-    </div>
-  </section>
-
-  <section class="secao" id="conta">
-    <h2>Com ou sem conta</h2>
-    <p class="lead">Você só precisa de login pra o que realmente depende dele.</p>
-    <div class="grade">
-      <div class="cartao">
-        <h3>Sem login</h3>
-        <ul>
-          <li>Calculadora completa, nos dois modos</li>
-          <li>Estimativa por STL e preço por marketplace</li>
-          <li>Orçamentos salvos <strong>só no seu aparelho</strong> — nada é enviado</li>
+  <section class="wrap secao" id="orcamento">
+    <div class="duas">
+      <div class="revela">
+        <h2>O orçamento que o seu cliente recebe</h2>
+        <p class="lead" style="margin-bottom:0">Limpo, com a sua cara e sem mostrar quanto a peça custou pra você.</p>
+        <ul class="checks">
+          <li>Nome, contato e cidade da sua empresa no cabeçalho</li>
+          <li>Vista da peça, quando você envia o arquivo STL</li>
+          <li>Prazo de entrega, forma de pagamento e validade</li>
+          <li>Só o preço final — nada de custo nem de lucro</li>
         </ul>
+        <p class="mini">Pra gerar o PDF você entra com a conta Google. Os orçamentos ficam salvos pra emitir de novo quando quiser.</p>
       </div>
-      <div class="cartao destaque">
-        <h3>Com conta Google</h3>
-        <ul>
-          <li>Tudo do modo sem login</li>
-          <li>Sincronização entre aparelhos</li>
-          <li>Orçamento em PDF pro cliente</li>
-          <li>Dados da sua empresa no cabeçalho do PDF</li>
-        </ul>
-      </div>
+      <figure class="papel revela" style="--atraso:.12s">
+        <div class="folha"><img src="images/landing/orcamento-pdf.jpg" width="620" height="877" alt="Exemplo de orçamento em PDF para o cliente, com dados fictícios" loading="lazy"></div>
+        <figcaption>Exemplo com dados fictícios</figcaption>
+      </figure>
     </div>
   </section>
 
-  <section class="secao" id="faq">
-    <h2>Perguntas frequentes</h2>
-    <p class="lead"></p>
-    <details>
+  <div class="faixa">
+    <section class="wrap secao" id="como-funciona">
+      <h2 class="revela">Como funciona</h2>
+      <p class="lead revela">Três passos, e menos de um minuto na primeira peça.</p>
+      <div class="grade">
+        <div class="cartao"><div class="bolinha">1</div><h3>Escolha o modo e a impressora</h3><p>Filamento ou resina, e o modelo da sua máquina. Se ela não estiver no catálogo, é só cadastrar com os seus valores.</p></div>
+        <div class="cartao"><div class="bolinha">2</div><h3>Conte sobre a peça</h3><p>Digite o peso (ou o volume) e o tempo de impressão — ou envie o STL e deixe o app fazer a estimativa.</p></div>
+        <div class="cartao"><div class="bolinha">3</div><h3>Veja o preço e emita o orçamento</h3><p>Custo por peça, preço sugerido, preço em cada marketplace e, se quiser, o PDF pro cliente.</p></div>
+      </div>
+    </section>
+
+    <section class="wrap secao" id="conta">
+      <h2 class="revela">Com ou sem conta</h2>
+      <p class="lead revela">Você só precisa de login pro que realmente depende dele.</p>
+      <div class="grade">
+        <div class="cartao">
+          <h3>Sem login</h3>
+          <ul>
+            <li>Calculadora completa, nos dois modos</li>
+            <li>Estimativa por STL e preço por marketplace</li>
+            <li>Orçamentos salvos <strong>só no seu aparelho</strong> — nada é enviado</li>
+          </ul>
+        </div>
+        <div class="cartao destaque">
+          <h3>Com conta Google</h3>
+          <ul>
+            <li>Tudo do modo sem login</li>
+            <li>Sincronização entre aparelhos</li>
+            <li>Orçamento em PDF pro cliente</li>
+            <li>Dados da sua empresa no cabeçalho do PDF</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="wrap secao" id="faq">
+    <h2 class="revela">Dúvidas frequentes</h2>
+    <p class="lead revela">Se a sua não estiver aqui, é só escrever pra gente.</p>
+    <details class="revela">
       <summary>Preciso pagar ou me cadastrar?</summary>
       <p>Não pra calcular. O app é gratuito e a calculadora funciona sem cadastro. O login com Google só é necessário pra sincronizar entre aparelhos e gerar o orçamento em PDF.</p>
     </details>
-    <details>
+    <details class="revela">
       <summary>Meus dados ficam seguros?</summary>
       <p>Sem login, tudo fica só no seu aparelho. Com login, guardamos apenas o que você cadastrou, vinculado à sua conta Google, e nunca vendemos nem compartilhamos esses dados. Os detalhes estão na <a href="privacidade.html">Política de Privacidade</a>.</p>
     </details>
-    <details>
+    <details class="revela">
       <summary>As taxas dos marketplaces estão certas?</summary>
       <p>São taxas de referência, em média. A comissão muda por categoria e por vendedor, então confira no simulador oficial da plataforma antes de anunciar de verdade.</p>
     </details>
-    <details>
+    <details class="revela">
       <summary>Os preços das impressoras e peças do catálogo são exatos?</summary>
-      <p>São estimativas de mercado pra você começar rápido. Ajuste com os seus valores em Configurações — é o que deixa o cálculo fiel à sua realidade.</p>
+      <p>São estimativas de mercado pra você começar rápido. Ajuste com os seus valores em Configurações — é isso que deixa o cálculo fiel à sua realidade.</p>
     </details>
-    <details>
+    <details class="revela">
       <summary>Dá pra usar no celular como um aplicativo?</summary>
       <p>Dá. No Chrome (Android), toque em "Instalar app" ou "Adicionar à tela inicial". No iPhone, abra no Safari, toque em Compartilhar e depois em "Adicionar à Tela de Início".</p>
     </details>
-    <details>
+    <details class="revela">
       <summary>Qual a diferença entre margem e markup?</summary>
-      <p>Margem é a fatia do preço final que sobra como lucro: com 40% de margem, R$ 40 de cada R$ 100 vendidos são lucro. Markup é quanto você soma em cima do custo, e dá um lucro menor do que parece. O Precifica 3D usa margem de verdade.</p>
+      <p>Margem é a fatia do preço final que sobra como lucro: com 40% de margem, R$ 40 de cada R$ 100 vendidos são lucro. Markup é quanto você soma em cima do custo, e rende menos lucro do que parece. O Precifica 3D usa margem de verdade.</p>
     </details>
   </section>
 
-  <section class="final">
-    <h2>Pronto pra precificar sua próxima peça?</h2>
-    <p>Abra a calculadora e veja o preço certo em menos de um minuto.</p>
-    <a class="btn" href="app.html">Abrir calculadora</a>
-  </section>
+  <div class="wrap">
+    <section class="final revela">
+      <h2>Pronto pra precificar sua próxima peça?</h2>
+      <p>Abra a calculadora e veja o preço certo em menos de um minuto.</p>
+      <a class="btn" href="app.html">Abrir calculadora</a>
+    </section>
+  </div>
 
-  <footer>
-    WDSERTORI SOLUÇÕES TÉCNICAS · Todos os direitos reservados<br>
-    <a href="privacidade.html">Política de Privacidade</a> · <a href="mailto:wdsertori@gmail.com">wdsertori@gmail.com</a>
-  </footer>
+</main>
 
-</div>
+<footer class="rodape">
+  WDSERTORI SOLUÇÕES TÉCNICAS · Todos os direitos reservados<br>
+  <a href="privacidade.html">Política de Privacidade</a> · <a href="mailto:wdsertori@gmail.com">wdsertori@gmail.com</a>
+</footer>
+
+<script>
+  // Tema claro/escuro (a escolha fica salva neste aparelho)
+  (function () {
+    var btn = document.getElementById('alternaTema');
+    var rotulo = document.getElementById('rotuloTema');
+    var meta = document.querySelector('meta[name="theme-color"]');
+    function aplica(t){
+      document.documentElement.setAttribute('data-tema', t);
+      if (rotulo) rotulo.textContent = t === 'escuro' ? 'Modo claro' : 'Modo escuro';
+      if (meta) meta.setAttribute('content', t === 'escuro' ? '#0E2A47' : '#F6FAFE');
+    }
+    aplica(document.documentElement.getAttribute('data-tema') === 'escuro' ? 'escuro' : 'claro');
+    btn.addEventListener('click', function () {
+      var novo = document.documentElement.getAttribute('data-tema') === 'escuro' ? 'claro' : 'escuro';
+      aplica(novo);
+      try { localStorage.setItem('p3d_tema_landing', novo); } catch (e) {}
+    });
+  })();
+
+  // Blocos que surgem suavemente conforme a página rola
+  (function () {
+    var raiz = document.documentElement;
+    try {
+      // os cartões de cada grade entram em sequência, um depois do outro
+      [].forEach.call(document.querySelectorAll('.grade'), function (g) {
+        [].forEach.call(g.children, function (c, i) {
+          c.classList.add('revela');
+          c.style.setProperty('--atraso', (i % 3) * 0.09 + 's');
+        });
+      });
+      var itens = document.querySelectorAll('.revela');
+      if (!('IntersectionObserver' in window)) {
+        [].forEach.call(itens, function (i) { i.classList.add('visivel'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entradas) {
+        entradas.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add('visivel'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+      [].forEach.call(itens, function (i) { io.observe(i); });
+    } catch (e) {
+      raiz.classList.remove('js');   // se algo falhar, tudo aparece sem animação
+    }
+  })();
+</script>
 
 <script type="module">
   // Números de uso: a seção continua ESCONDIDA até existir um número bonito.
@@ -282,7 +469,7 @@
   const MINIMO = 100;   // só mostra um contador depois de passar disso
 
   function mostrarNumeros(d){
-    const bloco = (idEl, n, rotulo) => {
+    const bloco = (idEl, n) => {
       if (!(n >= MINIMO)) return false;
       const el = document.getElementById(idEl);
       el.querySelector('strong').textContent = 'mais de ' + (Math.floor(n / 50) * 50);
