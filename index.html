@@ -487,6 +487,8 @@
   .modal-confirmar:disabled{opacity:0.6; cursor:wait;}
 
   .shop-aviso{font-size:11.5px; color:var(--text-dim); line-height:1.6; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:4px; padding:11px 13px; margin:0 0 20px;}
+  .shop-item.destaque{border-color:var(--accent); box-shadow:0 0 0 3px rgba(230,126,51,0.28);}
+  .shop-item{transition:border-color .3s ease, box-shadow .3s ease;}
   .shop-cat-n{color:var(--text-dim); font-size:10.5px;}
   .shop-vermais{width:100%; background:transparent; border:1px dashed var(--border); color:var(--text-dim); border-radius:6px; padding:10px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; cursor:pointer; margin-bottom:4px;}
   .shop-vermais:hover{color:var(--accent); border-color:var(--accent);}
@@ -1087,11 +1089,6 @@
   import {
     CATALOGO_IMPRESSORAS, CATALOGO_PECAS, CATALOGO_FILAMENTOS, CATALOGO_TIPOS_FILAMENTO,
     CATALOGO_RESINAS, CATALOGO_TIPOS_RESINA, MARKETPLACES,
-    LINKS_AFILIADO_IMPRESSORA as LINKS_COMPRAR_IMPRESSORA,
-    LINKS_AFILIADO_PECA as LINKS_COMPRAR_PECA,
-    LINKS_AFILIADO_PECA_GENERICA,
-    LINKS_AFILIADO_FILAMENTO,
-    LINKS_AFILIADO_RESINA,
     PRINTER_IMAGE_OVERRIDES,
   } from './catalogo.js';
 
@@ -1562,8 +1559,16 @@
     btn.textContent = abrindo ? 'Ver menos ↑' : `Ver mais ${n} ${n === 1 ? 'item' : 'itens'} ↓`;
   });
 
-  async function carregarLoja(){
-    if (lojaCarregada) return;
+  // Idempotente: abrir a guia e tocar em "Comprar" quase ao mesmo tempo não
+  // dispara duas buscas do loja.json.
+  let lojaPromise = null;
+  function carregarLoja(){
+    if (lojaCarregada) return Promise.resolve();
+    if (!lojaPromise) lojaPromise = carregarLojaInterno().finally(() => { lojaPromise = null; });
+    return lojaPromise;
+  }
+
+  async function carregarLojaInterno(){
     const box = document.getElementById('shopLista');
     try {
       const r = await fetch('loja.json', { cache: 'no-cache' });
@@ -1578,7 +1583,7 @@
       // Cada categoria mostra só o primeiro item; o resto fica num bloco
       // escondido que abre no "Ver mais", pra tela não virar uma lista enorme.
       const cartao = p => `
-          <a class="shop-item" href="${p.link}" target="_blank" rel="noopener sponsored">
+          <a class="shop-item" href="${p.link}" target="_blank" rel="noopener sponsored" data-alvos="${escapeHtml((p.alvos || []).join('|'))}">
             ${p.imagem
               ? `<img class="shop-foto" src="${p.imagem}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\'shop-foto-vazia\'>?</div>'">`
               : '<div class="shop-foto-vazia">?</div>'}
@@ -1594,7 +1599,8 @@
         const doGrupo = produtos.filter(p => p.categoria === cat);
         if (!doGrupo.length) return;
         const resto = doGrupo.slice(1);
-        html += `<div class="shop-cat">${cat.toUpperCase()} <span class="shop-cat-n">${doGrupo.length}</span></div>`;
+        const restoId = resto.length ? `shopResto${i}` : '';
+        html += `<div class="shop-cat" data-shop-cat="${cat}" data-resto-id="${restoId}">${cat.toUpperCase()} <span class="shop-cat-n">${doGrupo.length}</span></div>`;
         html += cartao(doGrupo[0]);
         if (resto.length){
           html += `<div class="shop-resto" id="shopResto${i}" hidden>${resto.map(cartao).join('')}</div>`;
@@ -1608,6 +1614,43 @@
       box.innerHTML = '<div class="empty-hint">Não consegui carregar a lista agora.</div>';
     }
   }
+
+  // Abre a Shopping a partir de um "Comprar" do app. `chaves` vai da mais
+  // específica pra mais geral; vale a primeira que existir na lista.
+  async function irParaLoja(categoria, chaves){
+    closePanel(); closeFilamentPanel(); closeResinaPanel();
+    showScreen('shop');
+    await carregarLoja();
+    const lista = document.getElementById('shopLista');
+    const cartoes = [...lista.querySelectorAll('.shop-item')];
+    let alvo = null;
+    for (const k of chaves){
+      alvo = cartoes.find(a => (a.dataset.alvos || '').split('|').includes(k));
+      if (alvo) break;
+    }
+    const cab = [...lista.querySelectorAll('[data-shop-cat]')].find(c => c.dataset.shopCat === categoria);
+    const el = alvo || cab;
+    if (!el) return;
+    // abre o "Ver mais" que contém o alvo; sem alvo, abre o da categoria inteira
+    const bloco = alvo ? alvo.closest('.shop-resto')
+                       : (cab && cab.dataset.restoId ? document.getElementById(cab.dataset.restoId) : null);
+    if (bloco && bloco.hidden){
+      bloco.hidden = false;
+      const btn = bloco.nextElementSibling;
+      if (btn && btn.classList.contains('shop-vermais')) btn.textContent = 'Ver menos ↑';
+    }
+    if (alvo){
+      alvo.classList.add('destaque');
+      setTimeout(() => alvo.classList.remove('destaque'), 2800);
+    }
+    setTimeout(() => el.scrollIntoView({ behavior:'smooth', block: alvo ? 'center' : 'start' }), 60);
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-loja-cat]');
+    if (!b) return;
+    e.preventDefault();
+    irParaLoja(b.dataset.lojaCat, (b.dataset.lojaAlvos || '').split('|').filter(Boolean));
+  });
 
   // Qualquer "?" ou link de ajuda abre a tela de Ajuda já na seção certa.
   document.addEventListener('click', e => {
@@ -1642,35 +1685,35 @@
 
   // Sem link de afiliado cadastrado em catalogo.js, monta uma busca no
   // Mercado Livre. Pra peças, inclui modelo + fabricante pra afinar o resultado.
-  function linkBuscaMercadoLivre(termo){
-    return `https://lista.mercadolivre.com.br/${encodeURIComponent(termo)}`;
+  // ============ "COMPRAR" → GUIA SHOPPING ============
+  // Todo botão "Comprar" do app abre a guia Shopping. Se existir um produto
+  // ligado àquele item (coluna "alvo" do loja/links.txt), ele abre em destaque;
+  // senão, abre só a categoria certa. Nada aqui aponta pra fora do app.
+  function catalogoIdDaImpressora(imp){
+    if (!imp) return '';
+    if (imp.catalogoId) return imp.catalogoId;
+    const c = CATALOGO_IMPRESSORAS.find(x => x.fabricante === imp.fabricante && x.modelo === imp.modelo);
+    return c ? c.id : '';
   }
-  function linkComprarImpressora(p){
-    if (p.catalogoId && LINKS_COMPRAR_IMPRESSORA[p.catalogoId]) return LINKS_COMPRAR_IMPRESSORA[p.catalogoId];
-    return linkBuscaMercadoLivre(`${p.fabricante} ${p.modelo} impressora 3D`);
+  // atributos do botão: categoria + chaves de alvo, da mais específica pra mais geral
+  function dadosComprar(categoria, chaves){
+    return `data-loja-cat="${categoria}" data-loja-alvos="${chaves.filter(Boolean).join('|')}"`;
   }
-  // Link da peça, em ordem de prioridade:
-  //   1. link específico daquela peça NAQUELA impressora do catálogo
-  //   2. link genérico da peça (vale pra impressora cadastrada à mão)
-  //   3. busca automática no Mercado Livre com peça + modelo + fabricante
-  function linkComprarPeca(pecaNome, impressora){
-    const pm = PECAS_MANUTENCAO.find(x => x.nome === pecaNome);
-    if (pm && impressora){
-      // Impressora do catálogo tem id direto; cadastrada à mão, tenta casar
-      // fabricante + modelo com algum modelo do catálogo.
-      const catId = impressora.catalogoId || (CATALOGO_IMPRESSORAS.find(x =>
-        x.fabricante === impressora.fabricante && x.modelo === impressora.modelo) || {}).id;
-      const doModelo = catId && LINKS_COMPRAR_PECA[catId];
-      if (doModelo && doModelo[pm.id]) return doModelo[pm.id];
-    }
-    if (pm && LINKS_AFILIADO_PECA_GENERICA[pm.id]) return LINKS_AFILIADO_PECA_GENERICA[pm.id];
-    const sufixo = impressora ? ` ${impressora.modelo} ${impressora.fabricante}` : ' impressora 3D';
-    return linkBuscaMercadoLivre(pecaNome + sufixo);
+  function comprarImpressora(imp){
+    const id = catalogoIdDaImpressora(imp);
+    return dadosComprar('Impressoras', id ? [`impressora:${id}`] : []);
   }
-  function linkComprarFilamentoPorNome(nome){
-    const catalogo = CATALOGO_FILAMENTOS.find(f => f.nome === nome);
-    if (catalogo && LINKS_AFILIADO_FILAMENTO[catalogo.id]) return LINKS_AFILIADO_FILAMENTO[catalogo.id];
-    return linkBuscaMercadoLivre(nome + ' filamento impressora 3D');
+  function comprarPeca(pecaId, imp){
+    const id = catalogoIdDaImpressora(imp);
+    return dadosComprar('Peças de reposição', [id ? `peca:${id}:${pecaId}` : '', `peca:*:${pecaId}`]);
+  }
+  function comprarFilamento(nome){
+    const c = CATALOGO_FILAMENTOS.find(f => f.nome === nome);
+    return dadosComprar('Filamentos', c ? [`filamento:${c.id}`] : []);
+  }
+  function comprarResina(nome){
+    const c = CATALOGO_RESINAS.find(r => r.nome === nome);
+    return dadosComprar('Resinas', c ? [`resina:${c.id}`] : []);
   }
 
   // Catálogo do GitHub — ver catalogo.js pra adicionar/editar modelos.
@@ -1809,7 +1852,7 @@
           </span>
           <span class="watts">${p.watts ? p.watts + ' W' : ''}</span>
         </button>
-        <a href="${linkComprarImpressora(p)}" target="_blank" rel="noopener" class="buy-link-btn" aria-label="Comprar">🛒</a>
+        <a href="#" ${comprarImpressora(p)} class="buy-link-btn" aria-label="Comprar">🛒</a>
         <button type="button" class="fav-btn${favs.includes(p.id) ? ' active' : ''}" data-fav="${p.id}" aria-label="Favoritar">${favs.includes(p.id) ? '★' : '☆'}</button>
       </div>
     `).join('');
@@ -1917,7 +1960,7 @@
       infoEl.hidden = false;
       precoField.hidden = true;  // preço vem do filamento selecionado
       infoEl.innerHTML = `<span>${escapeHtml(f.nome)} — R$ ${f.precoKg.toFixed(2)}/kg</span>
-        <a href="${linkComprarFilamentoPorNome(f.nome)}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a>`;
+        <a href="#" ${comprarFilamento(f.nome)} class="buy-link">comprar →</a>`;
     }
   }
 
@@ -1947,12 +1990,6 @@
   });
 
   // ============ SELETOR DE RESINA (mesmo padrão do seletor de filamento) ============
-  function linkComprarResinaPorNome(nome){
-    const catalogo = CATALOGO_RESINAS.find(r => r.nome === nome);
-    if (catalogo && LINKS_AFILIADO_RESINA[catalogo.id]) return LINKS_AFILIADO_RESINA[catalogo.id];
-    return linkBuscaMercadoLivre(nome + ' resina impressora 3D');
-  }
-
   function todasResinas(){
     const custom = { id:'custom', nome:'Personalizado', precoLitro:null };
     return [custom, ...lsGet(LS_RESINAS, [])];
@@ -1992,7 +2029,7 @@
       infoEl.hidden = false;
       precoField.hidden = true;  // preço vem da resina selecionada
       infoEl.innerHTML = `<span>${escapeHtml(r.nome)} — R$ ${r.precoLitro.toFixed(2)}/L</span>
-        <a href="${linkComprarResinaPorNome(r.nome)}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a>`;
+        <a href="#" ${comprarResina(r.nome)} class="buy-link">comprar →</a>`;
     }
   }
 
@@ -2045,7 +2082,7 @@
         <div class="nome">${escapeHtml(r.nome)}${r.tipo ? ` <span class="badge neutral">${escapeHtml(r.tipo)}</span>` : ''}</div>
         <div class="info">R$ ${r.precoLitro.toFixed(2)}/L</div>
         <div class="actions">
-          <a href="${linkComprarResinaPorNome(r.nome)}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
+          <a href="#" ${comprarResina(r.nome)} class="buy-link-action">Comprar →</a>
           <button type="button" class="danger" data-delres="${r.id}">Excluir</button>
         </div>
       </div>
@@ -2096,7 +2133,7 @@
         <div class="nome">${escapeHtml(f.nome)}${f.tipo ? ` <span class="badge neutral">${escapeHtml(f.tipo)}</span>` : ''}</div>
         <div class="info">R$ ${f.precoKg.toFixed(2)}/kg</div>
         <div class="actions">
-          <a href="${linkComprarFilamentoPorNome(f.nome)}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
+          <a href="#" ${comprarFilamento(f.nome)} class="buy-link-action">Comprar →</a>
           <button type="button" class="danger" data-delfil="${f.id}">Excluir</button>
         </div>
       </div>
@@ -2976,7 +3013,7 @@
       const nomeExib = `${item.fabricante || ''} ${item.modelo || ''}`.trim() || 'Impressora sem nome';
       const linhasPecas = pecasRelevantes.map(pm => `
         <div class="peca-row">
-          <span class="peca-nome">${pm.nome} <a href="${linkComprarPeca(pm.nome, item)}" target="_blank" rel="noopener" class="buy-link">comprar ↗</a></span>
+          <span class="peca-nome">${pm.nome} <a href="#" ${comprarPeca(pm.id, item)} class="buy-link">comprar →</a></span>
           <div class="peca-inputs">
             <div class="input-box"><span class="unit-mini">R$</span><input type="number" class="peca-custo tem-prefixo" data-peca="${pm.id}" value="${pecas[pm.id].custo}" step="5"></div>
             <div class="input-box"><input type="number" class="peca-horas" data-peca="${pm.id}" value="${pecas[pm.id].horas}" step="50"><span class="unit-mini-suffix">h</span></div>
@@ -3021,7 +3058,7 @@
           <div class="parts-resumo" data-resumo="${item.id}">Manutenção: <strong>${fmt(custoManutencaoPorHora(item))}/hora</strong> · última revisão: ${ultima}</div>
           <button type="button" class="save-parts-btn" data-save-mp="${item.id}">Salvar alterações</button>
           <div class="saved-item-actions">
-            <a href="${linkComprarImpressora({catalogoId:null, fabricante:item.fabricante, modelo:item.modelo})}" target="_blank" rel="noopener" class="buy-link-action">Comprar ↗</a>
+            <a href="#" ${comprarImpressora(item)} class="buy-link-action">Comprar →</a>
             <button type="button" data-maint="${item.id}">Revisão feita hoje</button>
             <button type="button" class="danger" data-delmp="${item.id}">Excluir</button>
           </div>

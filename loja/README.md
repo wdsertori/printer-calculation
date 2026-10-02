@@ -7,11 +7,36 @@ Documento interno. Não aparece no app.
 Edite **somente** o `loja/links.txt`. Uma linha por produto:
 
 ```
-categoria | link de afiliado | título opcional | descrição opcional
+categoria | link de afiliado | título opcional | descrição opcional | alvo opcional
 ```
 
 Categorias válidas (escreva exatamente assim):
-`Impressoras` · `Filamentos` · `Peças de reposição` · `Ferramentas` · `Acessórios` · `Aprenda 3D`
+`Impressoras` · `Filamentos` · `Resinas` · `Peças de reposição` · `Ferramentas` · `Acessórios` · `Aprenda 3D`
+
+## Ligar um produto a um botão "Comprar" do app (coluna `alvo`)
+
+Todos os botões "Comprar" espalhados pelo app (impressora, peça, filamento,
+resina) abrem esta guia Shopping. A 5ª coluna diz **qual produto** deve abrir em
+destaque. Sem ela, o botão abre só a categoria certa. É opcional.
+
+| Botão do app | Chave |
+|---|---|
+| Impressora do catálogo | `impressora:ender3v3se` |
+| Peça de uma impressora | `peca:ender3v3se:bico` |
+| Peça que vale pra qualquer impressora | `peca:*:graxa` |
+| Filamento sugerido | `filamento:pla_generico` |
+| Resina sugerida | `resina:resina_padrao` |
+
+Os ids (`ender3v3se`, `bico`, `pla_generico`...) são os do `catalogo.js`. O mesmo
+produto pode servir a vários botões: separe as chaves por vírgula
+(`peca:a1:hotend,peca:a1mini:hotend`).
+
+Quando o botão é de um item que o usuário cadastrou à mão e não existe no
+catálogo, ele abre a categoria, sem destaque.
+
+**Dica:** depois da Action rodar, confira o título que o Mercado Livre devolveu
+pra cada linha (ele aparece depois do `#`). Se não bater com o item, o link está
+trocado.
 
 Ao dar commit nesse arquivo, uma GitHub Action roda o processador, busca
 título/descrição/foto de cada link e regrava o `loja.json`, que é o arquivo
