@@ -352,6 +352,20 @@
   .saved-item .actions button:hover{color:var(--text); border-color:var(--accent);}
   .saved-item .actions button.danger:hover{color:var(--danger); border-color:var(--danger);}
   .empty-hint{font-size:12.5px; color:var(--text-dim); padding:10px 0; font-style:italic;}
+  .resumo-nav{display:flex; align-items:center; justify-content:space-between; margin:6px 0 14px;}
+  .resumo-nav button{width:42px; height:42px; border-radius:8px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:22px; line-height:1; cursor:pointer;}
+  .resumo-nav button:hover:not(:disabled){border-color:var(--accent);}
+  .resumo-nav button:disabled{opacity:0.3; cursor:default;}
+  .resumo-mes{font-weight:600; font-size:15.5px;}
+  .resumo-grade{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .resumo-tile{background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:12px 13px;}
+  .resumo-tile .rot{font-size:10.5px; color:var(--text-dim); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:0.05em;}
+  .resumo-tile .val{font-size:19px; font-weight:600; margin-top:5px; font-family:'IBM Plex Mono',monospace;}
+  .resumo-tile .val.pos{color:var(--teal);}
+  .resumo-tile .val.neg{color:var(--danger);}
+  .resumo-tile .dica{font-size:11.5px; color:var(--text-dim); margin-top:4px; line-height:1.45;}
+  .resumo-agora{margin-top:14px; padding-top:12px; border-top:1px dashed var(--grid-line); font-size:13px; color:var(--text-dim); line-height:1.6;}
+  .resumo-agora strong{color:var(--text);}
   .filtro-status{display:flex; gap:6px; flex-wrap:wrap; margin:16px 0 2px;}
   .filtro-status .chip{padding:6px 10px; font-size:11px;}
   .status-linha{display:flex; align-items:center; gap:10px; margin-top:9px; flex-wrap:wrap;}
@@ -827,6 +841,19 @@
     <div class="filtro-status" id="filtroOrc"></div>
     <div id="orcamentosLista"></div>
   </details>
+
+  <details class="card">
+    <summary>
+      <span class="n">05</span> Resumo do mês
+      <span class="summary-chevron">▾</span>
+    </summary>
+    <div class="resumo-nav">
+      <button type="button" id="resumoAnt" aria-label="Mês anterior">‹</button>
+      <div class="resumo-mes" id="resumoMesNome"></div>
+      <button type="button" id="resumoProx" aria-label="Próximo mês">›</button>
+    </div>
+    <div id="resumoMes"></div>
+  </details>
   <footer>CUSTO = MATERIAL + ENERGIA + DEPRECIAÇÃO + MÃO DE OBRA</footer>
   </div>
   </div>
@@ -1028,6 +1055,7 @@
 
     <div class="card">
       <h2>Onde ficam salvos os dados</h2>
+      <p class="help-text"><strong>Resumo do mês.</strong> Faturamento e lucro contam os orçamentos <em>aprovados</em> naquele mês, pela data em que você marcou "Aprovado". Lucro real é o preço cobrado menos o custo da peça (o custo que o app calculou na hora de emitir), vezes a quantidade. A taxa de aprovação olha só os orçamentos emitidos no mês que já tiveram resposta — aprovado ou recusado.</p>
       <p class="help-text"><strong>Status do orçamento.</strong> Todo orçamento que você emite em PDF nasce como "Enviado". Conforme o cliente responde, troque pra Aprovado, Em produção, Entregue ou Recusado — a lista tem um filtro por status, e a data de cada mudança fica guardada.</p>
       <p class="help-text">Sem login, tudo fica salvo só no navegador deste aparelho — outra pessoa que abrir o site não vê nada do que você cadastrou, e você mesmo não vê no celular o que cadastrou no computador.</p>
       <p class="help-text">Entrando com a conta Google (ícone no topo), os dados passam a seguir você entre aparelhos. O círculo em volta da sua foto muda de cor pra indicar o status: laranja salvando, verde sincronizado, vermelho erro.</p>
@@ -2204,7 +2232,92 @@
   let filtroOrc = 'todos';
   const filtroOrcEl = document.getElementById('filtroOrc');
 
+  // ---------- RESUMO DO MÊS ----------
+  const APROVADOS = ['aprovado', 'producao', 'entregue'];
+  // Data em que o orçamento foi aprovado: a 1ª vez que o histórico passou por um status "aprovado ou além".
+  function dataAprovacao(item){
+    const h = (item.emissao.historico || []).find(x => APROVADOS.includes(x.s));
+    return new Date(h ? h.em : item.emissao.data);
+  }
+  // Faturamento/lucro = orçamentos aprovados NAQUELE mês (pela data da aprovação).
+  // Taxa de aprovação = dos emitidos naquele mês, quantos já responderam e aprovaram.
+  // Lucro real = (preço cobrado - custo da peça) x quantidade; só entra quem tem o custo gravado.
+  function calcularResumo(lista, ano, mes){
+    const noMes = d => d.getFullYear() === ano && d.getMonth() === mes;
+    const emit = lista.filter(i => i.emissao);
+    const doMes = emit.filter(i => noMes(new Date(i.emissao.data)));
+    let aprov = 0, recus = 0;
+    doMes.forEach(i => {
+      const st = statusDe(i);
+      if (APROVADOS.includes(st)) aprov++; else if (st === 'recusado') recus++;
+    });
+    const decididos = aprov + recus;
+    const aprovadosNoMes = emit.filter(i => APROVADOS.includes(statusDe(i)) && noMes(dataAprovacao(i)));
+    let faturamento = 0, lucro = 0, fatComCusto = 0;
+    aprovadosNoMes.forEach(i => {
+      const e = i.emissao, q = Number(e.qtd) || 0, p = Number(e.precoUnit) || 0, c = Number(e.custoUnit) || 0;
+      faturamento += p * q;
+      if (c > 0){ lucro += (p - c) * q; fatComCusto += p * q; }
+    });
+    const conta = st => emit.filter(i => statusDe(i) === st).length;
+    return {
+      emitidos: doMes.length, aprov, recus, decididos,
+      taxa: decididos ? aprov / decididos : null,
+      nAprovados: aprovadosNoMes.length, faturamento,
+      lucro: fatComCusto > 0 ? lucro : null,
+      margem: fatComCusto > 0 ? lucro / fatComCusto : null,
+      ticket: aprovadosNoMes.length ? faturamento / aprovadosNoMes.length : null,
+      agora: { aguardando: conta('enviado'), aprovados: conta('aprovado'), producao: conta('producao') },
+    };
+  }
+
+  const hojeRef = new Date();
+  let mesResumo = { ano: hojeRef.getFullYear(), mes: hojeRef.getMonth() };
+  const resumoEl = document.getElementById('resumoMes');
+  const resumoNomeEl = document.getElementById('resumoMesNome');
+  const resumoAntBtn = document.getElementById('resumoAnt');
+  const resumoProxBtn = document.getElementById('resumoProx');
+
+  function renderResumo(){
+    const { ano, mes } = mesResumo;
+    const nome = new Date(ano, mes, 1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
+    resumoNomeEl.textContent = nome.charAt(0).toUpperCase() + nome.slice(1);
+    const h = new Date();
+    resumoProxBtn.disabled = ano > h.getFullYear() || (ano === h.getFullYear() && mes >= h.getMonth());
+
+    const r = calcularResumo(lsGet(LS_ORC, []), ano, mes);
+    const plural = (n, um, varios) => n === 1 ? um : varios;
+    const tile = (rot, val, dica, cls) => `<div class="resumo-tile"><div class="rot">${rot}</div><div class="val${cls ? ' ' + cls : ''}">${val}</div><div class="dica">${dica}</div></div>`;
+    const tracos = '—';
+    let html = '';
+    if (!r.emitidos && !r.nAprovados){
+      html = '<div class="empty-hint">Nenhum orçamento emitido ou aprovado neste mês.</div>';
+    } else {
+      html = '<div class="resumo-grade">' +
+        tile('Emitidos', r.emitidos, 'orçamentos em PDF') +
+        tile('Aprovação', r.taxa === null ? tracos : Math.round(r.taxa * 100) + '%',
+          r.decididos ? `${r.aprov} de ${r.decididos} ${plural(r.decididos, 'respondido', 'respondidos')}` : 'ninguém respondeu ainda') +
+        tile('Faturamento', fmt(r.faturamento), `${r.nAprovados} ${plural(r.nAprovados, 'aprovado', 'aprovados')} no mês`) +
+        tile('Lucro real', r.lucro === null ? tracos : fmt(r.lucro), 'preço cobrado − custo', r.lucro === null ? '' : (r.lucro < 0 ? 'neg' : 'pos')) +
+        tile('Margem real', r.margem === null ? tracos : (r.margem * 100).toFixed(1).replace('.', ',') + '%', 'lucro ÷ faturamento') +
+        tile('Ticket médio', r.ticket === null ? tracos : fmt(r.ticket), 'por orçamento aprovado') +
+      '</div>';
+    }
+    html += `<div class="resumo-agora"><strong>Agora:</strong> ${r.agora.aguardando} aguardando resposta · ${r.agora.aprovados} ${plural(r.agora.aprovados, 'aprovado', 'aprovados')} · ${r.agora.producao} em produção</div>`;
+    resumoEl.innerHTML = html;
+  }
+
+  resumoAntBtn.addEventListener('click', () => {
+    mesResumo = mesResumo.mes === 0 ? { ano: mesResumo.ano - 1, mes: 11 } : { ano: mesResumo.ano, mes: mesResumo.mes - 1 };
+    renderResumo();
+  });
+  resumoProxBtn.addEventListener('click', () => {
+    mesResumo = mesResumo.mes === 11 ? { ano: mesResumo.ano + 1, mes: 0 } : { ano: mesResumo.ano, mes: mesResumo.mes + 1 };
+    renderResumo();
+  });
+
   function renderOrcamentos(){
+    renderResumo();   // o resumo acompanha qualquer mudança na lista (salvar, excluir, trocar status, nuvem)
     const list = lsGet(LS_ORC, []);
     if (!list.length){
       filtroOrcEl.innerHTML = '';
