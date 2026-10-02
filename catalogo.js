@@ -103,6 +103,15 @@ export const CATALOGO_IMPRESSORAS = [
     pecas:{ tela:{custo:750,horas:2000}, fep:{custo:80,horas:300}, cuba:{custo:220,horas:3000} },
   },
   {
+    // preço: MEDIDO (R$4.399 a R$5.499 em 6 lojas BR; Amazon R$4.799; arredondado pra cima)
+    // watts/vidaUtil: estimados (fonte 24V 6A = 144 W máx.) · tela/cuba: estimados
+    // (cuba baseada no reservatório de metal da linha Saturn 4, ~R$460 na Slim3D)
+    id:'saturn4ultra16k', tipo:'resina', fabricante:'Elegoo', modelo:'Saturn 4 Ultra 16K',
+    spec:'resina · LCD 16K · cuba aquecida', watts:70, icon:'resina',
+    precoCompra:4800, vidaUtil:3500, intervaloDias:60,
+    pecas:{ tela:{custo:1000,horas:2000}, fep:{custo:80,horas:300}, cuba:{custo:450,horas:3000} },
+  },
+  {
     // watts: MEDIDO (ficha técnica Anycubic, 100W) · preço: estimado (import de ~US$549)
     id:'photonm5s', tipo:'resina', fabricante:'Anycubic', modelo:'Photon Mono M5s',
     spec:'resina · LCD 12K · sem nivelamento', watts:100, icon:'resina',
@@ -226,6 +235,7 @@ export const LINKS_AFILIADO_IMPRESSORA = {
   // x1c: '',
   // mars5: '',
   saturn4ultra: 'https://meli.la/2Xv2KHg',
+  saturn4ultra16k: 'https://meli.la/2XZxTqB',
   photonm5s: 'https://meli.la/228t2pA',
   sonicmini8k: 'https://meli.la/2kbazrA',
 };
@@ -280,6 +290,7 @@ export const LINKS_AFILIADO_PECA = {
   x1c: {},
   mars5: {},
   saturn4ultra: {},
+  saturn4ultra16k: {},
   photonm5s: {},
   sonicmini8k: {
     fep: 'https://meli.la/1iNum6k',
