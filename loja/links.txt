@@ -1,7 +1,7 @@
 # ============================================================================
 # LOJA DO PRECIFICA 3D — uma linha por produto.
 #
-# Formato:   categoria | link de afiliado | título opcional | descrição opcional
+# Formato:   categoria | link de afiliado | título opcional | descrição opcional | alvo opcional
 #
 # Só categoria e link são obrigatórios. O processador busca título, descrição
 # e foto sozinho a partir do link (mesma técnica da prévia do WhatsApp).
@@ -10,7 +10,15 @@
 # que devolve só "Amazon.com.br" para robôs de prévia.
 #
 # Categorias válidas (escreva igual):
-#   Impressoras | Filamentos | Peças de reposição | Ferramentas | Acessórios | Aprenda 3D
+#   Impressoras | Filamentos | Resinas | Peças de reposição | Ferramentas | Acessórios | Aprenda 3D
+#
+# 5ª coluna (alvo), OPCIONAL: liga o produto a um botão "Comprar" do app, pra
+# abrir a Shopping já com esse cartão em destaque. Sem ela, o "Comprar" abre só
+# a categoria. Várias chaves separadas por vírgula. Formatos:
+#     impressora:ender3v3se        peca:ender3v3se:bico
+#     peca:*:graxa  (vale pra qualquer impressora)
+#     filamento:pla_generico       resina:resina_padrao
+# Os ids são os mesmos do catalogo.js.
 #
 # Linha começando com # é comentário e é ignorada.
 #
@@ -25,7 +33,7 @@
 # Aprenda 3D | https://amzn.to/xxxxxxx | Impressão 3D para Iniciantes | Livro introdutório
 # ============================================================================
 Acessórios | https://meli.la/2dUxJZB  # Pc Gamer Fácil Pulse Amd Ryzen 7 5700g Radeon Vega 8 Ssd 480gb 16gb Ddr4 Fonte 500w - Pgf-0150pu
-Impressoras | https://meli.la/2Zndd4d  # Impressora 3d Bambu Lab A1 Mini Sem Ams
+Impressoras | https://meli.la/2Zndd4d |  |  | impressora:a1mini # Impressora 3d Bambu Lab A1 Mini Sem Ams
 Impressoras | https://meli.la/1miPkfX  # Impressora 3d Branca Multicolorida Bamboo Lab A1 Combo Ams Branco
 Impressoras | https://meli.la/1uuBbZ2  # Impressora 3d Anycubic Kobra 3 V2 Combo Fdm Multicolorida Cinza
 Ferramentas | https://meli.la/21Eev5C  # Kit 47 Ferramentas Impressão 3d Acabamento Rebarbador Preto
@@ -41,8 +49,48 @@ Peças de reposição | https://meli.la/2duG94U  # Hotend Bico Aço Bambu Lab A1
 Peças de reposição | https://meli.la/2CXrTTT  # Kit Bico Cerâmico Troca Rápida Para Creality K1/k1c/k1 Max
 Peças de reposição | https://meli.la/335Wmjc  # Bico De Troca Rápida Unicorn 0,4mm K1 E Ender-3 V3 Series
 Peças de reposição | https://meli.la/2L7g7ff  # Bico Nozzle Creality Hi Creality K2 Plus K2 Pro K2 0,2-0,8mm Bico 0.4mm
-Ferramentas | https://meli.la/2E2amjP  # Creality Graxa Lubrificante Para Impressora 3d, 10g Original
+Ferramentas | https://meli.la/2E2amjP |  |  | peca:ender3v3se:graxa,peca:a1:graxa,peca:k2:graxa,peca:*:graxa # Creality Graxa Lubrificante Para Impressora 3d, 10g Original
 Peças de reposição | https://meli.la/2BSRA43  # Bico Para Kobra Bimetálico X S1 0.25/0.4/0.6 /0.8 Nozzle Bico 0.4
 Acessórios | https://meli.la/2WVtNLT  # Saco Vácuo Para Filamento 3d Pla/abs Armazenagem
 Acessórios | https://meli.la/1BNqPuu  # Saco A Vácuo 50x60 Cm Com Bomba Elétrica
 Acessórios | https://meli.la/1sTzS7w  # Kit 10 Sacos Vácuo P/ Filamento 3d Com Bomba E Sílica Gel
+
+# --- Migrados do links-afiliado.csv (5ª coluna = a que item do app o produto corresponde) ---
+Impressoras | https://meli.la/18PS7HW |  |  | impressora:ender3v3se
+Impressoras | https://meli.la/1cFHWte |  |  | impressora:kobra3
+Impressoras | https://meli.la/1M8w8XM |  |  | impressora:crealityhi
+Impressoras | https://meli.la/26Vafxw |  |  | impressora:a1
+Impressoras | https://meli.la/14oppcG |  |  | impressora:k2
+Impressoras | https://meli.la/2JqwQqc |  |  | impressora:p1s
+Impressoras | https://meli.la/2Xv2KHg |  |  | impressora:saturn4ultra
+Impressoras | https://meli.la/2XZxTqB |  |  | impressora:saturn4ultra16k
+Impressoras | https://meli.la/228t2pA |  |  | impressora:photonm5s
+Impressoras | https://meli.la/2kbazrA |  |  | impressora:sonicmini8k
+Peças de reposição | https://meli.la/1fw459W |  |  | peca:ender3v3se:hotend
+Peças de reposição | https://meli.la/1Q4Ncj2 |  |  | peca:ender3v3se:bico
+Peças de reposição | https://meli.la/1nBGu9x |  |  | peca:ender3v3se:mesa
+Peças de reposição | https://meli.la/1sYkQib |  |  | peca:kobra3:hotend
+Peças de reposição | https://meli.la/11gsqPU |  |  | peca:kobra3:bico
+Peças de reposição | https://meli.la/3153uaM |  |  | peca:kobra3:mesa
+Peças de reposição | https://meli.la/1H9xkxv |  |  | peca:kobra3:graxa
+Peças de reposição | https://meli.la/2qevE3y |  |  | peca:crealityhi:hotend
+Peças de reposição | https://meli.la/1VYQZnR |  |  | peca:crealityhi:bico,peca:k2:bico
+Peças de reposição | https://meli.la/2KNVpNC |  |  | peca:crealityhi:graxa,peca:a1mini:graxa
+Peças de reposição | https://meli.la/1AoE7ta |  |  | peca:a1mini:hotend,peca:a1:hotend
+Peças de reposição | https://meli.la/18i6EPi |  |  | peca:a1mini:bico,peca:a1:bico
+Peças de reposição | https://meli.la/13GaAuA |  |  | peca:a1mini:mesa
+Peças de reposição | https://meli.la/1fzqPos |  |  | peca:a1:mesa
+Peças de reposição | https://meli.la/2ov9ujS |  |  | peca:k2:hotend
+Peças de reposição | https://meli.la/2TW4Npj |  |  | peca:k2:mesa
+Peças de reposição | https://meli.la/317PVFH |  |  | peca:k2:filtro
+Peças de reposição | https://meli.la/1iNum6k |  |  | peca:sonicmini8k:fep
+Peças de reposição | https://meli.la/1hahZm3 |  |  | peca:sonicmini8k:cuba
+Filamentos | https://meli.la/1pfsNGu |  |  | filamento:pla_generico
+Filamentos | https://meli.la/1dh4qDG |  |  | filamento:petg_generico
+Filamentos | https://meli.la/23YsFFU |  |  | filamento:abs_generico
+Filamentos | https://meli.la/1dmqCmV |  |  | filamento:tpu_generico
+Filamentos | https://meli.la/1VUqyxa |  |  | filamento:nylon_generico
+Resinas | https://meli.la/1VawycB |  |  | resina:resina_padrao
+Resinas | https://meli.la/1UMfUwE |  |  | resina:resina_abslike
+Resinas | https://meli.la/33Y5FFn |  |  | resina:resina_lavavel
+Resinas | https://meli.la/2Z2bqXQ |  |  | resina:resina_flexivel

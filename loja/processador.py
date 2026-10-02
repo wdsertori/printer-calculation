@@ -378,6 +378,7 @@ def resolve_url(url: str) -> dict:
 CATEGORIAS = [
     "Impressoras",
     "Filamentos",
+    "Resinas",
     "Peças de reposição",
     "Ferramentas",
     "Acessórios",
@@ -425,6 +426,9 @@ def read_items(path: Path) -> list[dict]:
                 "link": partes[1],
                 "titulo_manual": partes[2] if len(partes) > 2 else "",
                 "descricao_manual": partes[3] if len(partes) > 3 else "",
+                # 5ª coluna, opcional: a que item do app esse produto corresponde
+                # (ex.: "peca:ender3v3se:bico"). Várias chaves separadas por vírgula.
+                "alvos": [a.strip() for a in partes[4].split(",") if a.strip()] if len(partes) > 4 else [],
             })
 
     return items
@@ -560,6 +564,7 @@ def main() -> int:
             "descricao": item["descricao_manual"] or descricao,
             "imagem": dados["imagem"],
             "marketplace": dados["marketplace"],
+            "alvos": item["alvos"],
         })
 
     # Anota os títulos no links.txt enquanto a ordem ainda espelha o arquivo
