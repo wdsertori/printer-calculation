@@ -33,7 +33,7 @@
 # Aprenda 3D | https://amzn.to/xxxxxxx | Impressão 3D para Iniciantes | Livro introdutório
 # ============================================================================
 Acessórios | https://meli.la/2dUxJZB  # Pc Gamer Fácil Pulse Amd Ryzen 7 5700g Radeon Vega 8 Ssd 480gb 16gb Ddr4 Fonte 500w - Pgf-0150pu
-Impressoras | https://meli.la/2Zndd4d |  |  | impressora:a1mini # Impressora 3d Bambu Lab A1 Mini Sem Ams
+Impressoras | https://meli.la/2Zndd4d |  |  | impressora:a1mini  # Impressora 3d Bambu Lab A1 Mini Sem Ams
 Impressoras | https://meli.la/1miPkfX  # Impressora 3d Branca Multicolorida Bamboo Lab A1 Combo Ams Branco
 Impressoras | https://meli.la/1uuBbZ2  # Impressora 3d Anycubic Kobra 3 V2 Combo Fdm Multicolorida Cinza
 Ferramentas | https://meli.la/21Eev5C  # Kit 47 Ferramentas Impressão 3d Acabamento Rebarbador Preto
@@ -49,48 +49,48 @@ Peças de reposição | https://meli.la/2duG94U  # Hotend Bico Aço Bambu Lab A1
 Peças de reposição | https://meli.la/2CXrTTT  # Kit Bico Cerâmico Troca Rápida Para Creality K1/k1c/k1 Max
 Peças de reposição | https://meli.la/335Wmjc  # Bico De Troca Rápida Unicorn 0,4mm K1 E Ender-3 V3 Series
 Peças de reposição | https://meli.la/2L7g7ff  # Bico Nozzle Creality Hi Creality K2 Plus K2 Pro K2 0,2-0,8mm Bico 0.4mm
-Ferramentas | https://meli.la/2E2amjP |  |  | peca:ender3v3se:graxa,peca:a1:graxa,peca:k2:graxa,peca:*:graxa # Creality Graxa Lubrificante Para Impressora 3d, 10g Original
+Ferramentas | https://meli.la/2E2amjP |  |  | peca:ender3v3se:graxa,peca:a1:graxa,peca:k2:graxa,peca:*:graxa  # Creality Graxa Lubrificante Para Impressora 3d, 10g Original
 Peças de reposição | https://meli.la/2BSRA43  # Bico Para Kobra Bimetálico X S1 0.25/0.4/0.6 /0.8 Nozzle Bico 0.4
 Acessórios | https://meli.la/2WVtNLT  # Saco Vácuo Para Filamento 3d Pla/abs Armazenagem
 Acessórios | https://meli.la/1BNqPuu  # Saco A Vácuo 50x60 Cm Com Bomba Elétrica
 Acessórios | https://meli.la/1sTzS7w  # Kit 10 Sacos Vácuo P/ Filamento 3d Com Bomba E Sílica Gel
 
 # --- Migrados do links-afiliado.csv (5ª coluna = a que item do app o produto corresponde) ---
-Impressoras | https://meli.la/18PS7HW |  |  | impressora:ender3v3se
-Impressoras | https://meli.la/1cFHWte |  |  | impressora:kobra3
-Impressoras | https://meli.la/1M8w8XM |  |  | impressora:crealityhi
-Impressoras | https://meli.la/26Vafxw |  |  | impressora:a1
-Impressoras | https://meli.la/14oppcG |  |  | impressora:k2
-Impressoras | https://meli.la/2JqwQqc |  |  | impressora:p1s
-Impressoras | https://meli.la/2Xv2KHg |  |  | impressora:saturn4ultra
-Impressoras | https://meli.la/2XZxTqB |  |  | impressora:saturn4ultra16k
-Impressoras | https://meli.la/228t2pA |  |  | impressora:photonm5s
-Impressoras | https://meli.la/2kbazrA |  |  | impressora:sonicmini8k
-Peças de reposição | https://meli.la/1fw459W |  |  | peca:ender3v3se:hotend
-Peças de reposição | https://meli.la/1Q4Ncj2 |  |  | peca:ender3v3se:bico
-Peças de reposição | https://meli.la/1nBGu9x |  |  | peca:ender3v3se:mesa
-Peças de reposição | https://meli.la/1sYkQib |  |  | peca:kobra3:hotend
-Peças de reposição | https://meli.la/11gsqPU |  |  | peca:kobra3:bico
-Peças de reposição | https://meli.la/3153uaM |  |  | peca:kobra3:mesa
-Peças de reposição | https://meli.la/1H9xkxv |  |  | peca:kobra3:graxa
-Peças de reposição | https://meli.la/2qevE3y |  |  | peca:crealityhi:hotend
-Peças de reposição | https://meli.la/1VYQZnR |  |  | peca:crealityhi:bico,peca:k2:bico
-Peças de reposição | https://meli.la/2KNVpNC |  |  | peca:crealityhi:graxa,peca:a1mini:graxa
-Peças de reposição | https://meli.la/1AoE7ta |  |  | peca:a1mini:hotend,peca:a1:hotend
-Peças de reposição | https://meli.la/18i6EPi |  |  | peca:a1mini:bico,peca:a1:bico
-Peças de reposição | https://meli.la/13GaAuA |  |  | peca:a1mini:mesa
-Peças de reposição | https://meli.la/1fzqPos |  |  | peca:a1:mesa
-Peças de reposição | https://meli.la/2ov9ujS |  |  | peca:k2:hotend
-Peças de reposição | https://meli.la/2TW4Npj |  |  | peca:k2:mesa
-Peças de reposição | https://meli.la/317PVFH |  |  | peca:k2:filtro
-Peças de reposição | https://meli.la/1iNum6k |  |  | peca:sonicmini8k:fep
-Peças de reposição | https://meli.la/1hahZm3 |  |  | peca:sonicmini8k:cuba
-Filamentos | https://meli.la/1pfsNGu |  |  | filamento:pla_generico
-Filamentos | https://meli.la/1dh4qDG |  |  | filamento:petg_generico
-Filamentos | https://meli.la/23YsFFU |  |  | filamento:abs_generico
-Filamentos | https://meli.la/1dmqCmV |  |  | filamento:tpu_generico
-Filamentos | https://meli.la/1VUqyxa |  |  | filamento:nylon_generico
-Resinas | https://meli.la/1VawycB |  |  | resina:resina_padrao
-Resinas | https://meli.la/1UMfUwE |  |  | resina:resina_abslike
-Resinas | https://meli.la/33Y5FFn |  |  | resina:resina_lavavel
-Resinas | https://meli.la/2Z2bqXQ |  |  | resina:resina_flexivel
+Impressoras | https://meli.la/18PS7HW |  |  | impressora:ender3v3se  # Impressora 3d Creality Fdm Ender-3 V3 Se Bivolt - 1001020508 Cor Preto
+Impressoras | https://meli.la/1cFHWte |  |  | impressora:kobra3  # Minhas listas de recomendações
+Impressoras | https://meli.la/1M8w8XM |  |  | impressora:crealityhi  # Impressora 3d Creality Hi Cor Cinza-escuro
+Impressoras | https://meli.la/26Vafxw |  |  | impressora:a1  # Impressora 3d Bambu Lab A1 Sem Ams Lite
+Impressoras | https://meli.la/14oppcG |  |  | impressora:k2  # Creality K2 Combo Impressora 3d Multicolor Com Cfs, 600 Mm/s 127/220v Preto
+Impressoras | https://meli.la/2JqwQqc |  |  | impressora:p1s  # Impressora 3D Bambu Lab P1S combo Ams
+Impressoras | https://meli.la/2Xv2KHg |  |  | impressora:saturn4ultra  # Impressora 3D de resina Elegoo Saturn 4 Ultra 16k com tampa
+Impressoras | https://meli.la/2XZxTqB |  |  | impressora:saturn4ultra16k  # Impressora 3d Resina Elegoo Saturn 4 Ultra 16k Msla Resina 127/220v Preto
+Impressoras | https://meli.la/228t2pA |  |  | impressora:photonm5s  # Impressora 3d De Resina Anycubic Photon Mono 4 10k, Cor Pret Preto
+Impressoras | https://meli.la/2kbazrA |  |  | impressora:sonicmini8k  # Impressora 3d + Estação De Lavagem E Cura Profissional Bivolt Vermelho/amarelo
+Peças de reposição | https://meli.la/1fw459W |  |  | peca:ender3v3se:hotend  # Minhas listas de recomendações
+Peças de reposição | https://meli.la/1Q4Ncj2 |  |  | peca:ender3v3se:bico  # Kit 5 Bicos Creality Ender 3 V3 Se Nozzle 3d Upper
+Peças de reposição | https://meli.la/1nBGu9x |  |  | peca:ender3v3se:mesa  # Placa Pei Mesa P/ Creality K1 K1c Ender 3 V3 Ke Se Ender 5 Pei Dourado
+Peças de reposição | https://meli.la/1sYkQib |  |  | peca:kobra3:hotend  # Hotend Anycubic Kobra 3 Combo / Ace Pro Sem Dissipador 24v
+Peças de reposição | https://meli.la/11gsqPU |  |  | peca:kobra3:bico  # Bico Troca Rápida Nozzle Kobra 3 Combo 0.4mm Aço Endurecido
+Peças de reposição | https://meli.la/3153uaM |  |  | peca:kobra3:mesa  # Placa Texturizada Anycubic Kobra 3 Combo 256x268mm Chameleon 127/220v
+Peças de reposição | https://meli.la/1H9xkxv |  |  | peca:kobra3:graxa  # Kit 3 Graxa Lubrificante 10g Impressora 3d Bambu Lab Ender
+Peças de reposição | https://meli.la/2qevE3y |  |  | peca:crealityhi:hotend  # Hotend Para Creality Hi Combo Kit Completo Bico 0,4 Mm 24v
+Peças de reposição | https://meli.la/1VYQZnR |  |  | peca:crealityhi:bico,peca:k2:bico  # Creality Nozzle Bico Kit Unicorn 0,4mm 0,6mm 0,8mm K1c
+Peças de reposição | https://meli.la/2KNVpNC |  |  | peca:crealityhi:graxa,peca:a1mini:graxa  # Graxa Lubrificante Creality Para Impressora 3d
+Peças de reposição | https://meli.la/1AoE7ta |  |  | peca:a1mini:hotend,peca:a1:hotend  # Hotend Bambulab A1 A1 Mini 0,2mm 0,4mm 0,6mm 0,8mm Bico 0.2mm
+Peças de reposição | https://meli.la/18i6EPi |  |  | peca:a1mini:bico,peca:a1:bico  # Hotend Original Bambu Lab A1/a1 Mini - Aço Endurecido 0,4mm
+Peças de reposição | https://meli.la/13GaAuA |  |  | peca:a1mini:mesa  # Placa Fria Mesa Para Bambu Lab A1 Mini Impressora 3d
+Peças de reposição | https://meli.la/1fzqPos |  |  | peca:a1:mesa  # Placa Mesa Fria Azul Cool Plate Bambu Lab A1 P1p P1s X1c 127/220v
+Peças de reposição | https://meli.la/2ov9ujS |  |  | peca:k2:hotend  # Hotend Cerâmico Com Dissipador Creality K2 Bico 0.4mm 24v
+Peças de reposição | https://meli.la/2TW4Npj |  |  | peca:k2:mesa  # Placa Pei Dupla Face Fosca Para Creality K2 0
+Peças de reposição | https://meli.la/317PVFH |  |  | peca:k2:filtro  # Filtro De Ar Creality Para Impressoras 3d K2/k2 Plus
+Peças de reposição | https://meli.la/1iNum6k |  |  | peca:sonicmini8k:fep  # Filme Nfep Phrozen Sonic Mini 8k, 8ks
+Peças de reposição | https://meli.la/1hahZm3 |  |  | peca:sonicmini8k:cuba  # Tanque De Resina Anycubic Photon Mono 4 Com Filme Fep
+Filamentos | https://meli.la/1pfsNGu |  |  | filamento:pla_generico  # Filamento Pla Premium 1,75mm 1kg Voolt3d Branco Velvet
+Filamentos | https://meli.la/1dh4qDG |  |  | filamento:petg_generico  # Filamento Petg 3d Creality Hyper Petg 1 Kg/rolo 1.75mm Preto
+Filamentos | https://meli.la/23YsFFU |  |  | filamento:abs_generico  # Filamento Abs Premium 1kg 1,75mm Impressão 3d Várias Cores Preto
+Filamentos | https://meli.la/1dmqCmV |  |  | filamento:tpu_generico  # Filamento Tpu 95a Carretel 1.75mm 1kg Para Impressora 3d Flexível Flex Rígido Resistente Opaco Branco
+Filamentos | https://meli.la/1VUqyxa |  |  | filamento:nylon_generico  # Creality Hyper Paht-cf Filamento Paht-cf Nylon 1,75mm Preto
+Resinas | https://meli.la/1VawycB |  |  | resina:resina_padrao  # Resina Anycubic 3d Abs Like 3.0 -  Cor Cinza Hd- 1kg
+Resinas | https://meli.la/1UMfUwE |  |  | resina:resina_abslike  # Resina Impressora 3d - 3d Cure Abs-like - 1 Kg Cor Clear
+Resinas | https://meli.la/33Y5FFn |  |  | resina:resina_lavavel  # Resina Anycubic 3d Lavável Em Água 2.0 Verde Translúcido 1kg
+Resinas | https://meli.la/2Z2bqXQ |  |  | resina:resina_flexivel  # Resina Flexível  Para Impressora 3d Cure Flex Preto 500g Preto

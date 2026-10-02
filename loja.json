@@ -1,5 +1,5 @@
 {
-  "atualizadoEm": "2026-10-02 01:29",
+  "atualizadoEm": "2026-10-02 02:12",
   "produtos": [
     {
       "categoria": "Impressoras",
@@ -7,7 +7,10 @@
       "titulo": "Impressora 3d Bambu Lab A1 Mini Sem Ams",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_923398-MLB116025255233_082026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:a1mini"
+      ]
     },
     {
       "categoria": "Impressoras",
@@ -15,7 +18,8 @@
       "titulo": "Impressora 3d Branca Multicolorida Bamboo Lab A1 Combo Ams Branco",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_686520-MLA104117744584_012026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Impressoras",
@@ -23,7 +27,8 @@
       "titulo": "Impressora 3d Anycubic Kobra 3 V2 Combo Fdm Multicolorida Cinza",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_746686-MLA99482017946_112025-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Impressoras",
@@ -31,7 +36,118 @@
       "titulo": "Creality impressora 3d hi combo com sistema multicolor",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_787544-MLA100005493733_122025-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/18PS7HW",
+      "titulo": "Impressora 3d Creality Fdm Ender-3 V3 Se Bivolt - 1001020508 Cor Preto",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_771678-MLA98100107975_112025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:ender3v3se"
+      ]
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/1cFHWte",
+      "titulo": "Minhas listas de recomendações",
+      "descricao": "Lista de afiliados",
+      "imagem": "https://http2.mlstatic.com/D_Q_NP_834115-MLB106909434962_022026-AB{sanitized_title}.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:kobra3"
+      ]
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/1M8w8XM",
+      "titulo": "Impressora 3d Creality Hi Cor Cinza-escuro",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_846941-MLA99498368583_112025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:crealityhi"
+      ]
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/26Vafxw",
+      "titulo": "Impressora 3d Bambu Lab A1 Sem Ams Lite",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_625971-MLB115774506279_082026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:a1"
+      ]
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/14oppcG",
+      "titulo": "Creality K2 Combo Impressora 3d Multicolor Com Cfs, 600 Mm/s 127/220v Preto",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_676133-MLB115336468784_082026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:k2"
+      ]
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/2JqwQqc",
+      "titulo": "Impressora 3D Bambu Lab P1S combo Ams",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_761263-MLA99933125465_112025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:p1s"
+      ]
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/2Xv2KHg",
+      "titulo": "Impressora 3D de resina Elegoo Saturn 4 Ultra 16k com tampa",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_644688-MLA91310134419_082025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:saturn4ultra"
+      ]
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/2XZxTqB",
+      "titulo": "Impressora 3d Resina Elegoo Saturn 4 Ultra 16k Msla Resina 127/220v Preto",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_798415-MLA99449975490_112025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:saturn4ultra16k"
+      ]
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/228t2pA",
+      "titulo": "Impressora 3d De Resina Anycubic Photon Mono 4 10k, Cor Pret Preto",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_828794-MLA99452290410_112025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:photonm5s"
+      ]
+    },
+    {
+      "categoria": "Impressoras",
+      "link": "https://meli.la/2kbazrA",
+      "titulo": "Impressora 3d + Estação De Lavagem E Cura Profissional Bivolt Vermelho/amarelo",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_974778-MLB115260536302_082026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "impressora:sonicmini8k"
+      ]
     },
     {
       "categoria": "Filamentos",
@@ -39,7 +155,8 @@
       "titulo": "Filamento Pla 1,75mm 1kg Para Impressora 3d Branco Ou Preto",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_803232-MLB117998140543_092026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Filamentos",
@@ -47,7 +164,107 @@
       "titulo": "Filamento 3d Sunlu Printer Filament Pla +silk De 1.75mm 1kg Dourado",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_935238-MLA86991538446_072025-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
+    },
+    {
+      "categoria": "Filamentos",
+      "link": "https://meli.la/1pfsNGu",
+      "titulo": "Filamento Pla Premium 1,75mm 1kg Voolt3d Branco Velvet",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_831235-MLA109482250190_042026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "filamento:pla_generico"
+      ]
+    },
+    {
+      "categoria": "Filamentos",
+      "link": "https://meli.la/1dh4qDG",
+      "titulo": "Filamento Petg 3d Creality Hyper Petg 1 Kg/rolo 1.75mm Preto",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_959188-MLA99487645488_112025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "filamento:petg_generico"
+      ]
+    },
+    {
+      "categoria": "Filamentos",
+      "link": "https://meli.la/23YsFFU",
+      "titulo": "Filamento Abs Premium 1kg 1,75mm Impressão 3d Várias Cores Preto",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_704805-MLB117437195411_092026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "filamento:abs_generico"
+      ]
+    },
+    {
+      "categoria": "Filamentos",
+      "link": "https://meli.la/1dmqCmV",
+      "titulo": "Filamento Tpu 95a Carretel 1.75mm 1kg Para Impressora 3d Flexível Flex Rígido Resistente Opaco Branco",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_920147-MLA107304486320_032026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "filamento:tpu_generico"
+      ]
+    },
+    {
+      "categoria": "Filamentos",
+      "link": "https://meli.la/1VUqyxa",
+      "titulo": "Creality Hyper Paht-cf Filamento Paht-cf Nylon 1,75mm Preto",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_948355-MLB109769751245_032026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "filamento:nylon_generico"
+      ]
+    },
+    {
+      "categoria": "Resinas",
+      "link": "https://meli.la/1VawycB",
+      "titulo": "Resina Anycubic 3d Abs Like 3.0 -  Cor Cinza Hd- 1kg",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_600622-MLB108179708117_032026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "resina:resina_padrao"
+      ]
+    },
+    {
+      "categoria": "Resinas",
+      "link": "https://meli.la/1UMfUwE",
+      "titulo": "Resina Impressora 3d - 3d Cure Abs-like - 1 Kg Cor Clear",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_900200-MLA99562288190_122025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "resina:resina_abslike"
+      ]
+    },
+    {
+      "categoria": "Resinas",
+      "link": "https://meli.la/33Y5FFn",
+      "titulo": "Resina Anycubic 3d Lavável Em Água 2.0 Verde Translúcido 1kg",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_834115-MLB106909434962_022026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "resina:resina_lavavel"
+      ]
+    },
+    {
+      "categoria": "Resinas",
+      "link": "https://meli.la/2Z2bqXQ",
+      "titulo": "Resina Flexível  Para Impressora 3d Cure Flex Preto 500g Preto",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_857483-MLB116257221934_092026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "resina:resina_flexivel"
+      ]
     },
     {
       "categoria": "Peças de reposição",
@@ -55,7 +272,8 @@
       "titulo": "Nozzle Bico Hotend Aço Impressora Bambu A1 A1 Mini Original",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_733157-MLB115399789379_072026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Peças de reposição",
@@ -63,7 +281,8 @@
       "titulo": "Hotend Bico Aço Bambu Lab A1 A1 Mini 0,2mm 0,4mm 0,6mm 0,8mm 0.2mm",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_979598-MLB111917857658_062026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Peças de reposição",
@@ -71,7 +290,8 @@
       "titulo": "Kit Bico Cerâmico Troca Rápida Para Creality K1/k1c/k1 Max",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_629889-MLB115626031421_082026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Peças de reposição",
@@ -79,7 +299,8 @@
       "titulo": "Bico De Troca Rápida Unicorn 0,4mm K1 E Ender-3 V3 Series",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_996195-MLA99945006815_112025-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Peças de reposição",
@@ -87,7 +308,8 @@
       "titulo": "Bico Nozzle Creality Hi Creality K2 Plus K2 Pro K2 0,2-0,8mm Bico 0.4mm",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_854025-MLB111604173252_062026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Peças de reposição",
@@ -95,7 +317,221 @@
       "titulo": "Bico Para Kobra Bimetálico X S1 0.25/0.4/0.6 /0.8 Nozzle Bico 0.4",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_969230-MLB114980014003_072026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1fw459W",
+      "titulo": "Minhas listas de recomendações",
+      "descricao": "Lista de afiliados",
+      "imagem": "https://http2.mlstatic.com/D_Q_NP_834115-MLB106909434962_022026-AB{sanitized_title}.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:ender3v3se:hotend"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1Q4Ncj2",
+      "titulo": "Kit 5 Bicos Creality Ender 3 V3 Se Nozzle 3d Upper",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_991373-MLB106329767547_012026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:ender3v3se:bico"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1nBGu9x",
+      "titulo": "Placa Pei Mesa P/ Creality K1 K1c Ender 3 V3 Ke Se Ender 5 Pei Dourado",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_692516-MLB116658168471_082026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:ender3v3se:mesa"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1sYkQib",
+      "titulo": "Hotend Anycubic Kobra 3 Combo / Ace Pro Sem Dissipador 24v",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_742133-MLB86751875588_072025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:kobra3:hotend"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/11gsqPU",
+      "titulo": "Bico Troca Rápida Nozzle Kobra 3 Combo 0.4mm Aço Endurecido",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_865246-MLB115942257523_082026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:kobra3:bico"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/3153uaM",
+      "titulo": "Placa Texturizada Anycubic Kobra 3 Combo 256x268mm Chameleon 127/220v",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_756240-MLB114271108904_082026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:kobra3:mesa"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1H9xkxv",
+      "titulo": "Kit 3 Graxa Lubrificante 10g Impressora 3d Bambu Lab Ender",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_868815-MLB113036608557_062026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:kobra3:graxa"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/2qevE3y",
+      "titulo": "Hotend Para Creality Hi Combo Kit Completo Bico 0,4 Mm 24v",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_835165-MLB114860713387_072026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:crealityhi:hotend"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1VYQZnR",
+      "titulo": "Creality Nozzle Bico Kit Unicorn 0,4mm 0,6mm 0,8mm K1c",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_700578-MLA99411823294_112025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:crealityhi:bico",
+        "peca:k2:bico"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/2KNVpNC",
+      "titulo": "Graxa Lubrificante Creality Para Impressora 3d",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_895027-MLB118395724735_092026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:crealityhi:graxa",
+        "peca:a1mini:graxa"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1AoE7ta",
+      "titulo": "Hotend Bambulab A1 A1 Mini 0,2mm 0,4mm 0,6mm 0,8mm Bico 0.2mm",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_688947-MLB115448001124_082026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:a1mini:hotend",
+        "peca:a1:hotend"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/18i6EPi",
+      "titulo": "Hotend Original Bambu Lab A1/a1 Mini - Aço Endurecido 0,4mm",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_894395-MLB116652868891_082026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:a1mini:bico",
+        "peca:a1:bico"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/13GaAuA",
+      "titulo": "Placa Fria Mesa Para Bambu Lab A1 Mini Impressora 3d",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_796190-MLB113735603260_072026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:a1mini:mesa"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1fzqPos",
+      "titulo": "Placa Mesa Fria Azul Cool Plate Bambu Lab A1 P1p P1s X1c 127/220v",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_698614-MLB117253831879_092026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:a1:mesa"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/2ov9ujS",
+      "titulo": "Hotend Cerâmico Com Dissipador Creality K2 Bico 0.4mm 24v",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_711269-MLB113078787838_072026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:k2:hotend"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/2TW4Npj",
+      "titulo": "Placa Pei Dupla Face Fosca Para Creality K2 0",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_862238-MLB117247746751_092026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:k2:mesa"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/317PVFH",
+      "titulo": "Filtro De Ar Creality Para Impressoras 3d K2/k2 Plus",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_804852-MLB113299363869_062026-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:k2:filtro"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1iNum6k",
+      "titulo": "Filme Nfep Phrozen Sonic Mini 8k, 8ks",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_834479-MLB97993301987_112025-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:sonicmini8k:fep"
+      ]
+    },
+    {
+      "categoria": "Peças de reposição",
+      "link": "https://meli.la/1hahZm3",
+      "titulo": "Tanque De Resina Anycubic Photon Mono 4 Com Filme Fep",
+      "descricao": "",
+      "imagem": "https://http2.mlstatic.com/D_NQ_NP_829183-MLB81072384855_112024-O.webp",
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:sonicmini8k:cuba"
+      ]
     },
     {
       "categoria": "Ferramentas",
@@ -103,7 +539,8 @@
       "titulo": "Kit 47 Ferramentas Impressão 3d Acabamento Rebarbador Preto",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_651117-MLB116577356576_092026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Ferramentas",
@@ -111,7 +548,8 @@
       "titulo": "Kit 54 Peças Completo de Ferramentas Manuais para Impressão 3D, Alicate, Pinças, Estilete, Agulhas Inox para Limpeza de Bico",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_806994-MLA113558951870_072026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Ferramentas",
@@ -119,7 +557,8 @@
       "titulo": "Graxa P/ Lubrificar Eixo Impressora 3d Ptfe Anti Atrito 60g",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_645899-MLB54079329293_022023-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Ferramentas",
@@ -127,7 +566,8 @@
       "titulo": "Kit Acabamento Impressão 3d Limas Alicate Escovas 11 Peças Amarelo",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_857437-MLB117654699151_092026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Ferramentas",
@@ -135,7 +575,13 @@
       "titulo": "Creality Graxa Lubrificante Para Impressora 3d, 10g Original",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_636471-MLB115957427840_092026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": [
+        "peca:ender3v3se:graxa",
+        "peca:a1:graxa",
+        "peca:k2:graxa",
+        "peca:*:graxa"
+      ]
     },
     {
       "categoria": "Acessórios",
@@ -143,7 +589,8 @@
       "titulo": "Pc Gamer Fácil Pulse Amd Ryzen 7 5700g Radeon Vega 8 Ssd 480gb 16gb Ddr4 Fonte 500w - Pgf-0150pu",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_916508-MLA99386060350_112025-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Acessórios",
@@ -151,7 +598,8 @@
       "titulo": "Caixa de secador de 2 filamentos Sovol Sh01 Pla+, petg, tpu, abs, cor branca",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_932819-MLA101891185331_122025-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Acessórios",
@@ -159,7 +607,8 @@
       "titulo": "Saco Vácuo Para Filamento 3d Pla/abs Armazenagem",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_920267-MLB115528592230_082026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Acessórios",
@@ -167,7 +616,8 @@
       "titulo": "Saco A Vácuo 50x60 Cm Com Bomba Elétrica",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_994447-MLB111964992121_052026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     },
     {
       "categoria": "Acessórios",
@@ -175,7 +625,8 @@
       "titulo": "Kit 10 Sacos Vácuo P/ Filamento 3d Com Bomba E Sílica Gel",
       "descricao": "",
       "imagem": "https://http2.mlstatic.com/D_NQ_NP_639311-MLB115381176413_072026-O.webp",
-      "marketplace": "Mercado Livre"
+      "marketplace": "Mercado Livre",
+      "alvos": []
     }
   ]
 }
