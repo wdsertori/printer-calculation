@@ -1460,6 +1460,10 @@
       } else {
         // primeiro login: manda o que já tinha localmente pra nuvem
         pushToCloud();
+        // Conta como novo usuário só aqui, porque é o único ponto em que não
+        // existia documento dele em users/. Quem já tem documento (login de
+        // novo, outro aparelho) cai no ramo de cima e não é contado de novo.
+        incrementarContador('usuariosCadastrados');
       }
     } catch(e){
       setStatusVisual('error', 'erro ao carregar');
