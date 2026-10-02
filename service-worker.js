@@ -7,10 +7,11 @@
 // (Firebase, jsPDF, fontes) não são interceptados — deixa o navegador
 // cuidar do cache deles normalmente.
 
-const CACHE_NOME = 'precifica3d-v1';
+const CACHE_NOME = 'precifica3d-v2';
 const ARQUIVOS_APP_SHELL = [
   './',
   './index.html',
+  './app.html',
   './catalogo.js',
   './site.webmanifest',
   './icon-192.png',

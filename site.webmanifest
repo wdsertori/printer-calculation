@@ -9,5 +9,6 @@
   "theme_color": "#0E2A47",
   "background_color": "#0E2A47",
   "display": "standalone",
-  "start_url": "."
+  "start_url": "app.html",
+  "scope": "./"
 }

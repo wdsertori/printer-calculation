@@ -12,7 +12,7 @@ trocar pela foto real do modelo de dois jeitos. O site tenta, nessa ordem:
 ## Opção 1 — arquivo no repositório (recomendado)
 
 Crie a pasta `images/printers/` na raiz do repositório (ao lado do
-`index.html`) e salve uma imagem com o **id do modelo** como nome.
+`app.html`) e salve uma imagem com o **id do modelo** como nome.
 
 | Impressora | Nome do arquivo |
 |---|---|

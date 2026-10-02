@@ -2,11 +2,11 @@
 // CATALOGO.JS — dados que o site usa, separados do resto do código.
 //
 // Edite este arquivo à vontade pra ir adicionando impressoras, peças e
-// filamentos com o tempo. Não precisa mexer no index.html pra isso — só
+// filamentos com o tempo. Não precisa mexer no app.html pra isso — só
 // seguir o padrão de cada lista abaixo (copia um bloco existente, troca
 // os valores, salva).
 //
-// Depois de editar, é só subir os dois arquivos (index.html + catalogo.js)
+// Depois de editar, é só subir os dois arquivos (app.html + catalogo.js)
 // pro repositório do GitHub, igual sempre.
 // ============================================================================
 
