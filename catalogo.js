@@ -224,11 +224,10 @@ export const LINKS_AFILIADO_IMPRESSORA = {
   k2: 'https://meli.la/14oppcG',
   p1s: 'https://meli.la/2JqwQqc',
   // x1c: '',
-
   // mars5: '',
-  // saturn4ultra: '',
-  // photonm5s: '',
-  // sonicmini8k: '',
+  saturn4ultra: 'https://meli.la/2Xv2KHg',
+  photonm5s: 'https://meli.la/228t2pA',
+  sonicmini8k: 'https://meli.la/2kbazrA',
 };
 
 // Peças são específicas de cada impressora (o hotend da Ender não serve na
@@ -256,12 +255,22 @@ export const LINKS_AFILIADO_PECA = {
   crealityhi: {
     hotend: 'https://meli.la/2qevE3y',
     bico: 'https://meli.la/1VYQZnR',
+    graxa: 'https://meli.la/2KNVpNC',
   },
-  a1mini: {},
+  a1mini: {
+    hotend: 'https://meli.la/1AoE7ta',
+    bico: 'https://meli.la/18i6EPi',
+    mesa: 'https://meli.la/13GaAuA',
+    graxa: 'https://meli.la/2KNVpNC',
+  },
   a1: {
+    hotend: 'https://meli.la/1AoE7ta',
+    bico: 'https://meli.la/18i6EPi',
+    mesa: 'https://meli.la/1fzqPos',
     graxa: 'https://meli.la/2E2amjP',
   },
   k2: {
+    hotend: 'https://meli.la/2ov9ujS',
     bico: 'https://meli.la/1VYQZnR',
     mesa: 'https://meli.la/2TW4Npj',
     filtro: 'https://meli.la/317PVFH',
@@ -269,11 +278,13 @@ export const LINKS_AFILIADO_PECA = {
   },
   p1s: {},
   x1c: {},
-
   mars5: {},
   saturn4ultra: {},
   photonm5s: {},
-  sonicmini8k: {},
+  sonicmini8k: {
+    fep: 'https://meli.la/1iNum6k',
+    cuba: 'https://meli.la/1hahZm3',
+  },
 };
 
 // Usado quando a impressora não é do catálogo (cadastrada à mão pelo usuário)
@@ -285,7 +296,6 @@ export const LINKS_AFILIADO_PECA_GENERICA = {
   // mesa: '',
   // filtro: '',
   graxa: 'https://meli.la/2E2amjP',
-
   // tela: '',
   // fep: '',
   // cuba: '',
@@ -300,10 +310,10 @@ export const LINKS_AFILIADO_FILAMENTO = {
 };
 
 export const LINKS_AFILIADO_RESINA = {
-  // resina_padrao: '',
-  // resina_abslike: '',
+  resina_padrao: 'https://meli.la/1VawycB',
+  resina_abslike: 'https://meli.la/1UMfUwE',
   // resina_lavavel: '',
-  // resina_flexivel: '',
+  resina_flexivel: 'https://meli.la/2Z2bqXQ',
 };
 
 
