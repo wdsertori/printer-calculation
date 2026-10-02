@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora de Impressão 3D — Custo e Orçamento</title>
+<title>Precifica 3D — Custo e Orçamento</title>
 <meta name="description" content="Calcule custo de material, energia, depreciação e preço sugerido de impressões 3D. Estime peso direto de um arquivo STL.">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -768,6 +768,7 @@
     <div class="line"><span>Energia</span><span id="rEnergia">—</span></div>
     <div class="line"><span>Depreciação</span><span id="rDeprec">—</span></div>
     <div class="line"><span>Mão de obra</span><span id="rMaoObra">—</span></div>
+    <div class="line"><span>Miscelâneos</span><span id="rMiscelaneos">—</span></div>
     <div class="line total"><span>Custo total do lote</span><span id="rCustoLote">—</span></div>
     <div class="line total"><span>Custo por peça</span><span id="rCustoPeca">—</span></div>
 
@@ -1120,6 +1121,7 @@
     energia: document.getElementById('rEnergia'),
     deprec: document.getElementById('rDeprec'),
     maoObra: document.getElementById('rMaoObra'),
+    miscelaneos: document.getElementById('rMiscelaneos'),
     custoLote: document.getElementById('rCustoLote'),
     custoPeca: document.getElementById('rCustoPeca'),
     precoPeca: document.getElementById('rPrecoPeca'),
@@ -1179,6 +1181,7 @@
     out.energia.textContent = fmt(energia);
     out.deprec.textContent = fmt(deprec);
     out.maoObra.textContent = fmt(maoObra);
+    out.miscelaneos.textContent = fmt(miscelaneos);
     out.custoLote.textContent = fmt(custoLote);
     out.custoPeca.textContent = fmt(custoPeca);
     out.precoPeca.textContent = fmt(precoPeca);
