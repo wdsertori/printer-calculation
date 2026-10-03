@@ -389,6 +389,8 @@
   .saved-item .actions button:hover{color:var(--text); border-color:var(--accent);}
   .saved-item .actions button.danger:hover{color:var(--danger-text); border-color:var(--danger);}
   .empty-hint{font-size:12.5px; color:var(--text-dim); padding:10px 0; font-style:italic;}
+  .clientes-resumo{font-size:13px; color:var(--text-dim); margin:2px 0 10px; line-height:1.6;}
+  .clientes-resumo strong{color:var(--text);}
   .resumo-nav{display:flex; align-items:center; justify-content:space-between; margin:6px 0 14px;}
   .resumo-nav button{width:42px; height:42px; border-radius:8px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:22px; line-height:1; cursor:pointer;}
   .resumo-nav button:hover:not(:disabled){border-color:var(--accent);}
@@ -891,6 +893,16 @@
     </div>
     <div id="resumoMes"></div>
   </details>
+
+  <details class="card">
+    <summary>
+      <span class="n">06</span> Clientes
+      <span class="summary-chevron">▾</span>
+    </summary>
+    <p class="card-desc">Montada sozinha a partir dos orçamentos que você emite com o nome do cliente.</p>
+    <div class="clientes-resumo" id="clientesResumo"></div>
+    <div id="clientesLista"></div>
+  </details>
   <footer>CUSTO = MATERIAL + ENERGIA + DEPRECIAÇÃO + MÃO DE OBRA</footer>
   </div>
   </div>
@@ -1101,6 +1113,7 @@
 
     <div class="card">
       <h2>Onde ficam salvos os dados</h2>
+      <p class="help-text"><strong>Clientes.</strong> Não existe cadastro à parte: a lista é montada com os nomes que você digita ao emitir o orçamento em PDF, somando quantos orçamentos cada um recebeu e quanto já aprovou. Ao digitar um nome que já usou, o campo sugere o nome pra você não escrever de novo. Pra tirar um cliente da lista, exclua os orçamentos dele.</p>
       <p class="help-text"><strong>Resumo do mês.</strong> Faturamento e lucro contam os orçamentos <em>aprovados</em> naquele mês, pela data em que você marcou "Aprovado". Lucro real é o preço cobrado menos o custo da peça (o custo que o app calculou na hora de emitir), vezes a quantidade. A taxa de aprovação olha só os orçamentos emitidos no mês que já tiveram resposta — aprovado ou recusado.</p>
       <p class="help-text"><strong>Status do orçamento.</strong> Todo orçamento que você emite em PDF nasce como "Enviado". Conforme o cliente responde, troque pra Aprovado, Em produção, Entregue ou Recusado — a lista tem um filtro por status, e a data de cada mudança fica guardada.</p>
       <p class="help-text">Sem login, tudo fica salvo só no navegador deste aparelho — outra pessoa que abrir o site não vê nada do que você cadastrou, e você mesmo não vê no celular o que cadastrou no computador.</p>
@@ -1130,7 +1143,7 @@
     <div id="pdfModalForm" hidden>
       <h2 class="modal-titulo">Orçamento para o cliente</h2>
       <p class="modal-texto">Tudo já vem preenchido — ajuste o que quiser antes de emitir.</p>
-      <div class="text-field"><label for="pdfCliente">Cliente</label><input type="text" id="pdfCliente" placeholder="nome do cliente (opcional)"></div>
+      <div class="text-field"><label for="pdfCliente">Cliente</label><input type="text" id="pdfCliente" list="clientesSugestoes" autocomplete="off" placeholder="nome do cliente (opcional)"><datalist id="clientesSugestoes"></datalist></div>
       <div class="text-field"><label for="pdfDescricao">Descrição da peça</label><input type="text" id="pdfDescricao"></div>
       <div class="field no-prefix"><label>Quantidade</label><div class="input-box"><input type="number" id="pdfQtd" min="1" step="1"></div></div>
       <div class="field"><label>Preço por peça<span class="hint">sugerido pela calculadora</span></label><div class="input-box"><span class="unit">R$</span><input type="number" id="pdfPreco" min="0" step="0.01"></div></div>
@@ -2378,8 +2391,60 @@
     renderResumo();
   });
 
+  // ---------- CLIENTES ----------
+  // Não existe cadastro de cliente: a lista é montada a partir dos orçamentos emitidos.
+  // "maria souza", "Maria  Souza" e "María Souza" contam como a mesma pessoa.
+  const chaveCliente = nome => String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  function agruparClientes(lista){
+    const mapa = new Map();
+    lista.forEach(i => {
+      if (!i.emissao) return;
+      const nome = String(i.emissao.cliente || '').replace(/\s+/g, ' ').trim();
+      if (!nome) return;
+      const k = chaveCliente(nome), dt = new Date(i.emissao.data);
+      let c = mapa.get(k);
+      if (!c){ c = { nome, orcamentos: 0, aprovados: 0, total: 0, ultima: dt }; mapa.set(k, c); }
+      c.orcamentos++;
+      if (dt >= c.ultima){ c.ultima = dt; c.nome = nome; }   // a grafia mais recente é a que aparece
+      if (APROVADOS.includes(statusDe(i))){
+        c.aprovados++;
+        c.total += (Number(i.emissao.precoUnit) || 0) * (Number(i.emissao.qtd) || 0);
+      }
+    });
+    return [...mapa.values()].sort((a, b) => b.total - a.total || b.ultima - a.ultima || a.nome.localeCompare(b.nome, 'pt-BR'));
+  }
+
+  const clientesListaEl = document.getElementById('clientesLista');
+  const clientesResumoEl = document.getElementById('clientesResumo');
+  const clientesSugEl = document.getElementById('clientesSugestoes');
+
+  function renderClientes(){
+    const clientes = agruparClientes(lsGet(LS_ORC, []));
+    // sugestões do campo "Cliente" no PDF: o mais recente primeiro (montadas pelo DOM, sem montar HTML com o nome)
+    clientesSugEl.innerHTML = '';
+    [...clientes].sort((a, b) => b.ultima - a.ultima).forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.nome;
+      clientesSugEl.appendChild(o);
+    });
+    if (!clientes.length){
+      clientesResumoEl.innerHTML = '';
+      clientesListaEl.innerHTML = '<div class="empty-hint">Os clientes aparecem aqui quando você emite um orçamento com o nome preenchido.</div>';
+      return;
+    }
+    const totalGeral = clientes.reduce((soma, c) => soma + c.total, 0);
+    clientesResumoEl.innerHTML = `<strong>${clientes.length}</strong> ${clientes.length === 1 ? 'cliente' : 'clientes'} · ${fmt(totalGeral)} em orçamentos aprovados`;
+    clientesListaEl.innerHTML = clientes.map(c => `
+      <div class="saved-item">
+        <div class="nome">${escapeHtml(c.nome)}</div>
+        <div class="info">${c.orcamentos} ${c.orcamentos === 1 ? 'orçamento' : 'orçamentos'} · ${c.aprovados} ${c.aprovados === 1 ? 'aprovado' : 'aprovados'}${c.total > 0 ? ' · ' + fmt(c.total) : ''}</div>
+        <div class="info">último em ${c.ultima.toLocaleDateString('pt-BR')}</div>
+      </div>`).join('');
+  }
+
   function renderOrcamentos(){
-    renderResumo();   // o resumo acompanha qualquer mudança na lista (salvar, excluir, trocar status, nuvem)
+    renderResumo();
+    renderClientes();   // clientes e sugestões do PDF acompanham qualquer mudança na lista   // o resumo acompanha qualquer mudança na lista (salvar, excluir, trocar status, nuvem)
     const list = lsGet(LS_ORC, []);
     if (!list.length){
       filtroOrcEl.innerHTML = '';
