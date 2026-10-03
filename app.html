@@ -402,6 +402,7 @@
   .estoque-linha button, .perda-linha button{background:var(--accent-soft); border:1px solid rgba(230,126,51,0.4); color:var(--accent-text); border-radius:6px; padding:7px 12px; font-size:12.5px; cursor:pointer;}
   .estoque-linha button:disabled, .perda-linha button:disabled{opacity:0.4; cursor:default;}
   .estoque-orc{margin-top:10px; padding:10px 12px; border:1px dashed var(--border); border-radius:8px;}
+  .fecha-bloco + .fecha-bloco{margin-top:12px; padding-top:12px; border-top:1px dashed var(--grid-line);}
   .estoque-info{font-size:12.5px; color:var(--text-dim); margin-bottom:8px; line-height:1.5;}
   .perda-linha{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px;}
   .estoque-orc .dica{font-size:11.5px; color:var(--text-dim); margin-top:6px; line-height:1.45;}
@@ -1138,9 +1139,9 @@
 
     <div class="card">
       <h2>Onde ficam salvos os dados</h2>
-      <p class="help-text"><strong>Estoque.</strong> Em Configurações, cada filamento e resina tem um campo "Estoque" (em g ou mL). Preenchendo, o material passa a ser controlado: quando um orçamento vai pra "Em produção", a quantidade usada sai do estoque sozinha, e volta se você desfizer o status. Lá em "Em produção" também aparece a "Perda real" — lance o total que você perdeu naquele pedido com impressões erradas e suportes, e isso sai do estoque também. O aviso de estoque baixo fica desligado até você marcar a caixa em "Estoque". Material sem estoque informado não é controlado.</p>
+      <p class="help-text"><strong>Estoque.</strong> Em Configurações, cada filamento e resina tem um campo "Estoque" (em g ou mL). Preenchendo, o material passa a ser controlado: quando um orçamento vai pra "Em produção", a quantidade usada sai do estoque sozinha, e volta se você desfizer o status. Em "Em produção" também aparece a "Perda real" (em g, ou mL na resina), já preenchida com o desperdício estimado no cálculo e já descontada do estoque. Ajuste pro total que você realmente perdeu naquele pedido com impressões erradas e suportes e toque em "Lançar". O aviso de estoque baixo fica desligado até você marcar a caixa em "Estoque". Material sem estoque informado não é controlado.</p>
       <p class="help-text"><strong>Clientes.</strong> Não existe cadastro à parte: a lista é montada com os nomes que você digita ao emitir o orçamento em PDF, somando quantos orçamentos cada um recebeu e quanto já aprovou. Ao digitar um nome que já usou, o campo sugere o nome pra você não escrever de novo. Pra tirar um cliente da lista, exclua os orçamentos dele.</p>
-      <p class="help-text"><strong>Resumo do mês.</strong> Faturamento e lucro contam os orçamentos <em>aprovados</em> naquele mês, pela data em que você marcou "Aprovado". Lucro real é o preço cobrado menos o custo da peça (o custo que o app calculou na hora de emitir), vezes a quantidade. A taxa de aprovação olha só os orçamentos emitidos no mês que já tiveram resposta — aprovado ou recusado.</p>
+      <p class="help-text"><strong>Resumo do mês.</strong> Faturamento e lucro contam os orçamentos <em>aprovados</em> naquele mês, pela data em que você marcou "Aprovado". Lucro real é o preço cobrado menos o custo da peça (o custo que o app calculou na hora de emitir), vezes a quantidade. Em "Em produção" você pode informar o custo real de miscelâneos (argolas, chaveiros, cola, álcool…): ele substitui a estimativa do cálculo e passa a valer aqui. A taxa de aprovação olha só os orçamentos emitidos no mês que já tiveram resposta — aprovado ou recusado.</p>
       <p class="help-text"><strong>Status do orçamento.</strong> Todo orçamento que você emite em PDF nasce como "Enviado". Conforme o cliente responde, troque pra Aprovado, Em produção, Entregue ou Recusado — a lista tem um filtro por status, e a data de cada mudança fica guardada.</p>
       <p class="help-text">Sem login, tudo fica salvo só no navegador deste aparelho — outra pessoa que abrir o site não vê nada do que você cadastrou, e você mesmo não vê no celular o que cadastrou no computador.</p>
       <p class="help-text">Entrando com a conta Google (ícone no topo), os dados passam a seguir você entre aparelhos. O círculo em volta da sua foto muda de cor pra indicar o status: laranja salvando, verde sincronizado, vermelho erro.</p>
@@ -1308,7 +1309,7 @@
     out.precoPeca.textContent = fmt(precoPeca);
     out.precoLote.textContent = qtd > 1 ? `Lote de ${qtd} peças: ${fmt(precoLote)}` : 'Peça única';
     out.lucro.textContent = fmt(lucroPeca);
-    ultimoCalculo = { precoPeca, custoPeca, custoLote, qtd, pesoPeca: pesoOuVolume, modo: modoAtual, tempoImpressao };
+    ultimoCalculo = { precoPeca, custoPeca, custoLote, qtd, pesoPeca: pesoOuVolume, modo: modoAtual, tempoImpressao, desperdicio, miscelaneos };
     renderMarketplaces(precoPeca);
     renderPizza({
       material: material / qtd,
@@ -2366,9 +2367,9 @@
     const aprovadosNoMes = emit.filter(i => APROVADOS.includes(statusDe(i)) && noMes(dataAprovacao(i)));
     let faturamento = 0, lucro = 0, fatComCusto = 0;
     aprovadosNoMes.forEach(i => {
-      const e = i.emissao, q = Number(e.qtd) || 0, p = Number(e.precoUnit) || 0, c = Number(e.custoUnit) || 0;
+      const e = i.emissao, q = Number(e.qtd) || 0, p = Number(e.precoUnit) || 0, custo = custoDoPedido(e);
       faturamento += p * q;
-      if (c > 0){ lucro += (p - c) * q; fatComCusto += p * q; }
+      if (custo !== null){ lucro += p * q - custo; fatComCusto += p * q; }
     });
     const conta = st => emit.filter(i => statusDe(i) === st).length;
     return {
@@ -2494,12 +2495,30 @@
   const materialDe = ref => lsGet(chaveLista(ref.tipo), []).find(x => x.id === ref.id);
 
   // O que um orçamento novo guarda sobre o material. Material "Personalizado" (preço digitado, sem cadastro) não tem estoque.
-  function materialParaEmissao(modo, idMaterial, pesoPeca, qtd){
+  // perdaEstimada = consumo x % de desperdício do cálculo (o mesmo desperdício que já está no preço).
+  function materialParaEmissao(modo, idMaterial, pesoPeca, qtd, desperdicioPct){
     const tipo = modo === 'resina' ? 'resina' : 'filamento';
     if (!idMaterial || idMaterial === 'custom') return null;
     const m = lsGet(chaveLista(tipo), []).find(x => x.id === idMaterial);
     if (!m) return null;
-    return { tipo, id: m.id, nome: m.nome, unidade: unidadeDe(tipo), consumo: arred((Number(pesoPeca) || 0) * (Number(qtd) || 0)) };
+    const consumo = arred((Number(pesoPeca) || 0) * (Number(qtd) || 0));
+    return { tipo, id: m.id, nome: m.nome, unidade: unidadeDe(tipo), consumo, perdaEstimada: arred(consumo * (Number(desperdicioPct) || 0) / 100) };
+  }
+
+  // Miscelâneos do pedido: o cálculo estima um valor pro lote; aqui vira o valor proporcional à quantidade emitida.
+  // O custo real (argola, chaveiro, cola, álcool...) é lançado depois e substitui a estimativa no lucro real.
+  function miscParaEmissao(miscLote, qtdCalc, qtdEmissao){
+    const porPeca = (Number(miscLote) || 0) / Math.max(1, Number(qtdCalc) || 1);
+    return { estimado: arred(porPeca * (Number(qtdEmissao) || 0)), real: null };
+  }
+  // Custo total do pedido: custo por peça x quantidade, trocando a estimativa de miscelâneos pelo valor real quando existe.
+  // null = pedido antigo, sem custo gravado.
+  function custoDoPedido(e){
+    const q = Number(e.qtd) || 0, c = Number(e.custoUnit) || 0;
+    if (!(c > 0)) return null;
+    let total = c * q;
+    if (e.misc && typeof e.misc.real === 'number') total += e.misc.real - (Number(e.misc.estimado) || 0);
+    return Math.max(0, total);
   }
 
   // Soma `delta` ao estoque do material, mas só se ele controla estoque. Devolve true se mexeu.
@@ -2512,16 +2531,22 @@
     return true;
   }
 
-  // Chamada a cada troca de status: debita ao entrar em produção, devolve ao sair dela.
+  // Chamada a cada troca de status. Ao entrar em produção debita o consumo E a perda estimada (a % de desperdício do cálculo);
+  // ao sair, devolve. A perda só fica descontada se você já a CONFIRMOU como real (Lançar): plástico perdido não volta.
   function aplicarStatusNoEstoque(item, antes, depois){
     const e = item.emissao, ref = e && e.material;
     if (!ref) return;
     const debitava = CONSOME_ESTOQUE.includes(antes), debita = CONSOME_ESTOQUE.includes(depois);
     if (!debitava && debita && !(e.baixa > 0)){
       const consumo = Number(ref.consumo) || 0;
-      if (consumo > 0 && moverEstoque(ref, -consumo)) e.baixa = consumo;
+      if (consumo > 0 && moverEstoque(ref, -consumo)){
+        e.baixa = consumo;
+        const est = Number(ref.perdaEstimada) || 0;
+        if (est > 0 && !e.perdaConfirmada && !(e.perda > 0) && moverEstoque(ref, -est)) e.perda = est;
+      }
     } else if (debitava && !debita && e.baixa > 0){
       if (moverEstoque(ref, e.baixa)) e.baixa = 0;    // se o material sumiu, o registro fica como está
+      if (!e.perdaConfirmada && e.perda > 0 && moverEstoque(ref, e.perda)) e.perda = 0;   // era só estimativa: nada foi impresso
     }
   }
 
@@ -2532,6 +2557,7 @@
     const v = Math.max(0, Number(valor) || 0), delta = v - (Number(e.perda) || 0);
     if (delta !== 0 && !moverEstoque(e.material, -delta)) return { ok: false, motivo: 'sem-controle' };
     e.perda = v;
+    e.perdaConfirmada = true;   // agora é o número real: não é mais devolvido ao desfazer a produção
     return { ok: true, delta };
   }
 
@@ -2638,21 +2664,46 @@
           </select>
           <span class="desde">desde ${new Date(ult).toLocaleDateString('pt-BR')}</span>
         </div>`;
-        // estoque: só aparece depois de "Em produção", e só pra pedidos que sabem de qual material saem
+        // fechamento do pedido: só depois de "Em produção". Perda real (se o pedido sabe o material) e custo real de miscelâneos.
         const e = item.emissao;
-        if (e.material && CONSOME_ESTOQUE.includes(atual)){
-          const un = e.material.unidade, mat = materialDe(e.material), controla = !!mat && typeof mat.estoque === 'number';
-          const nomeMat = escapeHtml(e.material.nome);
-          linhaEstoque = `<div class="estoque-orc">
-            <div class="estoque-info">${e.baixa > 0 ? `Estoque: −${fmtQtd(e.baixa)} ${un} de ${nomeMat}` : (controla ? `${nomeMat}: este pedido não tirou nada do estoque` : `${nomeMat} está sem estoque informado (Configurações)`)}</div>
-            <div class="perda-linha">
-              <span>Perda real</span>
-              <input type="number" min="0" step="1" inputmode="decimal" placeholder="0" value="${e.perda > 0 ? e.perda : ''}" data-perda-input="${item.id}" aria-label="Perda real em ${un}">
-              <span>${un}</span>
-              <button type="button" data-perda="${item.id}"${controla ? '' : ' disabled'}>Lançar</button>
-            </div>
-            <div class="dica">Total perdido nesse pedido com impressões erradas e suportes. Sai do estoque na hora; lançar de novo corrige o valor.</div>
-          </div>`;
+        if (CONSOME_ESTOQUE.includes(atual)){
+          const partes = [];
+          if (e.material){
+            const un = e.material.unidade, mat = materialDe(e.material), controla = !!mat && typeof mat.estoque === 'number';
+            const nomeMat = escapeHtml(e.material.nome);
+            const estimada = Number(e.material.perdaEstimada) || 0;
+            const valorPerda = e.perda > 0 ? e.perda : (e.perdaConfirmada ? '' : (estimada > 0 ? estimada : ''));
+            const pct = fmtQtd(Number(e.desperdicioPct) || 0);
+            const dicaPerda = (!e.perdaConfirmada && e.perda > 0)
+              ? `Estimativa do cálculo (${pct}% de desperdício), já descontada do estoque. Ajuste pro número real e toque em Lançar.`
+              : (!controla && estimada > 0
+                ? `Estimativa do cálculo (${pct}% de desperdício). Informe o estoque desse material em Configurações pra lançar.`
+                : 'Total perdido neste pedido com impressões erradas e suportes. Sai do estoque na hora; lançar de novo corrige o valor.');
+            partes.push(`<div class="fecha-bloco">
+              <div class="estoque-info">${e.baixa > 0 ? `Estoque: −${fmtQtd(e.baixa)} ${un} de ${nomeMat}` : (controla ? `${nomeMat}: este pedido não tirou nada do estoque` : `${nomeMat} está sem estoque informado (Configurações)`)}</div>
+              <div class="perda-linha">
+                <span>Perda real</span>
+                <input type="number" min="0" step="0.1" inputmode="decimal" placeholder="0" value="${valorPerda}" data-perda-input="${item.id}" aria-label="Perda real em ${un}">
+                <span>${un}</span>
+                <button type="button" data-perda="${item.id}"${controla ? '' : ' disabled'}>Lançar</button>
+              </div>
+              <div class="dica">${dicaPerda}</div>
+            </div>`);
+          }
+          if (e.misc){
+            const real = typeof e.misc.real === 'number';
+            const valorMisc = real ? e.misc.real : (e.misc.estimado > 0 ? e.misc.estimado : '');
+            partes.push(`<div class="fecha-bloco">
+              <div class="perda-linha">
+                <span>Custo real de miscelâneos</span>
+                <span>R$</span>
+                <input type="number" min="0" step="0.01" inputmode="decimal" placeholder="0" value="${valorMisc}" data-misc-input="${item.id}" aria-label="Custo real de miscelâneos em reais">
+                <button type="button" data-misc="${item.id}">Salvar</button>
+              </div>
+              <div class="dica">Argolas, chaveiros, tarraxas, cola, álcool… Estimado no cálculo: ${fmt(e.misc.estimado)}. ${real ? 'Valor real salvo: entra no lucro real do resumo.' : 'Sem alterar, vale a estimativa.'}</div>
+            </div>`);
+          }
+          if (partes.length) linhaEstoque = `<div class="estoque-orc">${partes.join('')}</div>`;
         }
       }
       return `
@@ -2693,6 +2744,20 @@
     lsSet(LS_ORC, list);
     renderFilamentos(); renderResinas();
     renderOrcamentos();
+  });
+
+  // Salvar o custo real de miscelâneos de um pedido (vazio = volta a valer a estimativa do cálculo)
+  orcamentosLista.addEventListener('click', e => {
+    const b = e.target.closest('[data-misc]');
+    if (!b) return;
+    const list = lsGet(LS_ORC, []);
+    const item = list.find(x => x.id === b.dataset.misc);
+    if (!item || !item.emissao || !item.emissao.misc) return;
+    const campo = orcamentosLista.querySelector(`[data-misc-input="${b.dataset.misc}"]`);
+    const v = campo ? campo.value.trim() : '';
+    item.emissao.misc.real = v === '' ? null : arred(Math.max(0, Number(v) || 0));
+    lsSet(LS_ORC, list);
+    renderOrcamentos();   // o resumo do mês recalcula o lucro real
   });
 
   // "Lançar" a perda real de um pedido
@@ -2897,9 +2962,11 @@
         // estoque: de qual material esse pedido sai (a baixa só acontece quando o status chegar em "Em produção")
         baixa: 0,
         perda: 0,
+        desperdicioPct: Number(calcAtual.desperdicio) || 0,
       };
-      const matRef = materialParaEmissao(modoAtual, modoAtual === 'resina' ? currentResinaId : currentFilamentId, calcAtual.pesoPeca, emissao.qtd);
+      const matRef = materialParaEmissao(modoAtual, modoAtual === 'resina' ? currentResinaId : currentFilamentId, calcAtual.pesoPeca, emissao.qtd, calcAtual.desperdicio);
       if (matRef) emissao.material = matRef;
+      emissao.misc = miscParaEmissao(calcAtual.miscelaneos, calcAtual.qtd, emissao.qtd);   // custo real é preenchido depois, no pedido
 
       // Salva junto com o orçamento (sincroniza na conta, já que está logado).
       const list = lsGet(LS_ORC, []);
