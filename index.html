@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Precifica 3D — calculadora de custo e preço de impressão 3D</title>
-<meta name="description" content="Descubra o custo real de cada peça impressa em 3D (filamento ou resina) e o preço certo pra vender no Mercado Livre, Shopee e Amazon. Grátis, sem cadastro.">
+<meta name="description" content="Descubra o custo real de cada peça impressa em 3D (filamento ou resina) e o preço certo pra vender no Mercado Livre, Shopee e Amazon. Depois, acompanhe orçamentos, clientes e estoque. Grátis, sem cadastro pra calcular.">
 <meta name="theme-color" content="#F6FAFE">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Precifica 3D — saiba quanto cobrar por cada peça">
-<meta property="og:description" content="Custo real de material, energia, desgaste da máquina e mão de obra, com preço sugerido por marketplace. Filamento e resina.">
+<meta property="og:description" content="Custo real de material, energia, desgaste da máquina e mão de obra, com preço sugerido por marketplace. Orçamento em PDF, resumo do mês, clientes e estoque.">
 <meta property="og:image" content="https://wdsertori.github.io/printer-calculation/icon-512.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -167,6 +167,9 @@
   .folha img{width:100%; height:100%; display:block; object-fit:cover; object-position:top;}
   .papel figcaption{font-size:13px; color:var(--text-dim); margin-top:16px;}
 
+  .pilulas{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px;}
+  .pilula{background:var(--surface); border:1px solid var(--border); border-radius:999px; padding:8px 16px; font-size:13.5px; color:var(--text-dim); box-shadow:var(--sombra-suave);}
+
   /* numeros (escondidos ate passar do minimo) */
   .numeros{display:flex; gap:16px; flex-wrap:wrap; justify-content:center;}
   .num{background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:20px 32px; text-align:center; box-shadow:var(--sombra-suave);}
@@ -215,6 +218,7 @@
     <nav class="nav" aria-label="Seções">
       <a href="#recursos">Recursos</a>
       <a href="#orcamento">Orçamento</a>
+      <a href="#pedidos">Pedidos</a>
       <a href="#como-funciona">Como funciona</a>
       <a href="#faq">Dúvidas</a>
     </nav>
@@ -311,6 +315,12 @@
         <p>Entre com o Google e suas impressoras, filamentos e orçamentos acompanham você entre o celular e o computador.</p>
       </div>
     </div>
+    <div class="pilulas revela">
+      <span class="pilula">Filamento e resina</span>
+      <span class="pilula">Tema claro e escuro</span>
+      <span class="pilula">Instala no celular como app</span>
+      <span class="pilula">Funciona no celular e no computador</span>
+    </div>
   </section>
 
   <section class="wrap secao" id="orcamento">
@@ -330,6 +340,33 @@
         <div class="folha"><img src="images/landing/orcamento-pdf.jpg" width="620" height="877" alt="Exemplo de orçamento em PDF para o cliente, com dados fictícios" loading="lazy"></div>
         <figcaption>Exemplo com dados fictícios</figcaption>
       </figure>
+    </div>
+  </section>
+
+  <section class="wrap secao" id="pedidos">
+    <h2 class="revela">Depois do orçamento, acompanhe o pedido</h2>
+    <p class="lead revela">Quando o cliente responde, você marca no app. O resto — resumo do mês, lista de clientes e estoque — vai se montando a partir daí.</p>
+    <div class="grade">
+      <div class="cartao">
+        <div class="icone teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h3>Status de cada orçamento</h3>
+        <p>Enviado, aprovado, em produção, entregue ou recusado. A lista tem filtro por status e guarda a data de cada mudança.</p>
+      </div>
+      <div class="cartao">
+        <div class="icone"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <h3>Resumo do mês</h3>
+        <p>Orçamentos emitidos, taxa de aprovação, faturamento, <strong>lucro real</strong> (preço cobrado − custo da peça), margem real e ticket médio — com setas pra ver os meses anteriores.</p>
+      </div>
+      <div class="cartao">
+        <div class="icone azul"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Clientes, sem cadastro</h3>
+        <p>A lista se monta sozinha com os nomes dos orçamentos: quantos pedidos cada cliente fez e quanto já aprovou. Na próxima vez, o app sugere o nome enquanto você digita.</p>
+      </div>
+      <div class="cartao">
+        <div class="icone teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg></div>
+        <h3>Estoque de filamento e resina</h3>
+        <p>Informe quanto tem de cada material (é opcional). Quando o pedido entra em produção, o uso sai do estoque sozinho, e a <strong>perda real</strong> lança impressões erradas e suportes. O aviso de estoque baixo você liga se quiser.</p>
+      </div>
     </div>
   </section>
 
@@ -361,8 +398,9 @@
           <ul>
             <li>Tudo do modo sem login</li>
             <li>Sincronização entre aparelhos</li>
-            <li>Orçamento em PDF pro cliente</li>
-            <li>Dados da sua empresa no cabeçalho do PDF</li>
+            <li>Orçamento em PDF pro cliente, com os dados da sua empresa</li>
+            <li>Status, resumo do mês e lista de clientes</li>
+            <li>Estoque que desce sozinho quando o pedido entra em produção</li>
           </ul>
         </div>
       </div>
@@ -387,6 +425,14 @@
     <details class="revela">
       <summary>Os preços das impressoras e peças do catálogo são exatos?</summary>
       <p>São estimativas de mercado pra você começar rápido. Ajuste com os seus valores em Configurações — é isso que deixa o cálculo fiel à sua realidade.</p>
+    </details>
+    <details class="revela">
+      <summary>O estoque desconta sozinho?</summary>
+      <p>Só dos materiais em que você informar o estoque, e só nos orçamentos emitidos em PDF. Quando você marca o pedido como "Em produção", a quantidade usada sai do estoque. Se voltar o status, ela volta. A "perda real" serve pra lançar o que se perdeu com impressões erradas e suportes. Material sem estoque informado não é controlado, e o aviso de estoque baixo fica desligado até você ligar.</p>
+    </details>
+    <details class="revela">
+      <summary>O lucro do resumo do mês é o lucro de verdade?</summary>
+      <p>É o preço que você cobrou menos o custo que o app calculou na hora de emitir o orçamento, somando os pedidos aprovados naquele mês. Ele não desconta taxas de marketplace nem despesas que ficam fora do cálculo, como frete e aluguel. Serve pra acompanhar a margem de cada pedido, não pra substituir a sua contabilidade.</p>
     </details>
     <details class="revela">
       <summary>Dá pra usar no celular como um aplicativo?</summary>
