@@ -389,6 +389,22 @@
   .saved-item .actions button:hover{color:var(--text); border-color:var(--accent);}
   .saved-item .actions button.danger:hover{color:var(--danger-text); border-color:var(--danger);}
   .empty-hint{font-size:12.5px; color:var(--text-dim); padding:10px 0; font-style:italic;}
+  /* o seletor Filamento/Resina e o aviso de estoque só existem na tela da calculadora */
+  body:not([data-tela="main"]) #modoToggle{display:none;}
+  .alerta-estoque{display:none; margin:0 0 14px; padding:11px 14px; border-radius:8px; background:var(--accent-soft); border:1px solid rgba(230,126,51,0.4); border-left-width:4px; color:var(--text); font-size:13.5px; line-height:1.5; cursor:pointer;}
+  body[data-tela="main"] .alerta-estoque.tem{display:block;}
+  .alerta-estoque strong{color:var(--accent-text);}
+  .check-linha{display:flex; align-items:center; gap:10px; font-size:15px; cursor:pointer; margin:8px 0 2px;}
+  .check-linha input{width:20px; height:20px; accent-color:var(--accent); flex-shrink:0;}
+  .estoque-linha{display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--text-dim);}
+  .estoque-linha input, .perda-linha input{width:92px; background:var(--surface-2); border:1px solid var(--border); border-radius:6px; color:var(--text); padding:7px 8px; font-family:'IBM Plex Mono',monospace; font-size:13px;}
+  .estoque-linha input:focus, .perda-linha input:focus{outline:none; border-color:var(--accent);}
+  .estoque-linha button, .perda-linha button{background:var(--accent-soft); border:1px solid rgba(230,126,51,0.4); color:var(--accent-text); border-radius:6px; padding:7px 12px; font-size:12.5px; cursor:pointer;}
+  .estoque-linha button:disabled, .perda-linha button:disabled{opacity:0.4; cursor:default;}
+  .estoque-orc{margin-top:10px; padding:10px 12px; border:1px dashed var(--border); border-radius:8px;}
+  .estoque-info{font-size:12.5px; color:var(--text-dim); margin-bottom:8px; line-height:1.5;}
+  .perda-linha{display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px;}
+  .estoque-orc .dica{font-size:11.5px; color:var(--text-dim); margin-top:6px; line-height:1.45;}
   .clientes-resumo{font-size:13px; color:var(--text-dim); margin:2px 0 10px; line-height:1.6;}
   .clientes-resumo strong{color:var(--text);}
   .resumo-nav{display:flex; align-items:center; justify-content:space-between; margin:6px 0 14px;}
@@ -636,7 +652,7 @@
   }
 </style>
 </head>
-<body>
+<body data-tela="main">
 <div class="wrap">
   <div class="top-bar">
     <header>
@@ -652,6 +668,8 @@
       </div>
     </div>
   </div>
+
+  <div class="alerta-estoque" id="alertaEstoque" title="Toque pra ver o estoque"></div>
 
   <div class="modo-toggle" id="modoToggle">
     <button type="button" class="modo-btn active" data-modo="fdm">Filamento (FDM)</button>
@@ -928,6 +946,13 @@
     </div>
 
     <div class="card">
+      <h2>Estoque</h2>
+      <p class="card-desc">Cada filamento e cada resina pode ter o estoque controlado: informe quanto você tem (em g ou mL) na lista de "Dados do filamento" ou "Dados da resina". O estoque desce sozinho quando um orçamento vai pra "Em produção", e a "perda real" lança as impressões erradas e os suportes. Material sem estoque informado não é controlado.</p>
+      <label class="check-linha"><input type="checkbox" id="cfgAlertaEstoque"> Avisar quando o estoque estiver baixo</label>
+      <p class="card-desc" style="margin:4px 0 0">Desligado por padrão. Cada material tem o seu próprio limite ("avisar com até").</p>
+    </div>
+
+    <div class="card">
       <h2>Dados do filamento</h2>
       <div class="text-field">
         <label for="filTemplate">Preencher com filamento sugerido (opcional)</label>
@@ -1113,6 +1138,7 @@
 
     <div class="card">
       <h2>Onde ficam salvos os dados</h2>
+      <p class="help-text"><strong>Estoque.</strong> Em Configurações, cada filamento e resina tem um campo "Estoque" (em g ou mL). Preenchendo, o material passa a ser controlado: quando um orçamento vai pra "Em produção", a quantidade usada sai do estoque sozinha, e volta se você desfizer o status. Lá em "Em produção" também aparece a "Perda real" — lance o total que você perdeu naquele pedido com impressões erradas e suportes, e isso sai do estoque também. O aviso de estoque baixo fica desligado até você marcar a caixa em "Estoque". Material sem estoque informado não é controlado.</p>
       <p class="help-text"><strong>Clientes.</strong> Não existe cadastro à parte: a lista é montada com os nomes que você digita ao emitir o orçamento em PDF, somando quantos orçamentos cada um recebeu e quanto já aprovou. Ao digitar um nome que já usou, o campo sugere o nome pra você não escrever de novo. Pra tirar um cliente da lista, exclua os orçamentos dele.</p>
       <p class="help-text"><strong>Resumo do mês.</strong> Faturamento e lucro contam os orçamentos <em>aprovados</em> naquele mês, pela data em que você marcou "Aprovado". Lucro real é o preço cobrado menos o custo da peça (o custo que o app calculou na hora de emitir), vezes a quantidade. A taxa de aprovação olha só os orçamentos emitidos no mês que já tiveram resposta — aprovado ou recusado.</p>
       <p class="help-text"><strong>Status do orçamento.</strong> Todo orçamento que você emite em PDF nasce como "Enviado". Conforme o cliente responde, troque pra Aprovado, Em produção, Entregue ou Recusado — a lista tem um filtro por status, e a data de cada mudança fica guardada.</p>
@@ -1397,6 +1423,7 @@
   const LS_MODO = 'c3d_modo';                       // 'fdm' | 'resina'
   const LS_PRINTER_RESINA = 'c3d_printerId_resina'; // seleção de impressora separada por modo
   const LS_RESINAS = 'c3d_resinas';
+  const LS_CFG_ESTOQUE = 'c3d_cfg_estoque';
   const LS_RESINA_ID = 'c3d_resinaId';
   let modoAtual = lsGet(LS_MODO, 'fdm');
   // Peças relevantes pra um tipo de impressora ('fdm'/'resina') — 'ambos' (ex: graxa) sempre entra.
@@ -1521,6 +1548,7 @@
       filamentos: lsGet(LS_FILS, []),
       resinas: lsGet(LS_RESINAS, []),
       empresa: lsGet(LS_EMPRESA, {}),
+      cfgEstoque: lsGet(LS_CFG_ESTOQUE, {}),
       orcSeq: lsGet(LS_ORC_SEQ, 0),
       atualizadoEm: new Date().toISOString(),
     };
@@ -1551,6 +1579,7 @@
         if (data.filamentos) lsSetRaw(LS_FILS, data.filamentos);
         if (data.resinas) lsSetRaw(LS_RESINAS, data.resinas);
         if (data.empresa) lsSetRaw(LS_EMPRESA, data.empresa);
+        if (data.cfgEstoque) lsSetRaw(LS_CFG_ESTOQUE, data.cfgEstoque);
         if (data.orcSeq) lsSetRaw(LS_ORC_SEQ, data.orcSeq);
         aplicandoDadosDaNuvem = false;
 
@@ -1638,6 +1667,7 @@
   const navShopIcon = document.getElementById('openShop');
 
   function showScreen(nome){
+    document.body.dataset.tela = nome;
     mainScreen.hidden = nome !== 'main';
     settingsScreen.hidden = nome !== 'settings';
     helpScreen.hidden = nome !== 'help';
@@ -2195,6 +2225,7 @@
       <div class="saved-item" data-id="${r.id}">
         <div class="nome">${escapeHtml(r.nome)}${r.tipo ? ` <span class="badge neutral">${escapeHtml(r.tipo)}</span>` : ''}</div>
         <div class="info">R$ ${r.precoLitro.toFixed(2)}/L</div>
+        ${linhaEstoqueMaterial(r, 'resina')}
         <div class="actions">
           <a href="#" ${comprarResina(r.nome)} class="buy-link-action">Comprar →</a>
           <button type="button" class="danger" data-delres="${r.id}">Excluir</button>
@@ -2216,6 +2247,8 @@
   });
 
   resLista.addEventListener('click', e => {
+    const sv = e.target.closest('[data-est-salvar]');
+    if (sv){ salvarEstoqueMaterial(sv); return; }
     const delBtn = e.target.closest('[data-delres]');
     if (delBtn){
       lsSet(LS_RESINAS, lsGet(LS_RESINAS, []).filter(x => x.id !== delBtn.dataset.delres));
@@ -2246,6 +2279,7 @@
       <div class="saved-item" data-id="${f.id}">
         <div class="nome">${escapeHtml(f.nome)}${f.tipo ? ` <span class="badge neutral">${escapeHtml(f.tipo)}</span>` : ''}</div>
         <div class="info">R$ ${f.precoKg.toFixed(2)}/kg</div>
+        ${linhaEstoqueMaterial(f, 'filamento')}
         <div class="actions">
           <a href="#" ${comprarFilamento(f.nome)} class="buy-link-action">Comprar →</a>
           <button type="button" class="danger" data-delfil="${f.id}">Excluir</button>
@@ -2267,6 +2301,8 @@
   });
 
   filLista.addEventListener('click', e => {
+    const sv = e.target.closest('[data-est-salvar]');
+    if (sv){ salvarEstoqueMaterial(sv); return; }
     const delBtn = e.target.closest('[data-delfil]');
     if (delBtn){
       lsSet(LS_FILS, lsGet(LS_FILS, []).filter(x => x.id !== delBtn.dataset.delfil));
@@ -2442,9 +2478,128 @@
       </div>`).join('');
   }
 
+  // ---------- ESTOQUE ----------
+  // Cada filamento/resina PODE controlar estoque: basta ter o campo "estoque" preenchido (g ou mL).
+  // Sem ele nada é descontado e nada alerta, então quem não usar não vê diferença nenhuma.
+  // Regras (feitas pra nunca descontar duas vezes):
+  //  - o material "sai" quando o orçamento chega em Em produção/Entregue; se voltar pra antes disso, a baixa é devolvida;
+  //  - a "perda real" (impressões erradas e suportes) é um total lançado por pedido: só a diferença mexe no estoque.
+  const ESTOQUE_MINIMO_PADRAO = 200;                 // g ou mL, quando o material não tem "avisar com até"
+  const CONSOME_ESTOQUE = ['producao', 'entregue'];
+  const cfgEstoque = () => ({ alerta: false, ...lsGet(LS_CFG_ESTOQUE, {}) });
+  const arred = n => Math.round(n * 100) / 100;
+  const chaveLista = tipo => tipo === 'resina' ? LS_RESINAS : LS_FILS;
+  const unidadeDe = tipo => tipo === 'resina' ? 'mL' : 'g';
+  const fmtQtd = n => Number(n).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+  const materialDe = ref => lsGet(chaveLista(ref.tipo), []).find(x => x.id === ref.id);
+
+  // O que um orçamento novo guarda sobre o material. Material "Personalizado" (preço digitado, sem cadastro) não tem estoque.
+  function materialParaEmissao(modo, idMaterial, pesoPeca, qtd){
+    const tipo = modo === 'resina' ? 'resina' : 'filamento';
+    if (!idMaterial || idMaterial === 'custom') return null;
+    const m = lsGet(chaveLista(tipo), []).find(x => x.id === idMaterial);
+    if (!m) return null;
+    return { tipo, id: m.id, nome: m.nome, unidade: unidadeDe(tipo), consumo: arred((Number(pesoPeca) || 0) * (Number(qtd) || 0)) };
+  }
+
+  // Soma `delta` ao estoque do material, mas só se ele controla estoque. Devolve true se mexeu.
+  function moverEstoque(ref, delta){
+    const chave = chaveLista(ref.tipo), lista = lsGet(chave, []);
+    const m = lista.find(x => x.id === ref.id);
+    if (!m || typeof m.estoque !== 'number') return false;
+    m.estoque = arred(m.estoque + delta);
+    lsSet(chave, lista);
+    return true;
+  }
+
+  // Chamada a cada troca de status: debita ao entrar em produção, devolve ao sair dela.
+  function aplicarStatusNoEstoque(item, antes, depois){
+    const e = item.emissao, ref = e && e.material;
+    if (!ref) return;
+    const debitava = CONSOME_ESTOQUE.includes(antes), debita = CONSOME_ESTOQUE.includes(depois);
+    if (!debitava && debita && !(e.baixa > 0)){
+      const consumo = Number(ref.consumo) || 0;
+      if (consumo > 0 && moverEstoque(ref, -consumo)) e.baixa = consumo;
+    } else if (debitava && !debita && e.baixa > 0){
+      if (moverEstoque(ref, e.baixa)) e.baixa = 0;    // se o material sumiu, o registro fica como está
+    }
+  }
+
+  // Perda real = TOTAL perdido no pedido. Lançar de novo corrige o valor (só a diferença mexe no estoque).
+  function lancarPerda(item, valor){
+    const e = item.emissao;
+    if (!e || !e.material) return { ok: false, motivo: 'sem-material' };
+    const v = Math.max(0, Number(valor) || 0), delta = v - (Number(e.perda) || 0);
+    if (delta !== 0 && !moverEstoque(e.material, -delta)) return { ok: false, motivo: 'sem-controle' };
+    e.perda = v;
+    return { ok: true, delta };
+  }
+
+  function estoqueBaixo(m){
+    if (typeof m.estoque !== 'number') return false;
+    const min = typeof m.minimo === 'number' ? m.minimo : ESTOQUE_MINIMO_PADRAO;
+    return m.estoque <= min;
+  }
+  function materiaisBaixos(){
+    if (!cfgEstoque().alerta) return [];
+    const out = [];
+    [['filamento', LS_FILS], ['resina', LS_RESINAS]].forEach(([tipo, chave]) => {
+      lsGet(chave, []).forEach(m => { if (estoqueBaixo(m)) out.push({ tipo, nome: m.nome, estoque: m.estoque, un: unidadeDe(tipo) }); });
+    });
+    return out;
+  }
+
+  const alertaEstoqueEl = document.getElementById('alertaEstoque');
+  const cfgAlertaEl = document.getElementById('cfgAlertaEstoque');
+  function renderAlertaEstoque(){
+    cfgAlertaEl.checked = cfgEstoque().alerta;
+    const baixos = materiaisBaixos();
+    alertaEstoqueEl.classList.toggle('tem', baixos.length > 0);
+    alertaEstoqueEl.innerHTML = baixos.length
+      ? `<strong>Estoque baixo:</strong> ${baixos.map(b => `${escapeHtml(b.nome)} (${fmtQtd(b.estoque)} ${b.un})`).join(' · ')}`
+      : '';
+  }
+  cfgAlertaEl.addEventListener('change', () => {
+    lsSet(LS_CFG_ESTOQUE, { ...cfgEstoque(), alerta: cfgAlertaEl.checked });
+    renderAlertaEstoque();
+    renderFilamentos(); renderResinas();
+  });
+  alertaEstoqueEl.addEventListener('click', () => showScreen('settings'));
+
+  // linha "Estoque / avisar com até" de cada filamento e resina (em Configurações)
+  function linhaEstoqueMaterial(m, tipo){
+    const un = unidadeDe(tipo);
+    const baixo = cfgEstoque().alerta && estoqueBaixo(m);
+    return `<div class="estoque-linha">
+      <span>Estoque</span>
+      <input type="number" step="1" min="0" inputmode="decimal" placeholder="não controlar" value="${typeof m.estoque === 'number' ? m.estoque : ''}" data-est-input="${m.id}" aria-label="Estoque em ${un}">
+      <span>${un} · avisar com até</span>
+      <input type="number" step="1" min="0" inputmode="decimal" placeholder="${ESTOQUE_MINIMO_PADRAO}" value="${typeof m.minimo === 'number' ? m.minimo : ''}" data-min-input="${m.id}" aria-label="Avisar com até, em ${un}">
+      <span>${un}</span>
+      <button type="button" data-est-salvar="${m.id}" data-est-tipo="${tipo}">Salvar</button>
+      ${baixo ? '<span class="badge late">estoque baixo</span>' : ''}
+    </div>`;
+  }
+  function salvarEstoqueMaterial(btn){
+    const tipo = btn.dataset.estTipo, id = btn.dataset.estSalvar;
+    const caixa = btn.closest('.saved-item');
+    const vEst = caixa.querySelector('[data-est-input]').value.trim();
+    const vMin = caixa.querySelector('[data-min-input]').value.trim();
+    const chave = chaveLista(tipo), lista = lsGet(chave, []);
+    const m = lista.find(x => x.id === id);
+    if (!m) return;
+    if (vEst === '') delete m.estoque; else m.estoque = Math.max(0, Number(vEst) || 0);   // vazio = deixa de controlar
+    if (vMin === '') delete m.minimo; else m.minimo = Math.max(0, Number(vMin) || 0);
+    lsSet(chave, lista);
+    renderFilamentos(); renderResinas(); renderAlertaEstoque();
+    const novo = document.querySelector(`[data-est-salvar="${id}"]`);
+    if (novo){ novo.textContent = 'Salvo ✓'; setTimeout(() => { if (novo.isConnected) novo.textContent = 'Salvar'; }, 1400); }
+  }
+
   function renderOrcamentos(){
     renderResumo();
-    renderClientes();   // clientes e sugestões do PDF acompanham qualquer mudança na lista   // o resumo acompanha qualquer mudança na lista (salvar, excluir, trocar status, nuvem)
+    renderClientes();
+    renderAlertaEstoque();   // clientes e sugestões do PDF acompanham qualquer mudança na lista   // o resumo acompanha qualquer mudança na lista (salvar, excluir, trocar status, nuvem)
     const list = lsGet(LS_ORC, []);
     if (!list.length){
       filtroOrcEl.innerHTML = '';
@@ -2471,7 +2626,7 @@
       return;
     }
     orcamentosLista.innerHTML = visiveis.map(item => {
-      let linhaStatus = '';
+      let linhaStatus = '', linhaEstoque = '';
       if (item.emissao){
         const atual = statusDe(item);
         const def = STATUS_ORC.find(st => st.id === atual) || STATUS_ORC[0];
@@ -2483,12 +2638,29 @@
           </select>
           <span class="desde">desde ${new Date(ult).toLocaleDateString('pt-BR')}</span>
         </div>`;
+        // estoque: só aparece depois de "Em produção", e só pra pedidos que sabem de qual material saem
+        const e = item.emissao;
+        if (e.material && CONSOME_ESTOQUE.includes(atual)){
+          const un = e.material.unidade, mat = materialDe(e.material), controla = !!mat && typeof mat.estoque === 'number';
+          const nomeMat = escapeHtml(e.material.nome);
+          linhaEstoque = `<div class="estoque-orc">
+            <div class="estoque-info">${e.baixa > 0 ? `Estoque: −${fmtQtd(e.baixa)} ${un} de ${nomeMat}` : (controla ? `${nomeMat}: este pedido não tirou nada do estoque` : `${nomeMat} está sem estoque informado (Configurações)`)}</div>
+            <div class="perda-linha">
+              <span>Perda real</span>
+              <input type="number" min="0" step="1" inputmode="decimal" placeholder="0" value="${e.perda > 0 ? e.perda : ''}" data-perda-input="${item.id}" aria-label="Perda real em ${un}">
+              <span>${un}</span>
+              <button type="button" data-perda="${item.id}"${controla ? '' : ' disabled'}>Lançar</button>
+            </div>
+            <div class="dica">Total perdido nesse pedido com impressões erradas e suportes. Sai do estoque na hora; lançar de novo corrige o valor.</div>
+          </div>`;
+        }
       }
       return `
       <div class="saved-item" data-id="${item.id}">
         <div class="nome">${escapeHtml(item.nome)}</div>
         <div class="info">${new Date(item.savedAt).toLocaleDateString('pt-BR')} · ${item.emissao ? `nº ${String(item.emissao.numero).padStart(4,'0')} · ${item.emissao.qtd} × ${fmt(item.emissao.precoUnit)}${item.emissao.cliente ? ' · ' + escapeHtml(item.emissao.cliente) : ''}` : `total ${item.custoTotal} · sugerido ${item.precoPeca}`}</div>
         ${linhaStatus}
+        ${linhaEstoque}
         <div class="actions">
           <button type="button" data-load="${item.id}">Carregar</button>
           ${item.emissao ? `<button type="button" data-pdf="${item.id}">PDF</button>` : ''}
@@ -2512,12 +2684,32 @@
     const list = lsGet(LS_ORC, []);
     const item = list.find(x => x.id === sel.dataset.status);
     if (!item || !item.emissao) return;
-    const novo = sel.value;
-    if (novo === statusDe(item)) return;
+    const novo = sel.value, antes = statusDe(item);
+    if (novo === antes) return;
     if (!item.emissao.historico) item.emissao.historico = [{ s: 'enviado', em: item.emissao.data }];
     item.emissao.status = novo;
     item.emissao.historico.push({ s: novo, em: new Date().toISOString() });
+    aplicarStatusNoEstoque(item, antes, novo);   // debita ao entrar em produção, devolve ao sair
     lsSet(LS_ORC, list);
+    renderFilamentos(); renderResinas();
+    renderOrcamentos();
+  });
+
+  // "Lançar" a perda real de um pedido
+  orcamentosLista.addEventListener('click', e => {
+    const b = e.target.closest('[data-perda]');
+    if (!b) return;
+    const list = lsGet(LS_ORC, []);
+    const item = list.find(x => x.id === b.dataset.perda);
+    if (!item || !item.emissao) return;
+    const campo = orcamentosLista.querySelector(`[data-perda-input="${b.dataset.perda}"]`);
+    const r = lancarPerda(item, campo ? campo.value : 0);
+    if (!r.ok){
+      alert('Esse material está sem estoque informado. Preencha o estoque dele em Configurações pra lançar a perda.');
+      return;
+    }
+    lsSet(LS_ORC, list);
+    renderFilamentos(); renderResinas();
     renderOrcamentos();
   });
 
@@ -2702,7 +2894,12 @@
         // custo por peça como NÚMERO, pra calcular o lucro real depois (preço cobrado - custo)
         custoUnit: Number(calcAtual.custoPeca) || 0,
         modo: modoAtual,
+        // estoque: de qual material esse pedido sai (a baixa só acontece quando o status chegar em "Em produção")
+        baixa: 0,
+        perda: 0,
       };
+      const matRef = materialParaEmissao(modoAtual, modoAtual === 'resina' ? currentResinaId : currentFilamentId, calcAtual.pesoPeca, emissao.qtd);
+      if (matRef) emissao.material = matRef;
 
       // Salva junto com o orçamento (sincroniza na conta, já que está logado).
       const list = lsGet(LS_ORC, []);
