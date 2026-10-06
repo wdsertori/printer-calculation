@@ -232,8 +232,8 @@
 
   .text-field{padding:14px 0; border-top:1px solid var(--grid-line);}
   .text-field label{display:block; font-size:14.5px; margin-bottom:8px;}
-  .text-field input[type=text]{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:'IBM Plex Sans',sans-serif; font-size:15px; padding:12px;}
-  .text-field input[type=text]:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(230,126,51,0.15);}
+  .text-field input[type=text], .text-field input[type=number]{width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:4px; color:var(--text); font-family:'IBM Plex Sans',sans-serif; font-size:15px; padding:12px;}
+  .text-field input[type=text]:focus, .text-field input[type=number]:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(230,126,51,0.15);}
   .mp-template-select{width:100%; background:var(--surface-2); border:1px solid var(--border); color:var(--text); font-family:'IBM Plex Sans',sans-serif; font-size:14px; padding:11px 10px; border-radius:4px;}
   .mp-template-select:focus{outline:none; border-color:var(--accent);}
   .mp-template-hint{font-size:11px; color:var(--text-dim); line-height:1.5; margin:8px 0 0;}
@@ -555,6 +555,10 @@
   .modal .field{border-top:none; padding:8px 0;}
   .modal .text-field{border-top:none; padding:8px 0;}
   .pdf-total{text-align:right; font-size:14px; color:var(--text-dim); padding:12px 0 4px; border-top:1px solid var(--grid-line); margin-top:6px;}
+  .linha-dupla{display:grid; grid-template-columns:1.3fr 1fr; gap:12px; border-top:1px solid var(--grid-line);}
+  .linha-dupla .text-field{border-top:none; min-width:0;}
+  .pdf-total-det{font-size:11.5px; margin-top:4px; font-family:'IBM Plex Mono',monospace;}
+  .pdf-total-det:empty{display:none;}
   .pdf-total strong{color:var(--accent-text); font-family:'IBM Plex Mono',monospace; font-size:18px;}
   .modal-acoes{display:flex; gap:8px; margin-top:14px;}
   .modal-acoes button{flex:1; padding:12px; border-radius:6px; font-family:'IBM Plex Sans',sans-serif; font-size:14px; cursor:pointer;}
@@ -1141,7 +1145,7 @@
       <h2>Onde ficam salvos os dados</h2>
       <p class="help-text"><strong>Estoque.</strong> Em Configurações, cada filamento e resina tem um campo "Estoque" (em g ou mL). Preenchendo, o material passa a ser controlado: quando um orçamento vai pra "Em produção", a quantidade usada sai do estoque sozinha, e volta se você desfizer o status. Em "Em produção" também aparece a "Perda real" (em g, ou mL na resina), já preenchida com o desperdício estimado no cálculo e já descontada do estoque. Ajuste pro total que você realmente perdeu naquele pedido com impressões erradas e suportes e toque em "Lançar". O aviso de estoque baixo fica desligado até você marcar a caixa em "Estoque". Material sem estoque informado não é controlado.</p>
       <p class="help-text"><strong>Clientes.</strong> Não existe cadastro à parte: a lista é montada com os nomes que você digita ao emitir o orçamento em PDF, somando quantos orçamentos cada um recebeu e quanto já aprovou. Ao digitar um nome que já usou, o campo sugere o nome pra você não escrever de novo. Pra tirar um cliente da lista, exclua os orçamentos dele.</p>
-      <p class="help-text"><strong>Resumo do mês.</strong> Faturamento e lucro contam os orçamentos <em>aprovados</em> naquele mês, pela data em que você marcou "Aprovado". Lucro real é o preço cobrado menos o custo da peça (o custo que o app calculou na hora de emitir), vezes a quantidade. Em "Em produção" você pode informar o custo real de miscelâneos (argolas, chaveiros, cola, álcool…): ele substitui a estimativa do cálculo e passa a valer aqui. A taxa de aprovação olha só os orçamentos emitidos no mês que já tiveram resposta — aprovado ou recusado.</p>
+      <p class="help-text"><strong>Resumo do mês.</strong> Faturamento e lucro contam os orçamentos <em>aprovados</em> naquele mês, pela data em que você marcou "Aprovado". Lucro real é o preço cobrado menos o custo da peça (o custo que o app calculou na hora de emitir), vezes a quantidade. O frete cobrado no orçamento aparece no total do PDF, mas não entra no faturamento, no lucro nem na lista de clientes, porque é repasse. Em "Em produção" você pode informar o custo real de miscelâneos (argolas, chaveiros, cola, álcool…): ele substitui a estimativa do cálculo e passa a valer aqui. A taxa de aprovação olha só os orçamentos emitidos no mês que já tiveram resposta — aprovado ou recusado.</p>
       <p class="help-text"><strong>Status do orçamento.</strong> Todo orçamento que você emite em PDF nasce como "Enviado". Conforme o cliente responde, troque pra Aprovado, Em produção, Entregue ou Recusado — a lista tem um filtro por status, e a data de cada mudança fica guardada.</p>
       <p class="help-text">Sem login, tudo fica salvo só no navegador deste aparelho — outra pessoa que abrir o site não vê nada do que você cadastrou, e você mesmo não vê no celular o que cadastrou no computador.</p>
       <p class="help-text">Entrando com a conta Google (ícone no topo), os dados passam a seguir você entre aparelhos. O círculo em volta da sua foto muda de cor pra indicar o status: laranja salvando, verde sincronizado, vermelho erro.</p>
@@ -1174,11 +1178,14 @@
       <div class="text-field"><label for="pdfDescricao">Descrição da peça</label><input type="text" id="pdfDescricao"></div>
       <div class="field no-prefix"><label>Quantidade</label><div class="input-box"><input type="number" id="pdfQtd" min="1" step="1"></div></div>
       <div class="field"><label>Preço por peça<span class="hint">sugerido pela calculadora</span></label><div class="input-box"><span class="unit">R$</span><input type="number" id="pdfPreco" min="0" step="0.01"></div></div>
-      <div class="text-field"><label for="pdfPrazo">Prazo de entrega</label><input type="text" id="pdfPrazo"></div>
+      <div class="linha-dupla">
+        <div class="text-field"><label for="pdfPrazo">Prazo de entrega</label><input type="text" id="pdfPrazo"></div>
+        <div class="text-field"><label for="pdfFrete">Valor do frete</label><input type="number" id="pdfFrete" min="0" step="0.01" inputmode="decimal" placeholder="R$ 0,00"></div>
+      </div>
       <div class="text-field"><label for="pdfPagamento">Forma de pagamento</label><input type="text" id="pdfPagamento"></div>
       <div class="field no-prefix suffix wide"><label>Validade</label><div class="input-box"><input type="number" id="pdfValidade" min="1" step="1"><span class="unit-suffix">dias</span></div></div>
       <div class="text-field"><label for="pdfObs">Observações</label><textarea id="pdfObs" rows="2" placeholder="opcional"></textarea></div>
-      <div class="pdf-total">Total: <strong id="pdfTotal">—</strong></div>
+      <div class="pdf-total">Total: <strong id="pdfTotal">—</strong><div class="pdf-total-det" id="pdfTotalDet"></div></div>
       <div class="modal-acoes">
         <button type="button" class="modal-cancelar" data-fechar-modal>Cancelar</button>
         <button type="button" class="modal-confirmar" id="pdfEmitir">Salvar e gerar PDF</button>
@@ -2505,6 +2512,10 @@
     return { tipo, id: m.id, nome: m.nome, unidade: unidadeDe(tipo), consumo, perdaEstimada: arred(consumo * (Number(desperdicioPct) || 0) / 100) };
   }
 
+  // Frete cobrado no orçamento (R$, 2 casas, nunca negativo). Entra no TOTAL do PDF, mas não no faturamento,
+  // no lucro nem na lista de clientes: é repasse, e o app não sabe quanto você paga à transportadora.
+  function freteDe(valor){ return arred(Math.max(0, Number(valor) || 0)); }
+
   // Miscelâneos do pedido: o cálculo estima um valor pro lote; aqui vira o valor proporcional à quantidade emitida.
   // O custo real (argola, chaveiro, cola, álcool...) é lançado depois e substitui a estimativa no lucro real.
   function miscParaEmissao(miscLote, qtdCalc, qtdEmissao){
@@ -2709,7 +2720,7 @@
       return `
       <div class="saved-item" data-id="${item.id}">
         <div class="nome">${escapeHtml(item.nome)}</div>
-        <div class="info">${new Date(item.savedAt).toLocaleDateString('pt-BR')} · ${item.emissao ? `nº ${String(item.emissao.numero).padStart(4,'0')} · ${item.emissao.qtd} × ${fmt(item.emissao.precoUnit)}${item.emissao.cliente ? ' · ' + escapeHtml(item.emissao.cliente) : ''}` : `total ${item.custoTotal} · sugerido ${item.precoPeca}`}</div>
+        <div class="info">${new Date(item.savedAt).toLocaleDateString('pt-BR')} · ${item.emissao ? `nº ${String(item.emissao.numero).padStart(4,'0')} · ${item.emissao.qtd} × ${fmt(item.emissao.precoUnit)}${item.emissao.frete > 0 ? ' + frete ' + fmt(item.emissao.frete) : ''}${item.emissao.cliente ? ' · ' + escapeHtml(item.emissao.cliente) : ''}` : `total ${item.custoTotal} · sugerido ${item.precoPeca}`}</div>
         ${linhaStatus}
         ${linhaEstoque}
         <div class="actions">
@@ -2860,10 +2871,13 @@
   function atualizarTotalPdf(){
     const q = Math.max(1, parseFloat(pdfCampo('pdfQtd').value) || 1);
     const p = Math.max(0, parseFloat(pdfCampo('pdfPreco').value) || 0);
-    pdfCampo('pdfTotal').textContent = fmt(q * p);
+    const f = Math.max(0, parseFloat(pdfCampo('pdfFrete').value) || 0);
+    pdfCampo('pdfTotal').textContent = fmt(q * p + f);
+    pdfCampo('pdfTotalDet').textContent = f > 0 ? `${fmt(q * p)} em peças + ${fmt(f)} de frete` : '';
   }
   pdfCampo('pdfQtd').addEventListener('input', atualizarTotalPdf);
   pdfCampo('pdfPreco').addEventListener('input', atualizarTotalPdf);
+  pdfCampo('pdfFrete').addEventListener('input', atualizarTotalPdf);
 
   // Abre o formulário já preenchido com a calculadora + dados da empresa.
   function abrirFormPdf(){
@@ -2874,6 +2888,7 @@
     pdfCampo('pdfQtd').value = calcAtual.qtd || 1;
     pdfCampo('pdfPreco').value = (calcAtual.precoPeca || 0).toFixed(2);
     pdfCampo('pdfPrazo').value = emp.prazo || '';
+    pdfCampo('pdfFrete').value = '';
     pdfCampo('pdfPagamento').value = emp.pagamento || '';
     pdfCampo('pdfValidade').value = parseInt(emp.validade) || 7;
     pdfCampo('pdfObs').value = '';
@@ -2940,6 +2955,7 @@
         qtd: Math.max(1, parseInt(pdfCampo('pdfQtd').value) || 1),
         precoUnit: Math.max(0, parseFloat(pdfCampo('pdfPreco').value) || 0),
         prazo: pdfCampo('pdfPrazo').value.trim(),
+        frete: freteDe(pdfCampo('pdfFrete').value),
         pagamento: pdfCampo('pdfPagamento').value.trim(),
         validadeDias: Math.max(1, parseInt(pdfCampo('pdfValidade').value) || 7),
         obs: pdfCampo('pdfObs').value.trim(),
@@ -3119,6 +3135,8 @@
     d.text('TOTAL', colTot, y + 5.3, { align:'right' });
     y += 8;
     const total = e.qtd * e.precoUnit;
+    const frete = Math.max(0, Number(e.frete) || 0);
+    const totalGeral = total + frete;
     d.setFont('helvetica','normal'); d.setFontSize(10); d.setTextColor(...TXT);
     const itemLinhas = d.splitTextToSize(e.descricao, colQtd - M - 22);
     const alturaLinha = Math.max(9, itemLinhas.length * 4.6 + 4);
@@ -3128,13 +3146,20 @@
     d.text(money(total), colTot, y + 6, { align:'right' });
     y += alturaLinha;
     d.setDrawColor(220,224,228); d.setLineWidth(0.3); d.line(M, y, W - M, y);
+    if (frete > 0){
+      d.setFont('helvetica','normal'); d.setFontSize(10); d.setTextColor(...TXT);
+      d.text('Frete', M + 3, y + 6);
+      d.text(money(frete), colTot, y + 6, { align:'right' });
+      y += 9;
+      d.setDrawColor(220,224,228); d.setLineWidth(0.3); d.line(M, y, W - M, y);
+    }
     y += 4;
 
-    // --- total em destaque
+    // --- total em destaque (peças + frete)
     d.setFillColor(...LARANJA); d.roundedRect(W - M - 72, y, 72, 12, 1.5, 1.5, 'F');
     d.setTextColor(255,255,255); d.setFont('helvetica','bold');
     d.setFontSize(9); d.text('TOTAL', W - M - 68, y + 7.8);
-    d.setFontSize(13); d.text(money(total), W - M - 4, y + 8, { align:'right' });
+    d.setFontSize(13); d.text(money(totalGeral), W - M - 4, y + 8, { align:'right' });
     y += 22;
 
     // --- condições
