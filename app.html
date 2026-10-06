@@ -1014,7 +1014,7 @@
       <h2>Energia</h2>
       <div class="field">
         <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01" data-moeda data-casas-max="4"></div>
+        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01" data-moeda></div>
       </div>
     </div>
 
@@ -1243,78 +1243,80 @@
   let cloudSyncTimer = null;
   let aplicandoDadosDaNuvem = false; // trava pra não reenviar pra nuvem o que acabou de baixar dela
   // ============ CAMPOS PRINCIPAIS ============
-  // ============ CAMPOS DE DINHEIRO (formato brasileiro) ============
-  // Todo <input data-moeda> mostra "1.234,50" e aceita digitar "1234,5" (ou "1234.5"). Por baixo, o .value continua sendo
-  // o número em texto com ponto ("1234.5"): o cálculo, o salvamento local, a nuvem e os orçamentos salvos seguem iguais,
-  // e os valores salvos antes continuam valendo. Não existe valor negativo nesses campos.
+  // ============ CAMPOS DE DINHEIRO (estilo app de banco) ============
+  // Todo <input data-moeda> mostra sempre "1.234,50" (e "0,00" quando está zerado). Só se digitam números: eles entram
+  // da direita pra esquerda (1 -> 0,01 | 12 -> 0,12 | 123 -> 1,23); vírgula, ponto e letras são ignorados; apagar tira o
+  // último dígito. Por baixo, o .value continua sendo o número em texto com ponto ("1234.5"), então o cálculo, o
+  // salvamento local, a nuvem e os orçamentos salvos seguem iguais, e os valores salvos antes continuam valendo.
   const moedaNativo = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-  // Lê o texto do campo. Com vírgula, os pontos são milhar ("1.234,50"). Sem vírgula, um ponto seguido de exatamente 3 dígitos
-  // é milhar ("14.000" = quatorze mil) e qualquer outro é decimal ("12.5" = doze e meio). Em campos com mais de 2 casas
-  // (tarifa de energia) o ponto é sempre decimal: ninguém paga mil reais por kWh.
-  function textoParaNumero(t, milhar){
+  const MOEDA_MAX_DIGITOS = 11;                           // até R$ 999.999.999,99
+  const MOEDA_LIMITE = Math.pow(10, MOEDA_MAX_DIGITOS) - 1;
+  const centavosDe = t => {                               // "1.234,56" -> 123456
+    const d = String(t).replace(/\D/g, '').replace(/^0+/, '').slice(0, MOEDA_MAX_DIGITOS);
+    return d ? parseInt(d, 10) : 0;
+  };
+  const textoMoeda = c => (c / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // Texto COLADO é entendido como número em reais: "R$ 1.234,56", "1234,5", "14.000" (milhar), "12.5" (decimal), "129".
+  // Devolve null se não tiver nenhum dígito (aí a colagem é ignorada).
+  function centavosDeColado(t){
     let x = String(t).replace(/[^\d.,]/g, '');
-    if (!/\d/.test(x)) return NaN;
+    if (!/\d/.test(x)) return null;
     if (x.includes(',')){
       x = x.replace(/\./g, '').replace(',', '.');
     } else if (x.includes('.')){
       const p = x.split('.');
-      const ehMilhar = milhar && /^\d{1,3}$/.test(p[0]) && p[0] !== '0' && p.slice(1).every(q => /^\d{3}$/.test(q));
-      x = ehMilhar ? p.join('') : p[0] + '.' + p.slice(1).join('');
+      const milhar = /^\d{1,3}$/.test(p[0]) && p[0] !== '0' && p.slice(1).every(q => /^\d{3}$/.test(q));
+      x = milhar ? p.join('') : p[0] + '.' + p.slice(1).join('');
     }
-    return parseFloat(x);
-  }
-  // O que pode ficar no campo enquanto a pessoa digita ou cola. Os pontos ficam como foram digitados (ainda não dá pra saber
-  // se é milhar ou decimal); quando aparece a vírgula, os pontos viram milhar e saem.
-  function limparDigitacao(t, max){
-    t = String(t).replace(/[^\d.,]/g, '');
-    if (t.includes(',')){
-      t = t.replace(/\./g, '');
-      const i = t.indexOf(',');
-      t = t.slice(0, i + 1) + t.slice(i + 1).replace(/,/g, '');
-      if (t.length - i - 1 > max){          // casas demais: arredonda
-        const n = parseFloat(t.replace(',', '.'));
-        if (!isNaN(n)) t = n.toFixed(max).replace('.', ',').replace(/0+$/, '').replace(/,$/, '');
-      }
-    }
-    return t;
+    const n = parseFloat(x);
+    return isNaN(n) ? null : Math.min(Math.round(n * 100), MOEDA_LIMITE);
   }
   function ativarMoeda(inp){
     if (inp.__moeda) return;
     inp.__moeda = true;
-    const min = Number(inp.dataset.casas || 2), max = Number(inp.dataset.casasMax || min), milhar = max <= 2;
     const nativo = () => moedaNativo.get.call(inp), grava = t => moedaNativo.set.call(inp, t);
-    const cru = n => String(+n.toFixed(max)).replace('.', ',');
-    const bonito = n => n.toLocaleString('pt-BR', { minimumFractionDigits: min, maximumFractionDigits: max });
-    const inicial = nativo();                 // valor escrito no HTML: número com ponto
+    const mostra = c => { grava(textoMoeda(c)); const f = nativo().length; try { inp.setSelectionRange(f, f); } catch (e) {} };
+    const avisa = () => inp.dispatchEvent(new Event('input', { bubbles: true }));
+    const inicial = nativo();                             // valor escrito no HTML: número com ponto
     inp.type = 'text';
-    inp.setAttribute('inputmode', 'decimal');
+    inp.setAttribute('inputmode', 'numeric');             // teclado só de números
     inp.setAttribute('autocomplete', 'off');
     inp.removeAttribute('min'); inp.removeAttribute('step');
-    if (!inp.placeholder || /^\d+$/.test(inp.placeholder)) inp.placeholder = bonito(0);
+    inp.placeholder = '0,00';
     Object.defineProperty(inp, 'value', {
       configurable: true,
-      get(){ const n = textoParaNumero(nativo(), milhar); return isNaN(n) ? '' : String(n); },
+      get(){ return String(centavosDe(nativo()) / 100); },
       set(v){
         const t = v === null || v === undefined ? '' : String(v).trim().replace(',', '.');
-        const n = t === '' ? NaN : Number(t);
-        if (isNaN(n)){ grava(''); return; }
-        grava(document.activeElement === inp ? cru(Math.max(0, n)) : bonito(Math.max(0, n)));
+        const n = t === '' ? 0 : Number(t);
+        grava(textoMoeda(isNaN(n) ? 0 : Math.min(Math.round(Math.max(0, n) * 100), MOEDA_LIMITE)));
       },
     });
-    inp.addEventListener('input', () => {
-      const t = nativo(), novo = limparDigitacao(t, max);
-      if (novo !== t){ grava(novo); try { inp.setSelectionRange(novo.length, novo.length); } catch (e) {} }
+    // vírgula, ponto, letras e espaço: ignorados já na tecla (o campo nem pisca)
+    inp.addEventListener('keydown', e => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key && e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
     });
-    inp.addEventListener('focus', () => {     // ao tocar: número "cru" pra editar, tudo selecionado
-      const n = textoParaNumero(nativo(), milhar);
-      if (!isNaN(n)) grava(cru(n));
-      setTimeout(() => { if (document.activeElement === inp) inp.select(); }, 0);
+    inp.addEventListener('beforeinput', e => {            // teclados de celular
+      if (e.inputType === 'insertText' && e.data && !/\d/.test(e.data)) e.preventDefault();
     });
-    inp.addEventListener('blur', () => {      // ao sair: volta ao formato brasileiro
-      const n = textoParaNumero(nativo(), milhar);
-      grava(isNaN(n) ? '' : bonito(n));
+    inp.addEventListener('input', () => mostra(centavosDe(nativo())));   // reformata a cada dígito
+    inp.addEventListener('paste', e => {
+      const texto = e.clipboardData && e.clipboardData.getData('text');
+      if (texto === undefined || texto === null) return;
+      e.preventDefault();
+      const c = centavosDeColado(texto);
+      if (c !== null){ mostra(c); avisa(); }
     });
-    inp.value = inicial;
+    // ao tocar, o valor todo fica selecionado: o primeiro dígito substitui (como ao começar uma transferência nova)
+    let recemFocado = false;
+    inp.addEventListener('focus', () => {
+      recemFocado = true;
+      setTimeout(() => { if (document.activeElement === inp){ inp.select(); try { inp.setSelectionRange(0, nativo().length); } catch (e) {} } }, 0);
+    });
+    inp.addEventListener('mouseup', e => { if (recemFocado){ e.preventDefault(); recemFocado = false; } });   // o clique não desfaz a seleção
+    inp.addEventListener('blur', () => { recemFocado = false; });
+    inp.value = inicial;                                  // já no formato "0,00"
   }
   document.querySelectorAll('input[data-moeda]').forEach(ativarMoeda);
   // campos criados depois (listas de peças, impressoras, orçamentos) são ativados sozinhos
@@ -2843,7 +2845,7 @@
     renderOrcamentos();
   });
 
-  // Salvar o custo real de miscelâneos de um pedido (vazio = volta a valer a estimativa do cálculo)
+  // Salvar o custo real de miscelâneos de um pedido (o mesmo valor da estimativa = volta a valer a estimativa do cálculo)
   orcamentosLista.addEventListener('click', e => {
     const b = e.target.closest('[data-misc]');
     if (!b) return;
@@ -2851,8 +2853,9 @@
     const item = list.find(x => x.id === b.dataset.misc);
     if (!item || !item.emissao || !item.emissao.misc) return;
     const campo = orcamentosLista.querySelector(`[data-misc-input="${b.dataset.misc}"]`);
-    const v = campo ? campo.value.trim() : '';
-    item.emissao.misc.real = v === '' ? null : arred(Math.max(0, Number(v) || 0));
+    const v = arred(Math.max(0, Number(campo ? campo.value : 0) || 0));
+    // o campo nunca fica vazio; digitar o mesmo valor da estimativa equivale a "usar a estimativa"
+    item.emissao.misc.real = v === arred(Number(item.emissao.misc.estimado) || 0) ? null : v;
     lsSet(LS_ORC, list);
     renderOrcamentos();   // o resumo do mês recalcula o lucro real
   });
