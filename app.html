@@ -693,7 +693,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
         <div class="auth-popover-name" id="authPopoverName"></div>
         <div class="auth-popover-status" id="authSyncStatus"></div>
         <div class="auth-popover-acoes">
-          <button type="button" class="auth-popover-btn" id="authLang"><span>Idioma</span>: <b id="authLangCod">PT</b></button>
+          <button type="button" class="auth-popover-btn" id="authLang"></button>
           <button type="button" class="auth-popover-btn auth-popover-signout" id="authSignOut">Sair</button>
         </div>
       </div>
@@ -1248,7 +1248,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     CATALOGO_RESINAS, CATALOGO_TIPOS_RESINA, MARKETPLACES,
     PRINTER_IMAGE_OVERRIDES,
   } from './catalogo.js';
-  import { IDIOMA, REGIAO, SIMBOLO, t as tr, traduzirDOM, observarDOM, fmtMoeda, fmtNumero, fmtCentavos, fmtData, fmtMes, comparar, decimalLocal, gravarIdioma, outroIdioma, aplicarPadroes } from './i18n.js';
+  import { IDIOMA, REGIAO, SIMBOLO, t as tr, traduzirDOM, observarDOM, fmtMoeda, fmtNumero, fmtCentavos, fmtData, fmtMes, comparar, decimalLocal, gravarIdioma, outroIdioma, nomeIdioma, aplicarPadroes } from './i18n.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyBw3QJS_NAVy0e0tFkvLtPoG7vCA2XfQA4",
@@ -1621,6 +1621,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     if (c && c.__alterna){ c.__alterna(true); setTimeout(() => c.scrollIntoView({ behavior:'smooth', block:'start' }), 60); }
   }
   traduzirDOM(); observarDOM();
+  if (IDIOMA === 'en') document.querySelectorAll('a[href="privacidade.html"]').forEach(a => { a.href = 'en/privacy.html'; });
 
   document.querySelectorAll('#modoToggle .modo-btn').forEach(btn => {
     btn.addEventListener('click', () => aplicarModo(btn.dataset.modo));
@@ -1796,8 +1797,10 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
   authSignOut.addEventListener('click', () => { signOut(auth); authPopover.hidden = true; });
   document.getElementById('authLang').addEventListener('click', trocarIdioma);
   document.getElementById('idiomaChip').addEventListener('click', trocarIdioma);
-  document.getElementById('authLangCod').textContent = IDIOMA.toUpperCase();
-  document.getElementById('idiomaChip').textContent = IDIOMA.toUpperCase();
+  // o botão mostra o nome do OUTRO idioma ("English" em português, "Português" em inglês)
+  document.getElementById('authLang').textContent = nomeIdioma(outroIdioma());
+  document.getElementById('idiomaChip').textContent = outroIdioma().toUpperCase();
+  document.getElementById('idiomaChip').title = nomeIdioma(outroIdioma());
 
   onAuthStateChanged(auth, user => {
     currentUser = user;

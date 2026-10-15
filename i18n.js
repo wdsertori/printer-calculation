@@ -18,15 +18,19 @@
 export const CHAVE_IDIOMA = 'c3d_idioma';
 
 export const REGIOES = {
-  pt: { id:'pt', locale:'pt-BR', moeda:'BRL', simbolo:'R$', decimal:',', placeholder:'0,00',
+  pt: { id:'pt', nome:'Português', locale:'pt-BR', moeda:'BRL', simbolo:'R$', decimal:',', placeholder:'0,00',
         loja:true, padroes:null },
-  en: { id:'en', locale:'en-US', moeda:'USD', simbolo:'$', decimal:'.', placeholder:'0.00',
+  en: { id:'en', nome:'English', locale:'en-US', moeda:'USD', simbolo:'$', decimal:'.', placeholder:'0.00',
         loja:false,                                   // Shopping oculto por enquanto (sem afiliados nos EUA)
         // valores iniciais (só quando ainda não há nada salvo) — estimativas EUA, out/2026 — luz: média residencial ~18,6¢/kWh (EIA, mar/2026)
         padroes:{ precoKg:20, precoLitro:25, precoKwh:0.18, valorHora:20 } },
 };
 
 function detectar(){
+  try {                                   // ?lang=en / ?lang=pt (links da landing) vale e fica salvo
+    const q = new URLSearchParams(location.search).get('lang');
+    if (q && REGIOES[q]) { localStorage.setItem(CHAVE_IDIOMA, q); return q; }
+  } catch (e) {}
   try {
     const s = localStorage.getItem(CHAVE_IDIOMA);
     if (s && REGIOES[s]) return s;
@@ -104,7 +108,14 @@ export function gravarIdioma(id){
   try { localStorage.setItem(CHAVE_IDIOMA, id); } catch (e) {}
   return true;
 }
-export const outroIdioma = () => (IDIOMA === 'pt' ? 'en' : 'pt');
+// Idiomas oferecidos (nome na própria língua). Com 2 idiomas o app mostra um botão com o nome
+// do OUTRO idioma; quando entrar um terceiro, basta trocar o botão por uma lista com IDIOMAS.
+export const IDIOMAS = Object.values(REGIOES).map(r => ({ id:r.id, nome:r.nome }));
+export const outroIdioma = () => {
+  const outros = IDIOMAS.filter(i => i.id !== IDIOMA);
+  return outros.length ? outros[0].id : IDIOMA;
+};
+export const nomeIdioma = id => (REGIOES[id] ? REGIOES[id].nome : id);
 
 // valores iniciais da região (só se o usuário ainda não salvou nada)
 export function aplicarPadroes(chaveCampos){

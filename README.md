@@ -12,3 +12,8 @@ código aberto. Cópia, modificação e redistribuição são proibidas sem
 autorização. Ver [LICENSE](LICENSE).
 
 Contato: wdsertori@gmail.com
+
+
+## Versão em inglês das páginas públicas
+
+`en/index.html` e `en/privacy.html` são **gerados** a partir de `index.html` e `privacidade.html` (português) pelo script `tools/gerar-en.py`, com as traduções em `tools/en-site.json`. Mudou a página em português? Rode `python3 tools/gerar-en.py` e suba o resultado. Os textos do app em si ficam em `i18n-en.js`.

@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Precifica 3D — calculadora de custo e preço de impressão 3D</title>
 <meta name="description" content="Descubra o custo real de cada peça impressa em 3D (filamento ou resina) e o preço certo pra vender no Mercado Livre, Shopee e Amazon. Depois, acompanhe orçamentos, clientes e estoque. Grátis, sem cadastro pra calcular.">
+<!--i18n-head-->
+<link rel="canonical" href="https://wdsertori.github.io/printer-calculation/">
+<link rel="alternate" hreflang="pt-BR" href="https://wdsertori.github.io/printer-calculation/">
+<link rel="alternate" hreflang="en" href="https://wdsertori.github.io/printer-calculation/en/">
+<link rel="alternate" hreflang="x-default" href="https://wdsertori.github.io/printer-calculation/">
+<meta property="og:url" content="https://wdsertori.github.io/printer-calculation/">
+<meta property="og:locale" content="pt_BR">
+<!--/i18n-head-->
 <meta name="theme-color" content="#F6FAFE">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Precifica 3D — saiba quanto cobrar por cada peça">
@@ -81,6 +89,8 @@
   @media (min-width:800px){ .nav{display:flex;} }
   .acoes-topo{display:flex; align-items:center; gap:10px;}
   .tema-btn{display:inline-flex; align-items:center; gap:8px; background:transparent; border:1px solid var(--border); color:var(--text-dim); border-radius:999px; padding:8px 11px; font:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:border-color .2s, color .2s;}
+  .idioma-link{color:var(--text-dim); text-decoration:none; font-size:14px; font-weight:600; padding:8px 4px;}
+  .idioma-link:hover{color:var(--text);}
   .tema-btn:hover{border-color:var(--accent); color:var(--text);}
   .tema-btn svg{width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
   .tema-btn .rotulo{display:none;}
@@ -223,6 +233,7 @@
       <a href="#faq">Dúvidas</a>
     </nav>
     <div class="acoes-topo">
+      <a class="idioma-link" href="en/" hreflang="en" lang="en">English</a>
       <button type="button" class="tema-btn" id="alternaTema" aria-label="Alternar entre tema claro e escuro">
         <svg class="ico-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg class="ico-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="1.5" x2="12" y2="3.5"/><line x1="12" y1="20.5" x2="12" y2="22.5"/><line x1="4.6" y1="4.6" x2="6" y2="6"/><line x1="18" y1="18" x2="19.4" y2="19.4"/><line x1="1.5" y1="12" x2="3.5" y2="12"/><line x1="20.5" y1="12" x2="22.5" y2="12"/><line x1="4.6" y1="19.4" x2="6" y2="18"/><line x1="18" y1="6" x2="19.4" y2="4.6"/></svg>
