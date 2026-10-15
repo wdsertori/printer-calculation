@@ -6,11 +6,11 @@
 //
 // Regras:
 //  - O português é o texto ORIGINAL do app. Em pt nada é trocado.
-//  - Em en, cada texto vem do dicionário EN abaixo, pela chave.
-//      HTML:  <h2 data-i18n="chave">Texto em português</h2>
-//             data-i18n-placeholder / data-i18n-title / data-i18n-aria
-//      JS:    t('chave', { nome: 'x' })   (usa {nome} no texto)
-//  - Chave sem tradução cai no português: nunca aparece uma chave crua.
+//  - Em en, a chave é o próprio texto em português e o valor está em i18n-en.js.
+//      Texto já na página / criado depois (innerHTML, textContent): troca sozinho
+//      (traduzirDOM + observarDOM), inclusive placeholder, title, aria-label.
+//      Texto com valores no meio (ou PDF/alert):  t('Lote de {qtd} peças', { qtd })
+//  - Texto sem tradução cai no português: nunca aparece chave crua.
 //  - Dados salvos (ids de status, tipos de resina) continuam em português
 //    por dentro; só o rótulo na tela muda. Valores em dinheiro NÃO são
 //    convertidos entre moedas.
@@ -40,30 +40,51 @@ export const REGIAO = REGIOES[IDIOMA];
 export const SIMBOLO = REGIAO.simbolo;
 
 // ---------------------------------------------------------------- dicionário
-// Preenchido por etapas. Chaves já traduzidas aqui; o resto cai no português.
-export const EN = {
-  'conta.idioma': 'Language',
-  'conta.sair': 'Sign out',
-  'conta.aria': 'Account',
-};
+// A CHAVE é o próprio texto em português; o valor é o inglês (i18n-en.js).
+// Texto sem tradução continua em português — nunca aparece chave crua.
+import { EN } from './i18n-en.js';
+const norm = s => String(s).replace(/\s+/g, ' ').trim();
 
-export function t(chave, vars, original){
-  let s = IDIOMA === 'en' && EN[chave] != null ? EN[chave] : (original != null ? original : chave);
+// t('Lote de {qtd} peças', { qtd: 3 })  — texto montado em JS, com valores no meio
+export function t(pt, vars){
+  let s = IDIOMA === 'en' && EN[pt] != null ? EN[pt] : pt;
   if (vars) s = s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
   return s;
 }
 
-// traduz o que já está na página (atributos data-i18n*)
+// Textos que já estão na página (e os que o app cria depois, via observarDOM):
+// troca cada pedaço de texto e atributo (placeholder/title/aria-label/alt) que tiver tradução exata.
+const ATTRS = ['placeholder', 'title', 'aria-label', 'alt'];
+const PULA = /^(SCRIPT|STYLE|TEXTAREA|NOSCRIPT)$/;
+function trNo(n){
+  const v = n.nodeValue, k = norm(v);
+  if (!k || EN[k] == null) return;
+  const m = v.match(/^(\s*)[\s\S]*?(\s*)$/);
+  n.nodeValue = m[1] + EN[k] + m[2];
+}
+function trAttrs(e){
+  for (const a of ATTRS){
+    const v = e.getAttribute && e.getAttribute(a);
+    if (v) { const k = norm(v); if (EN[k] != null) e.setAttribute(a, EN[k]); }
+  }
+}
 export function traduzirDOM(raiz){
   if (IDIOMA !== 'en') return;
-  const r = raiz || document;
-  r.querySelectorAll('[data-i18n]').forEach(n => { const v = EN[n.dataset.i18n]; if (v != null) n.textContent = v; });
-  [['placeholder','i18nPlaceholder','placeholder'], ['title','i18nTitle','title'], ['aria-label','i18nAria','aria-label']]
-    .forEach(([attr, ds, nome]) => {
-      r.querySelectorAll('[data-i18n-' + nome.replace('aria-label','aria') + ']').forEach(n => {
-        const v = EN[n.dataset[ds]]; if (v != null) n.setAttribute(attr, v);
-      });
-    });
+  const r = raiz || document.body;
+  if (r.nodeType === 3){ if (r.parentNode && !PULA.test(r.parentNode.nodeName)) trNo(r); return; }
+  if (r.nodeType !== 1 || PULA.test(r.nodeName)) return;
+  trAttrs(r);
+  const w = document.createTreeWalker(r, 5);      // 1 = elementos, 4 = textos
+  let n;
+  while ((n = w.nextNode())){
+    if (n.nodeType === 3){ if (!PULA.test(n.parentNode.nodeName)) trNo(n); }
+    else if (!PULA.test(n.nodeName)) trAttrs(n);
+  }
+}
+export function observarDOM(){
+  if (IDIOMA !== 'en') return;
+  new MutationObserver(ms => { ms.forEach(m => m.addedNodes.forEach(n => traduzirDOM(n))); })
+    .observe(document.body, { childList: true, subtree: true });
 }
 
 // ------------------------------------------------------------------ formatos

@@ -693,8 +693,8 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
         <div class="auth-popover-name" id="authPopoverName"></div>
         <div class="auth-popover-status" id="authSyncStatus"></div>
         <div class="auth-popover-acoes">
-          <button type="button" class="auth-popover-btn" id="authLang"><span data-i18n="conta.idioma">Idioma</span>: <b id="authLangCod">PT</b></button>
-          <button type="button" class="auth-popover-btn auth-popover-signout" id="authSignOut" data-i18n="conta.sair">Sair</button>
+          <button type="button" class="auth-popover-btn" id="authLang"><span>Idioma</span>: <b id="authLangCod">PT</b></button>
+          <button type="button" class="auth-popover-btn auth-popover-signout" id="authSignOut">Sair</button>
         </div>
       </div>
       <button type="button" class="idioma-chip" id="idiomaChip" aria-label="Idioma / Language">PT</button>
@@ -1248,7 +1248,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     CATALOGO_RESINAS, CATALOGO_TIPOS_RESINA, MARKETPLACES,
     PRINTER_IMAGE_OVERRIDES,
   } from './catalogo.js';
-  import { IDIOMA, REGIAO, SIMBOLO, t as tr, traduzirDOM, fmtMoeda, fmtNumero, fmtCentavos, fmtData, fmtMes, comparar, decimalLocal, gravarIdioma, outroIdioma, aplicarPadroes } from './i18n.js';
+  import { IDIOMA, REGIAO, SIMBOLO, t as tr, traduzirDOM, observarDOM, fmtMoeda, fmtNumero, fmtCentavos, fmtData, fmtMes, comparar, decimalLocal, gravarIdioma, outroIdioma, aplicarPadroes } from './i18n.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyBw3QJS_NAVy0e0tFkvLtPoG7vCA2XfQA4",
@@ -1427,7 +1427,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     out.custoLote.textContent = fmt(custoLote);
     out.custoPeca.textContent = fmt(custoPeca);
     out.precoPeca.textContent = fmt(precoPeca);
-    out.precoLote.textContent = qtd > 1 ? `Lote de ${qtd} peças: ${fmt(precoLote)}` : 'Peça única';
+    out.precoLote.textContent = qtd > 1 ? tr('Lote de {qtd} peças: {preco}', { qtd, preco: fmt(precoLote) }) : tr('Peça única');
     out.lucro.textContent = fmt(lucroPeca);
     ultimoCalculo = { precoPeca, custoPeca, custoLote, qtd, pesoPeca: pesoOuVolume, modo: modoAtual, tempoImpressao, desperdicio, miscelaneos };
     renderMarketplaces(precoPeca);
@@ -1515,8 +1515,8 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const linhas = MARKETPLACES.map(mp => {
       const preco = precoMinimoMarketplace(mp, liquidoDesejado);
       const taxaTxt = mp.netPrice
-        ? 'você define o líquido'
-        : `${mp.percentual}%${mp.taxaFixa ? ' + ' + fmt(mp.taxaFixa) : ''}${mp.fixaAbaixoDe ? ' (fixa só abaixo de ' + fmt(mp.fixaAbaixoDe) + ')' : ''}`;
+        ? tr('você define o líquido')
+        : `${mp.percentual}%${mp.taxaFixa ? ' + ' + fmt(mp.taxaFixa) : ''}${mp.fixaAbaixoDe ? ' (' + tr('fixa só abaixo de {v}', { v: fmt(mp.fixaAbaixoDe) }) + ')' : ''}`;
       return `
         <div class="mkt-row">
           <span class="mkt-nome">${mp.nome}
@@ -1620,7 +1620,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const n = document.getElementById(id), c = n && n.closest('.card.acord');
     if (c && c.__alterna){ c.__alterna(true); setTimeout(() => c.scrollIntoView({ behavior:'smooth', block:'start' }), 60); }
   }
-  traduzirDOM();
+  traduzirDOM(); observarDOM();
 
   document.querySelectorAll('#modoToggle .modo-btn').forEach(btn => {
     btn.addEventListener('click', () => aplicarModo(btn.dataset.modo));
@@ -1773,7 +1773,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     return signInWithPopup(auth, googleProvider)
       .catch(e => {
         if (e.code !== 'auth/cancelled-popup-request' && e.code !== 'auth/popup-closed-by-user'){
-          alert('Não consegui entrar: ' + e.message);
+          alert(tr('Não consegui entrar: {msg}', { msg: e.message }));
         }
         console.error(e);
       })
@@ -2566,14 +2566,14 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       html = '<div class="resumo-grade">' +
         tile('Emitidos', r.emitidos, 'orçamentos em PDF') +
         tile('Aprovação', r.taxa === null ? tracos : Math.round(r.taxa * 100) + '%',
-          r.decididos ? `${r.aprov} de ${r.decididos} ${plural(r.decididos, 'respondido', 'respondidos')}` : 'ninguém respondeu ainda') +
-        tile('Faturamento', fmt(r.faturamento), `${r.nAprovados} ${plural(r.nAprovados, 'aprovado', 'aprovados')} no mês`) +
+          r.decididos ? `${tr('{a} de {d}', { a: r.aprov, d: r.decididos })} ${plural(r.decididos, tr('respondido'), tr('respondidos'))}` : 'ninguém respondeu ainda') +
+        tile('Faturamento', fmt(r.faturamento), tr('{n} {w} no mês', { n: r.nAprovados, w: plural(r.nAprovados, tr('aprovado'), tr('aprovados')) })) +
         tile('Lucro real', r.lucro === null ? tracos : fmt(r.lucro), 'preço cobrado − custo', r.lucro === null ? '' : (r.lucro < 0 ? 'neg' : 'pos')) +
         tile('Margem real', r.margem === null ? tracos : decimalLocal((r.margem * 100).toFixed(1)) + '%', 'lucro ÷ faturamento') +
         tile('Ticket médio', r.ticket === null ? tracos : fmt(r.ticket), 'por orçamento aprovado') +
       '</div>';
     }
-    html += `<div class="resumo-agora"><strong>Agora:</strong> ${r.agora.aguardando} aguardando resposta · ${r.agora.aprovados} ${plural(r.agora.aprovados, 'aprovado', 'aprovados')} · ${r.agora.producao} em produção</div>`;
+    html += `<div class="resumo-agora"><strong>Agora:</strong> ${tr('{a} aguardando resposta · {b} {w} · {c} em produção', { a: r.agora.aguardando, b: r.agora.aprovados, w: plural(r.agora.aprovados, tr('aprovado'), tr('aprovados')), c: r.agora.producao })}</div>`;
     resumoEl.innerHTML = html;
   }
 
@@ -2628,12 +2628,12 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       return;
     }
     const totalGeral = clientes.reduce((soma, c) => soma + c.total, 0);
-    clientesResumoEl.innerHTML = `<strong>${clientes.length}</strong> ${clientes.length === 1 ? 'cliente' : 'clientes'} · ${fmt(totalGeral)} em orçamentos aprovados`;
+    clientesResumoEl.innerHTML = `<strong>${clientes.length}</strong> ${tr('{w} · {v} em orçamentos aprovados', { w: tr(clientes.length === 1 ? 'cliente' : 'clientes'), v: fmt(totalGeral) })}`;
     clientesListaEl.innerHTML = clientes.map(c => `
       <div class="saved-item">
         <div class="nome">${escapeHtml(c.nome)}</div>
-        <div class="info">${c.orcamentos} ${c.orcamentos === 1 ? 'orçamento' : 'orçamentos'} · ${c.aprovados} ${c.aprovados === 1 ? 'aprovado' : 'aprovados'}${c.total > 0 ? ' · ' + fmt(c.total) : ''}</div>
-        <div class="info">último em ${fmtData(c.ultima)}</div>
+        <div class="info">${c.orcamentos} ${tr(c.orcamentos === 1 ? 'orçamento' : 'orçamentos')} · ${c.aprovados} ${tr(c.aprovados === 1 ? 'aprovado' : 'aprovados')}${c.total > 0 ? ' · ' + fmt(c.total) : ''}</div>
+        <div class="info">${tr('último em {d}', { d: fmtData(c.ultima) })}</div>
       </div>`).join('');
   }
 
@@ -2760,9 +2760,9 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const baixo = cfgEstoque().alerta && estoqueBaixo(m);
     return `<div class="estoque-linha">
       <span>Estoque</span>
-      <input type="number" step="1" min="0" inputmode="decimal" placeholder="não controlar" value="${typeof m.estoque === 'number' ? m.estoque : ''}" data-est-input="${m.id}" aria-label="Estoque em ${un}">
-      <span>${un} · avisar com até</span>
-      <input type="number" step="1" min="0" inputmode="decimal" placeholder="${ESTOQUE_MINIMO_PADRAO}" value="${typeof m.minimo === 'number' ? m.minimo : ''}" data-min-input="${m.id}" aria-label="Avisar com até, em ${un}">
+      <input type="number" step="1" min="0" inputmode="decimal" placeholder="não controlar" value="${typeof m.estoque === 'number' ? m.estoque : ''}" data-est-input="${m.id}" aria-label="${tr('Estoque em {un}', { un })}">
+      <span>${tr('{un} · avisar com até', { un })}</span>
+      <input type="number" step="1" min="0" inputmode="decimal" placeholder="${ESTOQUE_MINIMO_PADRAO}" value="${typeof m.minimo === 'number' ? m.minimo : ''}" data-min-input="${m.id}" aria-label="${tr('Avisar com até, em {un}', { un })}">
       <span>${un}</span>
       <button type="button" data-est-salvar="${m.id}" data-est-tipo="${tipo}">Salvar</button>
       ${baixo ? '<span class="badge late">estoque baixo</span>' : ''}
@@ -2802,8 +2802,8 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       const cont = {}; STATUS_ORC.forEach(st => cont[st.id] = 0);
       emitidos.forEach(i => { cont[statusDe(i)] = (cont[statusDe(i)] || 0) + 1; });
       filtroOrcEl.innerHTML =
-        `<button type="button" class="chip${filtroOrc === 'todos' ? ' active' : ''}" data-filtro="todos">Todos (${list.length})</button>` +
-        STATUS_ORC.map(st => `<button type="button" class="chip${filtroOrc === st.id ? ' active' : ''}" data-filtro="${st.id}">${st.nome} (${cont[st.id]})</button>`).join('');
+        `<button type="button" class="chip${filtroOrc === 'todos' ? ' active' : ''}" data-filtro="todos">${tr('Todos ({n})', { n: list.length })}</button>` +
+        STATUS_ORC.map(st => `<button type="button" class="chip${filtroOrc === st.id ? ' active' : ''}" data-filtro="${st.id}">${tr(st.nome)} (${cont[st.id]})</button>`).join('');
     } else {
       filtroOrcEl.innerHTML = '';
     }
@@ -2821,10 +2821,10 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
         const hist = item.emissao.historico || [];
         const ult = hist.length ? hist[hist.length - 1].em : item.emissao.data;
         linhaStatus = `<div class="status-linha">
-          <select data-status="${item.id}" style="color:${def.cor}; border-color:${def.cor}" aria-label="Status do orçamento">
-            ${STATUS_ORC.map(st => `<option value="${st.id}"${st.id === atual ? ' selected' : ''}>${st.nome}</option>`).join('')}
+          <select data-status="${item.id}" style="color:${def.cor}; border-color:${def.cor}" aria-label="${tr('Status do orçamento')}">
+            ${STATUS_ORC.map(st => `<option value="${st.id}"${st.id === atual ? ' selected' : ''}>${tr(st.nome)}</option>`).join('')}
           </select>
-          <span class="desde">desde ${fmtData(ult)}</span>
+          <span class="desde">${tr('desde {d}', { d: fmtData(ult) })}</span>
         </div>`;
         // fechamento do pedido: só depois de "Em produção". Perda real (se o pedido sabe o material) e custo real de miscelâneos.
         const e = item.emissao;
@@ -2837,15 +2837,15 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
             const valorPerda = e.perda > 0 ? e.perda : (e.perdaConfirmada ? '' : (estimada > 0 ? estimada : ''));
             const pct = fmtQtd(Number(e.desperdicioPct) || 0);
             const dicaPerda = (!e.perdaConfirmada && e.perda > 0)
-              ? `Estimativa do cálculo (${pct}% de desperdício), já descontada do estoque. Ajuste pro número real e toque em Lançar.`
+              ? tr('Estimativa do cálculo ({pct}% de desperdício), já descontada do estoque. Ajuste pro número real e toque em Lançar.', { pct })
               : (!controla && estimada > 0
-                ? `Estimativa do cálculo (${pct}% de desperdício). Informe o estoque desse material em Configurações pra lançar.`
-                : 'Total perdido neste pedido com impressões erradas e suportes. Sai do estoque na hora; lançar de novo corrige o valor.');
+                ? tr('Estimativa do cálculo ({pct}% de desperdício). Informe o estoque desse material em Configurações pra lançar.', { pct })
+                : tr('Total perdido neste pedido com impressões erradas e suportes. Sai do estoque na hora; lançar de novo corrige o valor.'));
             partes.push(`<div class="fecha-bloco">
-              <div class="estoque-info">${e.baixa > 0 ? `Estoque: −${fmtQtd(e.baixa)} ${un} de ${nomeMat}` : (controla ? `${nomeMat}: este pedido não tirou nada do estoque` : `${nomeMat} está sem estoque informado (Configurações)`)}</div>
+              <div class="estoque-info">${e.baixa > 0 ? tr('Estoque: −{q} {un} de {nome}', { q: fmtQtd(e.baixa), un, nome: nomeMat }) : (controla ? tr('{nome}: este pedido não tirou nada do estoque', { nome: nomeMat }) : tr('{nome} está sem estoque informado (Configurações)', { nome: nomeMat }))}</div>
               <div class="perda-linha">
                 <span>Perda real</span>
-                <input type="number" min="0" step="0.1" inputmode="decimal" placeholder="0" value="${valorPerda}" data-perda-input="${item.id}" aria-label="Perda real em ${un}">
+                <input type="number" min="0" step="0.1" inputmode="decimal" placeholder="0" value="${valorPerda}" data-perda-input="${item.id}" aria-label="${tr('Perda real em {un}', { un })}">
                 <span>${un}</span>
                 <button type="button" data-perda="${item.id}"${controla ? '' : ' disabled'}>Lançar</button>
               </div>
@@ -2859,10 +2859,10 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
               <div class="perda-linha">
                 <span>Custo real de miscelâneos</span>
                 <span>${SIMBOLO}</span>
-                <input type="number" data-moeda placeholder="0" value="${valorMisc}" data-misc-input="${item.id}" aria-label="Custo real de miscelâneos em reais">
+                <input type="number" data-moeda placeholder="0" value="${valorMisc}" data-misc-input="${item.id}" aria-label="${tr('Custo real de miscelâneos em reais')}">
                 <button type="button" data-misc="${item.id}">Salvar</button>
               </div>
-              <div class="dica">Argolas, chaveiros, tarraxas, cola, álcool… Estimado no cálculo: ${fmt(e.misc.estimado)}. ${real ? 'Valor real salvo: entra no lucro real do resumo.' : 'Sem alterar, vale a estimativa.'}</div>
+              <div class="dica">${tr('Argolas, chaveiros, tarraxas, cola, álcool… Estimado no cálculo: {v}.', { v: fmt(e.misc.estimado) })} ${tr(real ? 'Valor real salvo: entra no lucro real do resumo.' : 'Sem alterar, vale a estimativa.')}</div>
             </div>`);
           }
           if (partes.length) linhaEstoque = `<div class="estoque-orc">${partes.join('')}</div>`;
@@ -2871,7 +2871,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       return `
       <div class="saved-item" data-id="${item.id}">
         <div class="nome">${escapeHtml(item.nome)}</div>
-        <div class="info">${fmtData(item.savedAt)} · ${item.emissao ? `nº ${String(item.emissao.numero).padStart(4,'0')} · ${item.emissao.qtd} × ${fmt(item.emissao.precoUnit)}${item.emissao.frete > 0 ? ' + frete ' + fmt(item.emissao.frete) : ''}${item.emissao.cliente ? ' · ' + escapeHtml(item.emissao.cliente) : ''}` : `total ${item.custoTotal} · sugerido ${item.precoPeca}`}</div>
+        <div class="info">${fmtData(item.savedAt)} · ${item.emissao ? `${tr('nº {n}', { n: String(item.emissao.numero).padStart(4,'0') })} · ${item.emissao.qtd} × ${fmt(item.emissao.precoUnit)}${item.emissao.frete > 0 ? ' + ' + tr('frete {v}', { v: fmt(item.emissao.frete) }) : ''}${item.emissao.cliente ? ' · ' + escapeHtml(item.emissao.cliente) : ''}` : tr('total {t} · sugerido {s}', { t: item.custoTotal, s: item.precoPeca })}</div>
         ${linhaStatus}
         ${linhaEstoque}
         <div class="actions">
@@ -2933,7 +2933,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const campo = orcamentosLista.querySelector(`[data-perda-input="${b.dataset.perda}"]`);
     const r = lancarPerda(item, campo ? campo.value : 0);
     if (!r.ok){
-      alert('Esse material está sem estoque informado. Preencha o estoque dele em Configurações pra lançar a perda.');
+      alert(tr('Esse material está sem estoque informado. Preencha o estoque dele em Configurações pra lançar a perda.'));
       return;
     }
     lsSet(LS_ORC, list);
@@ -2942,7 +2942,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
   });
 
   document.getElementById('salvarOrcamentoBtn').addEventListener('click', () => {
-    const nome = orcamentoNomeInput.value.trim() || `Orçamento ${fmtData(new Date())}`;
+    const nome = orcamentoNomeInput.value.trim() || tr('Orçamento {d}', { d: fmtData(new Date()) });
     const list = lsGet(LS_ORC, []);
     list.unshift({
       id: Date.now().toString(36),
@@ -3025,7 +3025,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const p = Math.max(0, parseFloat(pdfCampo('pdfPreco').value) || 0);
     const f = Math.max(0, parseFloat(pdfCampo('pdfFrete').value) || 0);
     pdfCampo('pdfTotal').textContent = fmt(q * p + f);
-    pdfCampo('pdfTotalDet').textContent = f > 0 ? `${fmt(q * p)} em peças + ${fmt(f)} de frete` : '';
+    pdfCampo('pdfTotalDet').textContent = f > 0 ? tr('{a} em peças + {b} de frete', { a: fmt(q * p), b: fmt(f) }) : '';
   }
   pdfCampo('pdfQtd').addEventListener('input', atualizarTotalPdf);
   pdfCampo('pdfPreco').addEventListener('input', atualizarTotalPdf);
@@ -3036,7 +3036,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const emp = lsGet(LS_EMPRESA, {});
     const calcAtual = ultimoCalculo || {};
     pdfCampo('pdfCliente').value = '';
-    pdfCampo('pdfDescricao').value = orcamentoNomeInput.value.trim() || 'Peça impressa em 3D';
+    pdfCampo('pdfDescricao').value = orcamentoNomeInput.value.trim() || tr('Peça impressa em 3D');
     pdfCampo('pdfQtd').value = calcAtual.qtd || 1;
     pdfCampo('pdfPreco').value = (calcAtual.precoPeca || 0).toFixed(2);
     pdfCampo('pdfPrazo').value = emp.prazo || '';
@@ -3103,7 +3103,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
         numero: seq,
         data: new Date().toISOString(),
         cliente: pdfCampo('pdfCliente').value.trim(),
-        descricao: pdfCampo('pdfDescricao').value.trim() || 'Peça impressa em 3D',
+        descricao: pdfCampo('pdfDescricao').value.trim() || tr('Peça impressa em 3D'),
         qtd: Math.max(1, parseInt(pdfCampo('pdfQtd').value) || 1),
         precoUnit: Math.max(0, parseFloat(pdfCampo('pdfPreco').value) || 0),
         prazo: pdfCampo('pdfPrazo').value.trim(),
@@ -3155,7 +3155,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       fecharModalPdf();
     } catch(err){
       console.error(err);
-      alert('Não consegui gerar o PDF: ' + err.message);
+      alert(tr('Não consegui gerar o PDF: {msg}', { msg: err.message }));
     } finally {
       btn.disabled = false;
       btn.textContent = 'Salvar e gerar PDF';
@@ -3169,7 +3169,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const item = lsGet(LS_ORC, []).find(x => x.id === b.dataset.pdf);
     if (item && item.emissao){
       try { await gerarPdf(item.emissao, null); }
-      catch(err){ alert('Não consegui gerar o PDF: ' + err.message); }
+      catch(err){ alert(tr('Não consegui gerar o PDF: {msg}', { msg: err.message })); }
     }
   });
 
@@ -3191,7 +3191,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
   }
 
   async function gerarPdf(e, imagem){
-    if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('biblioteca de PDF não carregou, verifique a conexão');
+    if (!window.jspdf || !window.jspdf.jsPDF) throw new Error(tr('biblioteca de PDF não carregou, verifique a conexão'));
     const { jsPDF } = window.jspdf;
     const d = new jsPDF({ unit:'mm', format:'a4' });
     const M = 18, W = 210, L = W - 2 * M;
@@ -3214,7 +3214,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       }
     }
     d.setTextColor(...TXT); d.setFont('helvetica','bold'); d.setFontSize(14);
-    d.text(emp.nome || 'Orçamento de impressão 3D', xEmp, y + 6);
+    d.text(emp.nome || tr('Orçamento de impressão 3D'), xEmp, y + 6);
     d.setFont('helvetica','normal'); d.setFontSize(8.5); d.setTextColor(...CINZA);
     const contato = [emp.telefone, emp.email].filter(Boolean).join('   ·   ');
     if (contato) d.text(contato, xEmp, y + 11.5);
@@ -3223,10 +3223,10 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const dataEm = new Date(e.data);
     const validoAte = new Date(dataEm.getTime() + e.validadeDias * 86400000);
     d.setFont('helvetica','bold'); d.setFontSize(16); d.setTextColor(...LARANJA);
-    d.text('ORÇAMENTO', W - M, y + 6, { align:'right' });
+    d.text(tr('ORÇAMENTO'), W - M, y + 6, { align:'right' });
     d.setFont('helvetica','normal'); d.setFontSize(8.5); d.setTextColor(...CINZA);
-    d.text(`Nº ${String(e.numero).padStart(4,'0')}`, W - M, y + 11.5, { align:'right' });
-    d.text(`Emitido em ${fmtData(dataEm)}`, W - M, y + 16, { align:'right' });
+    d.text(tr('Nº {n}', { n: String(e.numero).padStart(4,'0') }), W - M, y + 11.5, { align:'right' });
+    d.text(tr('Emitido em {d}', { d: fmtData(dataEm) }), W - M, y + 16, { align:'right' });
     y += 23;
     d.setDrawColor(...LARANJA); d.setLineWidth(0.7); d.line(M, y, W - M, y);
     y += 9;
@@ -3241,20 +3241,20 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
 
     // --- cliente e descrição
     if (e.cliente){
-      rotulo('CLIENTE', M, y); y += 5;
+      rotulo(tr('CLIENTE'), M, y); y += 5;
       y += valor(e.cliente, M, y) * 5 + 3;
     }
-    rotulo('DESCRIÇÃO', M, y); y += 5;
+    rotulo(tr('DESCRIÇÃO'), M, y); y += 5;
     y += valor(e.descricao, M, y) * 5 + 5;
 
     // --- vista do STL + especificações técnicas
     const esp = e.especificacoes || {};
     const specs = [
-      ['DIMENSÕES', esp.dimensoes],
-      ['MATERIAL', esp.material],
-      [esp.unidadePeso === 'mL' ? 'VOLUME POR PEÇA' : 'PESO POR PEÇA',
+      [tr('DIMENSÕES'), esp.dimensoes],
+      [tr('MATERIAL'), esp.material],
+      [tr(esp.unidadePeso === 'mL' ? 'VOLUME POR PEÇA' : 'PESO POR PEÇA'),
         esp.pesoPeca ? `${Math.round(esp.pesoPeca)} ${esp.unidadePeso || 'g'}` : ''],
-      ['TEMPO DE IMPRESSÃO', formatarTempo(esp.tempoImpressao)],
+      [tr('TEMPO DE IMPRESSÃO'), formatarTempo(esp.tempoImpressao)],
     ].filter(s => s[1]);
     if (imagem || specs.length){
       let xSpec = M, alturaBloco = 0;
@@ -3281,9 +3281,9 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const colQtd = M + L - 70, colUnit = M + L - 36, colTot = W - M - 3;
     d.setFillColor(...ESCURO); d.rect(M, y, L, 8, 'F');
     d.setFont('helvetica','bold'); d.setFontSize(8.5); d.setTextColor(255,255,255);
-    d.text('ITEM', M + 3, y + 5.3);
-    d.text('QTD', colQtd, y + 5.3, { align:'right' });
-    d.text('VALOR UNIT.', colUnit, y + 5.3, { align:'right' });
+    d.text(tr('ITEM'), M + 3, y + 5.3);
+    d.text(tr('QTD'), colQtd, y + 5.3, { align:'right' });
+    d.text(tr('VALOR UNIT.'), colUnit, y + 5.3, { align:'right' });
     d.text('TOTAL', colTot, y + 5.3, { align:'right' });
     y += 8;
     const total = e.qtd * e.precoUnit;
@@ -3300,7 +3300,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     d.setDrawColor(220,224,228); d.setLineWidth(0.3); d.line(M, y, W - M, y);
     if (frete > 0){
       d.setFont('helvetica','normal'); d.setFontSize(10); d.setTextColor(...TXT);
-      d.text('Frete', M + 3, y + 6);
+      d.text(tr('Frete'), M + 3, y + 6);
       d.text(money(frete), colTot, y + 6, { align:'right' });
       y += 9;
       d.setDrawColor(220,224,228); d.setLineWidth(0.3); d.line(M, y, W - M, y);
@@ -3316,9 +3316,9 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
 
     // --- condições
     const condicoes = [
-      ['PRAZO DE ENTREGA', e.prazo],
-      ['FORMA DE PAGAMENTO', e.pagamento],
-      ['VALIDADE', `${e.validadeDias} dias (até ${fmtData(validoAte)})`],
+      [tr('PRAZO DE ENTREGA'), e.prazo],
+      [tr('FORMA DE PAGAMENTO'), e.pagamento],
+      [tr('VALIDADE'), tr('{n} dias (até {d})', { n: e.validadeDias, d: fmtData(validoAte) })],
     ].filter(c => c[1]);
     const larg = L / condicoes.length;
     condicoes.forEach(([k, v], i) => {
@@ -3328,16 +3328,16 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     y += 18;
 
     if (e.obs){
-      rotulo('OBSERVAÇÕES', M, y); y += 5;
+      rotulo(tr('OBSERVAÇÕES'), M, y); y += 5;
       y += valor(e.obs, M, y) * 5;
     }
 
     // --- rodapé
     d.setFont('helvetica','normal'); d.setFontSize(7.5); d.setTextColor(...CINZA);
-    d.text('Orçamento gerado com Precifica 3D', W / 2, 287, { align:'center' });
+    d.text(tr('Orçamento gerado com Precifica 3D'), W / 2, 287, { align:'center' });
 
     const slug = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase();
-    d.save(`orcamento-${String(e.numero).padStart(4,'0')}${e.cliente ? '-' + slug(e.cliente) : ''}.pdf`);
+    d.save(`${tr('orcamento')}-${String(e.numero).padStart(4,'0')}${e.cliente ? '-' + slug(e.cliente) : ''}.pdf`);
   }
 
   // ============ LEITOR DE STL (volume, peso — preenche o peso da peça ao vivo) ============
@@ -3639,7 +3639,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
         try {
           const buffer = ev.target.result;
           const triangles = isBinarySTL(buffer) ? parseBinarySTL(buffer) : parseAsciiSTL(new TextDecoder().decode(buffer));
-          if (!triangles.length) throw new Error('nenhum triângulo encontrado');
+          if (!triangles.length) throw new Error(tr('nenhum triângulo encontrado'));
           const stats = computeMeshStats(triangles);
           stlTrianglesAtual = triangles;
           stlBboxAtual = stats;
@@ -3650,7 +3650,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
           stlMaiorDimOriginal = stlDimsOriginal[stlEixoMaior];
 
           stlDimsOriginais.textContent = `${stlDimsOriginal[0].toFixed(1)} × ${stlDimsOriginal[1].toFixed(1)} × ${stlDimsOriginal[2].toFixed(1)} mm`;
-          stlDimLabel.textContent = `Maior dimensão (eixo ${EIXOS[stlEixoMaior]})`;
+          stlDimLabel.textContent = tr('Maior dimensão (eixo {x})', { x: EIXOS[stlEixoMaior] });
           stlDimSlider.value = Math.min(Math.max(stlMaiorDimOriginal, 1), 300).toFixed(0);
           stlInfill.value = 15;
 
@@ -3660,7 +3660,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
           updateStlDerived();
         } catch(err){
           stlStatus.className = 'stl-status error';
-          stlStatus.textContent = 'Não consegui ler este arquivo (' + err.message + ').';
+          stlStatus.textContent = tr('Não consegui ler este arquivo ({msg}).', { msg: err.message });
         }
       };
       reader.onerror = () => { stlStatus.className = 'stl-status error'; stlStatus.textContent = 'Erro ao ler o arquivo.'; };
@@ -3763,12 +3763,12 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
   }
 
   function statusManutencao(item){
-    if (!item.ultimaManutencao) return { label:'sem registro', cls:'neutral' };
+    if (!item.ultimaManutencao) return { label:tr('sem registro'), cls:'neutral' };
     const dias = Math.floor((Date.now() - new Date(item.ultimaManutencao).getTime()) / 86400000);
     const restante = (item.intervaloDias || 90) - dias;
-    if (restante > (item.intervaloDias || 90) * 0.2) return { label:`próxima em ${restante}d`, cls:'ok' };
-    if (restante >= 0) return { label:`atenção · ${restante}d`, cls:'warn' };
-    return { label:`atrasada ${Math.abs(restante)}d`, cls:'late' };
+    if (restante > (item.intervaloDias || 90) * 0.2) return { label:tr('próxima em {d}d', { d: restante }), cls:'ok' };
+    if (restante >= 0) return { label:tr('atenção · {d}d', { d: restante }), cls:'warn' };
+    return { label:tr('atrasada {d}d', { d: Math.abs(restante) }), cls:'late' };
   }
 
   function renderMinhasImpressoras(){
@@ -3777,12 +3777,12 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const favs = lsGet(LS_FAVS, []);
     mpLista.innerHTML = list.map(item => {
       const st = statusManutencao(item);
-      const ultima = item.ultimaManutencao ? fmtData(item.ultimaManutencao) : 'nunca';
+      const ultima = item.ultimaManutencao ? fmtData(item.ultimaManutencao) : tr('nunca');
       const pecas = pecasDoItem(item);
       const pecasRelevantes = pecasParaTipo(item.tipo || 'fdm');
       const favId = 'meu_' + item.id;
       const favorita = favs.includes(favId);
-      const nomeExib = `${item.fabricante || ''} ${item.modelo || ''}`.trim() || 'Impressora sem nome';
+      const nomeExib = `${item.fabricante || ''} ${item.modelo || ''}`.trim() || tr('Impressora sem nome');
       const linhasPecas = pecasRelevantes.map(pm => `
         <div class="peca-row">
           <span class="peca-nome">${pm.nome} <a href="#" ${comprarPeca(pm.id, item)} class="buy-link">comprar →</a></span>
@@ -3827,7 +3827,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
           <div class="parts-subtitle">PEÇAS DE REPOSIÇÃO — CUSTO E HORAS ATÉ TROCAR</div>
           ${linhasPecas}
 
-          <div class="parts-resumo" data-resumo="${item.id}">Manutenção: <strong>${fmt(custoManutencaoPorHora(item))}/hora</strong> · última revisão: ${ultima}</div>
+          <div class="parts-resumo" data-resumo="${item.id}">${tr('Manutenção:')} <strong>${fmt(custoManutencaoPorHora(item))}${tr('/hora')}</strong> · ${tr('última revisão:')} ${ultima}</div>
           <button type="button" class="save-parts-btn" data-save-mp="${item.id}">Salvar alterações</button>
           <div class="saved-item-actions">
             <a href="#" ${comprarImpressora(item)} class="buy-link-action">Comprar →</a>
@@ -3924,8 +3924,8 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
 
       // Atualiza só o resumo (não re-renderiza, pra não fechar o accordion).
       const resumo = box.querySelector(`[data-resumo="${item.id}"]`);
-      const ultima = item.ultimaManutencao ? fmtData(item.ultimaManutencao) : 'nunca';
-      if (resumo) resumo.innerHTML = `Manutenção: <strong>${fmt(custoManutencaoPorHora(item))}/hora</strong> · última revisão: ${ultima}`;
+      const ultima = item.ultimaManutencao ? fmtData(item.ultimaManutencao) : tr('nunca');
+      if (resumo) resumo.innerHTML = `${tr('Manutenção:')} <strong>${fmt(custoManutencaoPorHora(item))}${tr('/hora')}</strong> · ${tr('última revisão:')} ${ultima}`;
       // Se essa é a impressora ativa, o resultado principal muda também.
       if (currentPrinterId === 'meu_' + item.id){
         const p = todasImpressoras().find(x => x.id === currentPrinterId);
