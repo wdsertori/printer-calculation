@@ -22,8 +22,8 @@ export const REGIOES = {
         loja:true, padroes:null },
   en: { id:'en', locale:'en-US', moeda:'USD', simbolo:'$', decimal:'.', placeholder:'0.00',
         loja:false,                                   // Shopping oculto por enquanto (sem afiliados nos EUA)
-        // valores iniciais (só quando ainda não há nada salvo) — estimativas EUA, 2026
-        padroes:{ precoKg:22, precoLitro:35, precoKwh:0.17, valorHora:20 } },
+        // valores iniciais (só quando ainda não há nada salvo) — estimativas EUA, out/2026 — luz: média residencial ~18,6¢/kWh (EIA, mar/2026)
+        padroes:{ precoKg:20, precoLitro:25, precoKwh:0.18, valorHora:20 } },
 };
 
 function detectar(){

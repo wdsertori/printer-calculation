@@ -1,3 +1,5 @@
+import { IDIOMA } from './i18n.js';
+
 // ============================================================================
 // CATALOGO.JS — dados que o site usa, separados do resto do código.
 //
@@ -244,7 +246,7 @@ export const PRINTER_IMAGE_OVERRIDES = {
 // netPrice ....... true = plataforma onde você informa o líquido que quer
 //                  receber (Temu), então o preço mínimo é o próprio líquido
 // ----------------------------------------------------------------------------
-export const MARKETPLACES = [
+const MARKETPLACES_BR = [
   { nome:'Mercado Livre · Clássico', percentual:13, taxaFixa:6.50, fixaAbaixoDe:79,
     obs:'10–14% por categoria; taxa por unidade só abaixo de R$ 79' },
   { nome:'Mercado Livre · Premium', percentual:17, taxaFixa:6.50, fixaAbaixoDe:79,
@@ -258,3 +260,76 @@ export const MARKETPLACES = [
   { nome:'Temu · Net Price', percentual:0, taxaFixa:0, netPrice:true,
     obs:'você informa o líquido desejado e a Temu define o preço final' },
 ];
+
+
+// ============================================================================
+// VERSÃO EUA (idioma English)
+// Só vale quando o app está em inglês: troca preços para dólar, descrições,
+// nomes e a lista de marketplaces. Em português nada disso é usado.
+//
+// Todos os valores são ESTIMATIVAS (referência: lojas oficiais e roundups de
+// outubro/2026 — ex.: Bambu A1 combo US$ 399, Ender-3 V3 SE US$ 199, Saturn 4
+// Ultra US$ 379, Mars 5 Ultra US$ 259). Ajuste aqui à vontade.
+// ============================================================================
+export const MARKETPLACES_US = [
+  { nome:'Etsy', percentual:9.5, taxaFixa:0.45,
+    obs:'6.5% transaction + 3% & $0.25 payment processing + $0.20 listing; shipping is also charged the 6.5%' },
+  { nome:'Etsy · with Offsite Ads', percentual:24.5, taxaFixa:0.45,
+    obs:'adds 15% when a sale comes from an Etsy-placed ad (12% above $10k/year)' },
+  { nome:'eBay', percentual:13.6, taxaFixa:0.40,
+    obs:'13.6% on most categories (fee base includes shipping and tax) + $0.40 per order ($0.30 up to $10)' },
+  { nome:'Amazon Handmade', percentual:15, taxaFixa:0,
+    obs:'15% referral fee, no monthly fee; requires approval as a maker' },
+  { nome:'Direct sale · card', percentual:2.9, taxaFixa:0.30,
+    obs:'Stripe / Square-style card processing, for your own site or Instagram sales' },
+];
+
+const US = {
+  impressoras: {
+    ender3v3se:      { precoCompra:199,  spec:'open frame · 350 W PSU' },
+    kobra3:          { precoCompra:279,  spec:'open frame · 400 W PSU' },
+    crealityhi:      { precoCompra:399,  spec:'open frame · 390 W peak (120V)' },
+    a1mini:          { precoCompra:219,  spec:'compact open frame · 150 W PSU' },
+    a1:              { precoCompra:349,  spec:'open frame · 350 W peak (120V)' },
+    k2:              { precoCompra:799,  spec:'enclosed · 450 W peak (+20 W for CFS)' },
+    p1s:             { precoCompra:549,  spec:'enclosed · 350 W peak (120V)' },
+    x1c:             { precoCompra:1099, spec:'enclosed + AMS · 350 W peak (120V)' },
+    mars5:           { precoCompra:229,  spec:'resin · 4K LCD · entry level',  pecas:{ tela:55,  fep:10, cuba:25 } },
+    saturn4ultra:    { precoCompra:379,  spec:'resin · 12K LCD · heated vat',  pecas:{ tela:90,  fep:12, cuba:40 } },
+    saturn4ultra16k: { precoCompra:449,  spec:'resin · 16K LCD · heated vat',  pecas:{ tela:130, fep:12, cuba:70 } },
+    photonm5s:       { precoCompra:259,  spec:'resin · 12K LCD · no leveling', pecas:{ tela:80,  fep:12, cuba:30 } },
+    sonicmini8k:     { precoCompra:299,  spec:'resin · 8K LCD · compact',      pecas:{ tela:75,  fep:12, cuba:30 } },
+  },
+  pecasFdm: { hotend:20, bico:6, mesa:25, filtro:12, graxa:8 },          // custo por peça, US$
+  nomesPecas: { hotend:'Hotend', bico:'Nozzle', mesa:'Build plate', filtro:'Air filter', graxa:'Grease',
+                tela:'LCD screen', fep:'FEP film', cuba:'Resin vat' },
+  filamentos: {
+    pla_generico:   { nome:'Generic PLA',   precoKg:20 },
+    petg_generico:  { nome:'Generic PETG',  precoKg:22 },
+    abs_generico:   { nome:'Generic ABS',   precoKg:20 },
+    tpu_generico:   { nome:'Generic TPU',   precoKg:40 },
+    nylon_generico: { nome:'Generic nylon', precoKg:55 },
+  },
+  resinas: {                                   // preço por litro (≈ 1 kg)
+    resina_padrao:   { nome:'Generic standard resin',        precoLitro:25 },
+    resina_abslike:  { nome:'Generic ABS-like resin',        precoLitro:30 },
+    resina_lavavel:  { nome:'Generic water-washable resin',  precoLitro:30 },
+    resina_flexivel: { nome:'Generic flexible resin',        precoLitro:45 },
+  },
+};
+
+if (IDIOMA === 'en') {
+  CATALOGO_IMPRESSORAS.forEach(p => {
+    const u = US.impressoras[p.id]; if (!u) return;
+    p.precoCompra = u.precoCompra; p.spec = u.spec;
+    Object.keys(p.pecas || {}).forEach(k => {
+      const c = (u.pecas && u.pecas[k] != null) ? u.pecas[k] : US.pecasFdm[k];
+      if (c != null && p.pecas[k].custo > 0) p.pecas[k].custo = c;
+    });
+  });
+  CATALOGO_PECAS.forEach(pm => { if (US.nomesPecas[pm.id]) pm.nome = US.nomesPecas[pm.id]; });
+  CATALOGO_FILAMENTOS.forEach(f => { const u = US.filamentos[f.id]; if (u) Object.assign(f, u); });
+  CATALOGO_RESINAS.forEach(r => { const u = US.resinas[r.id]; if (u) Object.assign(r, u); });
+}
+
+export const MARKETPLACES = IDIOMA === 'en' ? MARKETPLACES_US : MARKETPLACES_BR;
