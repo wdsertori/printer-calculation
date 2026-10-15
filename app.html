@@ -159,6 +159,13 @@
   .subsection summary:hover{color:var(--accent-text);}
   .subsection[open]{padding-bottom:2px;}
 
+  /* Configurações: cards expansíveis (fechados por padrão) */
+  #settingsScreen .card.acord > h2{cursor:pointer; user-select:none; margin-bottom:0; padding:2px 0 14px; -webkit-tap-highlight-color:transparent;}
+  #settingsScreen .card.acord > h2::after{content:'▸'; margin-left:auto; font-size:12px; color:var(--text-dim); transition:transform .15s ease;}
+  #settingsScreen .card.acord.aberto > h2::after{transform:rotate(90deg);}
+  #settingsScreen .card.acord > h2:hover{color:var(--accent-text);}
+  #settingsScreen .card.acord.aberto > h2{margin-bottom:6px;}
+  #settingsScreen .card.acord:not(.aberto) > .card-corpo{display:none;}
   details.card{cursor:default;}
   details.card > summary{
     font-size:12px; font-family:'IBM Plex Mono', monospace; font-weight:500; color:var(--text-dim);
@@ -502,7 +509,13 @@
   }
   .auth-popover-name{font-size:12.5px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:3px;}
   .auth-popover-status{font-size:10.5px; color:var(--teal-text); font-family:'IBM Plex Mono',monospace; margin-bottom:10px;}
-  .auth-popover-signout{width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:8px 0; border-radius:4px; cursor:pointer;}
+  .auth-popover-acoes{display:flex; gap:8px;}
+  .auth-popover-btn{flex:1; white-space:nowrap; background:var(--surface); border:1px solid var(--border); color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:8px 10px; border-radius:4px; cursor:pointer;}
+  .auth-popover-btn:hover{color:var(--accent-text); border-color:var(--accent);}
+  .auth-popover-btn b{color:var(--text); font-weight:600;}
+  .idioma-chip{position:absolute; right:46px; top:50%; transform:translateY(-50%); background:transparent; border:1px solid var(--border); color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:11px; padding:5px 7px; border-radius:4px; cursor:pointer;}
+  .idioma-chip:hover{color:var(--accent-text); border-color:var(--accent);}
+  .auth-popover-signout{width:auto; background:var(--surface); border:1px solid var(--border); color:var(--text-dim); font-family:'IBM Plex Mono',monospace; font-size:11.5px; padding:8px 0; border-radius:4px; cursor:pointer;}
   .auth-popover-signout:hover{color:var(--danger-text); border-color:var(--danger);}
 
   .screen-title{font-size:22px; font-weight:600; margin:0 0 6px; letter-spacing:-0.01em;}
@@ -679,8 +692,12 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       <div class="auth-popover" id="authPopover" hidden>
         <div class="auth-popover-name" id="authPopoverName"></div>
         <div class="auth-popover-status" id="authSyncStatus"></div>
-        <button type="button" class="auth-popover-signout" id="authSignOut">Sair</button>
+        <div class="auth-popover-acoes">
+          <button type="button" class="auth-popover-btn" id="authLang"><span data-i18n="conta.idioma">Idioma</span>: <b id="authLangCod">PT</b></button>
+          <button type="button" class="auth-popover-btn auth-popover-signout" id="authSignOut" data-i18n="conta.sair">Sair</button>
+        </div>
       </div>
+      <button type="button" class="idioma-chip" id="idiomaChip" aria-label="Idioma / Language">PT</button>
     </div>
   </div>
 
@@ -950,15 +967,6 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
   <div id="settingsScreen" class="screen" hidden>
     <h1 class="screen-title">Configurações</h1>
     <p class="screen-desc">Valores que normalmente não mudam a cada peça — configure uma vez e esqueça.</p>
-
-    <div class="card">
-      <h2 data-i18n="idioma.titulo">Idioma</h2>
-      <p class="card-desc" data-i18n="idioma.desc">Idioma e moeda do aplicativo. Os valores em dinheiro já salvos não são convertidos entre moedas.</p>
-      <div class="modo-toggle" id="idiomaToggle" role="group" aria-label="Idioma do aplicativo" data-i18n-aria="idioma.aria" style="margin-bottom:4px">
-        <button type="button" class="modo-btn" data-idioma-op="pt">Português (R$)</button>
-        <button type="button" class="modo-btn" data-idioma-op="en">English (US$)</button>
-      </div>
-    </div>
 
     <div class="card">
       <h2>Aparência</h2>
@@ -1240,7 +1248,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     CATALOGO_RESINAS, CATALOGO_TIPOS_RESINA, MARKETPLACES,
     PRINTER_IMAGE_OVERRIDES,
   } from './catalogo.js';
-  import { IDIOMA, REGIAO, SIMBOLO, t as tr, traduzirDOM, fmtMoeda, fmtNumero, fmtCentavos, fmtData, fmtMes, comparar, decimalLocal, definirIdioma, aplicarPadroes } from './i18n.js';
+  import { IDIOMA, REGIAO, SIMBOLO, t as tr, traduzirDOM, fmtMoeda, fmtNumero, fmtCentavos, fmtData, fmtMes, comparar, decimalLocal, gravarIdioma, outroIdioma, aplicarPadroes } from './i18n.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyBw3QJS_NAVy0e0tFkvLtPoG7vCA2XfQA4",
@@ -1592,12 +1600,26 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
   document.querySelectorAll('#temaToggle .modo-btn').forEach(btn => {
     btn.addEventListener('click', () => aplicarTema(btn.dataset.temaOp));
   });
-  // Idioma / moeda (c3d_idioma, só neste aparelho). Trocar recarrega a página.
-  document.querySelectorAll('#idiomaToggle .modo-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.idiomaOp === IDIOMA);
-    btn.addEventListener('click', () => definirIdioma(btn.dataset.idiomaOp));
-  });
   document.querySelectorAll('[data-simbolo]').forEach(n => { n.textContent = SIMBOLO; });
+
+  // Cards de Configurações viram sanfona: título clicável, corpo recolhido
+  document.querySelectorAll('#settingsScreen > .card').forEach(card => {
+    const h = card.querySelector(':scope > h2'); if (!h) return;
+    const corpo = document.createElement('div'); corpo.className = 'card-corpo';
+    [...card.childNodes].forEach(n => { if (n !== h && !(n.classList && /^tick-/.test(n.className))) corpo.appendChild(n); });
+    card.appendChild(corpo);
+    card.classList.add('acord');
+    h.setAttribute('role', 'button'); h.tabIndex = 0; h.setAttribute('aria-expanded', 'false');
+    const alterna = abrir => { card.classList.toggle('aberto', abrir); h.setAttribute('aria-expanded', String(abrir)); };
+    h.addEventListener('click', () => alterna(!card.classList.contains('aberto')));
+    h.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); alterna(!card.classList.contains('aberto')); } });
+    card.__alterna = alterna;
+  });
+  // abre o card que contém o elemento (usado por atalhos que levam a Configurações)
+  function abrirCardDe(id){
+    const n = document.getElementById(id), c = n && n.closest('.card.acord');
+    if (c && c.__alterna){ c.__alterna(true); setTimeout(() => c.scrollIntoView({ behavior:'smooth', block:'start' }), 60); }
+  }
   traduzirDOM();
 
   document.querySelectorAll('#modoToggle .modo-btn').forEach(btn => {
@@ -1653,6 +1675,13 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       .catch(e => console.warn('contador não incrementou:', e));
   }
 
+  const idiomaLocal = () => { try { return localStorage.getItem('c3d_idioma') || IDIOMA; } catch (e) { return IDIOMA; } };
+  async function trocarIdioma(){
+    if (!gravarIdioma(outroIdioma())) return;
+    try { sessionStorage.setItem('c3d_idioma_recarga','1'); } catch (e) {}
+    if (currentUser){ try { await pushToCloud(); } catch (e) {} }
+    location.reload();
+  }
   async function pushToCloud(){
     if (!currentUser) return;
     const payload = {
@@ -1669,6 +1698,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       resinas: lsGet(LS_RESINAS, []),
       empresa: lsGet(LS_EMPRESA, {}),
       cfgEstoque: lsGet(LS_CFG_ESTOQUE, {}),
+      idioma: idiomaLocal(),
       orcSeq: lsGet(LS_ORC_SEQ, 0),
       atualizadoEm: new Date().toISOString(),
     };
@@ -1686,6 +1716,10 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
       const snap = await getDoc(doc(db, 'users', uid));
       if (snap.exists()){
         const data = snap.data();
+        // idioma do perfil: se difere deste aparelho, adota e recarrega (uma vez só)
+        if (data.idioma && data.idioma !== IDIOMA && gravarIdioma(data.idioma)){
+          try { if (!sessionStorage.getItem('c3d_idioma_recarga')){ sessionStorage.setItem('c3d_idioma_recarga','1'); location.reload(); return; } } catch (e) {}
+        }
         aplicandoDadosDaNuvem = true;
         if (data.campos) lsSetRaw(LS_CAMPOS, data.campos);
         if (data.modo) lsSetRaw(LS_MODO, data.modo);
@@ -1760,9 +1794,14 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     if (!authPopover.hidden && !e.target.closest('.dock-avatar-wrap')) authPopover.hidden = true;
   });
   authSignOut.addEventListener('click', () => { signOut(auth); authPopover.hidden = true; });
+  document.getElementById('authLang').addEventListener('click', trocarIdioma);
+  document.getElementById('idiomaChip').addEventListener('click', trocarIdioma);
+  document.getElementById('authLangCod').textContent = IDIOMA.toUpperCase();
+  document.getElementById('idiomaChip').textContent = IDIOMA.toUpperCase();
 
   onAuthStateChanged(auth, user => {
     currentUser = user;
+    document.getElementById('idiomaChip').hidden = !!user;
     if (user && pdfPendente){ pdfPendente = false; setTimeout(abrirFormPdf, 600); }
     if (user){
       authDockBtn.innerHTML = `<img src="${user.photoURL || ''}" alt="">`;
@@ -2062,7 +2101,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     const deprecHora = (ativa.vidaUtil ? ativa.precoCompra / ativa.vidaUtil : 0) + ativa.custoManutencaoHora;
     document.getElementById('apiDeprec').textContent = fmt(deprecHora);
   }
-  document.getElementById('apiGoSettingsEdit').addEventListener('click', e => { e.preventDefault(); showScreen('settings'); });
+  document.getElementById('apiGoSettingsEdit').addEventListener('click', e => { e.preventDefault(); showScreen('settings'); abrirCardDe('mpLista'); });
 
   function candidateSources(p){
     const list = [];
@@ -2168,7 +2207,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     }
     if (e.target.closest('[data-addprinter]')){
       closePanel();
-      showScreen('settings');
+      showScreen('settings'); abrirCardDe('mpLista');
       return;
     }
     const selBtn = e.target.closest('[data-select]');
@@ -2713,7 +2752,7 @@ html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display
     renderAlertaEstoque();
     renderFilamentos(); renderResinas();
   });
-  alertaEstoqueEl.addEventListener('click', () => showScreen('settings'));
+  alertaEstoqueEl.addEventListener('click', () => { showScreen('settings'); abrirCardDe('cfgAlertaEstoque'); });
 
   // linha "Estoque / avisar com até" de cada filamento e resina (em Configurações)
   function linhaEstoqueMaterial(m, tipo){

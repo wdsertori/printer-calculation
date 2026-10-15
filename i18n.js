@@ -42,9 +42,9 @@ export const SIMBOLO = REGIAO.simbolo;
 // ---------------------------------------------------------------- dicionário
 // Preenchido por etapas. Chaves já traduzidas aqui; o resto cai no português.
 export const EN = {
-  'idioma.titulo': 'Language',
-  'idioma.desc': 'Language and currency of the app. Saved amounts are not converted between currencies.',
-  'idioma.aria': 'App language',
+  'conta.idioma': 'Language',
+  'conta.sair': 'Sign out',
+  'conta.aria': 'Account',
 };
 
 export function t(chave, vars, original){
@@ -77,11 +77,13 @@ export const comparar = (a, b) => String(a).localeCompare(String(b), REGIAO.loca
 export const decimalLocal = s => String(s).replace('.', REGIAO.decimal);
 
 // ------------------------------------------------------------------- trocar
-export function definirIdioma(id){
-  if (!REGIOES[id] || id === IDIOMA) return;
+// grava a escolha neste aparelho (a nuvem é com o app). Devolve true se mudou.
+export function gravarIdioma(id){
+  if (!REGIOES[id] || id === IDIOMA) return false;
   try { localStorage.setItem(CHAVE_IDIOMA, id); } catch (e) {}
-  location.reload();                  // textos montados em JS refazem do zero
+  return true;
 }
+export const outroIdioma = () => (IDIOMA === 'pt' ? 'en' : 'pt');
 
 // valores iniciais da região (só se o usuário ainda não salvou nada)
 export function aplicarPadroes(chaveCampos){
