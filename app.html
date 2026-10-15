@@ -17,6 +17,9 @@
     var t = 'escuro';
     try { t = localStorage.getItem('c3d_tema') === 'claro' ? 'claro' : 'escuro'; } catch (e) {}
     document.documentElement.setAttribute('data-tema', t);
+    var l = 'pt'; try { l = localStorage.getItem('c3d_idioma') || ((navigator.language || 'pt').toLowerCase().indexOf('pt') === 0 ? 'pt' : 'en'); } catch (e) {}
+    document.documentElement.setAttribute('data-idioma', l === 'en' ? 'en' : 'pt');
+    document.documentElement.lang = l === 'en' ? 'en-US' : 'pt-BR';
     var m = document.querySelector('meta[name="theme-color"]');
     if (m) m.setAttribute('content', t === 'claro' ? '#F6FAFE' : '#0E2A47');
   })();
@@ -660,6 +663,8 @@
     /* Configurações e Ajuda seguem em coluna única, mais confortável de ler */
     #settingsScreen, #helpScreen{max-width:560px; margin:0 auto;}
   }
+/* Shopping fica oculto fora do Brasil (ainda sem afiliados) */
+html[data-idioma="en"] #openShop, html[data-idioma="en"] [data-loja-cat]{display:none !important}
 </style>
 </head>
 <body data-tela="main">
@@ -767,7 +772,7 @@
       <div class="active-filament-info" id="activeFilamentInfo" hidden></div>
       <div class="field" id="precoKgCustomField">
         <label>Preço do filamento<span class="hint">por quilo</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKg" value="120" step="1" data-moeda></div>
+        <div class="input-box"><span class="unit" data-simbolo>R$</span><input type="number" id="precoKg" value="120" step="1" data-moeda></div>
       </div>
     </div>
 
@@ -784,7 +789,7 @@
       <div class="active-filament-info" id="activeResinaInfo" hidden></div>
       <div class="field" id="precoLitroCustomField">
         <label>Preço da resina<span class="hint">por litro</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoLitro" value="180" step="10" data-moeda></div>
+        <div class="input-box"><span class="unit" data-simbolo>R$</span><input type="number" id="precoLitro" value="180" step="10" data-moeda></div>
       </div>
     </div>
 
@@ -837,7 +842,7 @@
       <summary>Configurações de mão de obra</summary>
       <div class="field">
         <label>Miscelâneos<span class="hint">álcool, cola, tinta — valor do lote inteiro</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="miscelaneos" value="0" step="1" data-moeda></div>
+        <div class="input-box"><span class="unit" data-simbolo>R$</span><input type="number" id="miscelaneos" value="0" step="1" data-moeda></div>
       </div>
       <div class="field no-prefix suffix">
         <label>Margem de lucro<span class="hint">fatia do preço final que é lucro</span></label>
@@ -947,6 +952,15 @@
     <p class="screen-desc">Valores que normalmente não mudam a cada peça — configure uma vez e esqueça.</p>
 
     <div class="card">
+      <h2 data-i18n="idioma.titulo">Idioma</h2>
+      <p class="card-desc" data-i18n="idioma.desc">Idioma e moeda do aplicativo. Os valores em dinheiro já salvos não são convertidos entre moedas.</p>
+      <div class="modo-toggle" id="idiomaToggle" role="group" aria-label="Idioma do aplicativo" data-i18n-aria="idioma.aria" style="margin-bottom:4px">
+        <button type="button" class="modo-btn" data-idioma-op="pt">Português (R$)</button>
+        <button type="button" class="modo-btn" data-idioma-op="en">English (US$)</button>
+      </div>
+    </div>
+
+    <div class="card">
       <h2>Aparência</h2>
       <p class="card-desc">Tema do aplicativo. A escolha fica salva neste aparelho.</p>
       <div class="modo-toggle" id="temaToggle" role="group" aria-label="Tema do aplicativo" style="margin-bottom:4px">
@@ -980,7 +994,7 @@
       </div>
       <div class="field">
         <label>Preço por kg<span class="hint">pra cadastrar na lista</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="filPreco" step="5" data-moeda></div>
+        <div class="input-box"><span class="unit" data-simbolo>R$</span><input type="number" id="filPreco" step="5" data-moeda></div>
       </div>
       <button type="button" class="save-btn" id="filAddBtn">Adicionar filamento</button>
       <div id="filLista"></div>
@@ -1004,7 +1018,7 @@
       </div>
       <div class="field">
         <label>Preço por litro<span class="hint">pra cadastrar na lista</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="resPreco" step="10" data-moeda></div>
+        <div class="input-box"><span class="unit" data-simbolo>R$</span><input type="number" id="resPreco" step="10" data-moeda></div>
       </div>
       <button type="button" class="save-btn" id="resAddBtn">Adicionar resina</button>
       <div id="resLista"></div>
@@ -1014,7 +1028,7 @@
       <h2>Energia</h2>
       <div class="field">
         <label>Preço da energia<span class="hint">tarifa por kWh</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="precoKwh" value="0.75" step="0.01" data-moeda></div>
+        <div class="input-box"><span class="unit" data-simbolo>R$</span><input type="number" id="precoKwh" value="0.75" step="0.01" data-moeda></div>
       </div>
     </div>
 
@@ -1038,7 +1052,7 @@
       <h2>Valor da sua hora</h2>
       <div class="field">
         <label>Valor da sua hora<span class="hint">zere se for uso pessoal</span></label>
-        <div class="input-box"><span class="unit">R$</span><input type="number" id="valorHora" value="30" step="1" data-moeda></div>
+        <div class="input-box"><span class="unit" data-simbolo>R$</span><input type="number" id="valorHora" value="30" step="1" data-moeda></div>
       </div>
     </div>
 
@@ -1182,10 +1196,10 @@
       <div class="text-field"><label for="pdfCliente">Cliente</label><input type="text" id="pdfCliente" list="clientesSugestoes" autocomplete="off" placeholder="nome do cliente (opcional)"><datalist id="clientesSugestoes"></datalist></div>
       <div class="text-field"><label for="pdfDescricao">Descrição da peça</label><input type="text" id="pdfDescricao"></div>
       <div class="field no-prefix"><label>Quantidade</label><div class="input-box"><input type="number" id="pdfQtd" min="1" step="1"></div></div>
-      <div class="field"><label>Preço por peça<span class="hint">sugerido pela calculadora</span></label><div class="input-box"><span class="unit">R$</span><input type="number" id="pdfPreco" min="0" step="0.01" data-moeda></div></div>
+      <div class="field"><label>Preço por peça<span class="hint">sugerido pela calculadora</span></label><div class="input-box"><span class="unit" data-simbolo>R$</span><input type="number" id="pdfPreco" min="0" step="0.01" data-moeda></div></div>
       <div class="linha-dupla">
         <div class="text-field"><label for="pdfPrazo">Prazo de entrega</label><input type="text" id="pdfPrazo"></div>
-        <div class="text-field"><label for="pdfFrete">Valor do frete</label><div class="input-moeda"><span>R$</span><input type="text" id="pdfFrete" data-moeda placeholder="0,00"></div></div>
+        <div class="text-field"><label for="pdfFrete">Valor do frete</label><div class="input-moeda"><span data-simbolo>R$</span><input type="text" id="pdfFrete" data-moeda placeholder="0,00"></div></div>
       </div>
       <div class="text-field"><label for="pdfPagamento">Forma de pagamento</label><input type="text" id="pdfPagamento"></div>
       <div class="field no-prefix suffix wide"><label>Validade</label><div class="input-box"><input type="number" id="pdfValidade" min="1" step="1"><span class="unit-suffix">dias</span></div></div>
@@ -1226,6 +1240,7 @@
     CATALOGO_RESINAS, CATALOGO_TIPOS_RESINA, MARKETPLACES,
     PRINTER_IMAGE_OVERRIDES,
   } from './catalogo.js';
+  import { IDIOMA, REGIAO, SIMBOLO, t as tr, traduzirDOM, fmtMoeda, fmtNumero, fmtCentavos, fmtData, fmtMes, comparar, decimalLocal, definirIdioma, aplicarPadroes } from './i18n.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyBw3QJS_NAVy0e0tFkvLtPoG7vCA2XfQA4",
@@ -1255,13 +1270,15 @@
     const d = String(t).replace(/\D/g, '').replace(/^0+/, '').slice(0, MOEDA_MAX_DIGITOS);
     return d ? parseInt(d, 10) : 0;
   };
-  const textoMoeda = c => (c / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const textoMoeda = fmtCentavos;
   // Texto COLADO é entendido como número em reais: "R$ 1.234,56", "1234,5", "14.000" (milhar), "12.5" (decimal), "129".
   // Devolve null se não tiver nenhum dígito (aí a colagem é ignorada).
   function centavosDeColado(t){
     let x = String(t).replace(/[^\d.,]/g, '');
     if (!/\d/.test(x)) return null;
-    if (x.includes(',')){
+    if (REGIAO.decimal === '.'){                          // en: "1,234.56" — vírgula é milhar
+      x = x.replace(/,/g, '');
+    } else if (x.includes(',')){
       x = x.replace(/\./g, '').replace(',', '.');
     } else if (x.includes('.')){
       const p = x.split('.');
@@ -1282,7 +1299,7 @@
     inp.setAttribute('inputmode', 'numeric');             // teclado só de números
     inp.setAttribute('autocomplete', 'off');
     inp.removeAttribute('min'); inp.removeAttribute('step');
-    inp.placeholder = '0,00';
+    inp.placeholder = REGIAO.placeholder;
     Object.defineProperty(inp, 'value', {
       configurable: true,
       get(){ return String(centavosDe(nativo()) / 100); },
@@ -1346,7 +1363,7 @@
     lucro: document.getElementById('rLucro'),
   };
 
-  const fmt = n => n.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+  const fmt = fmtMoeda;
   const num = id => parseFloat(el[id].value) || 0;
 
   function calc(){
@@ -1575,6 +1592,13 @@
   document.querySelectorAll('#temaToggle .modo-btn').forEach(btn => {
     btn.addEventListener('click', () => aplicarTema(btn.dataset.temaOp));
   });
+  // Idioma / moeda (c3d_idioma, só neste aparelho). Trocar recarrega a página.
+  document.querySelectorAll('#idiomaToggle .modo-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.idiomaOp === IDIOMA);
+    btn.addEventListener('click', () => definirIdioma(btn.dataset.idiomaOp));
+  });
+  document.querySelectorAll('[data-simbolo]').forEach(n => { n.textContent = SIMBOLO; });
+  traduzirDOM();
 
   document.querySelectorAll('#modoToggle .modo-btn').forEach(btn => {
     btn.addEventListener('click', () => aplicarModo(btn.dataset.modo));
@@ -1914,7 +1938,7 @@
   }
   function loadFieldsFromStorage(){
     const saved = lsGet(LS_CAMPOS, null);
-    if (!saved) return;
+    if (!saved){ aplicarPadroes(LS_CAMPOS); return; }
     ids.forEach(id => { if (saved[id] !== undefined) el[id].value = saved[id]; });
   }
 
@@ -2487,7 +2511,7 @@
 
   function renderResumo(){
     const { ano, mes } = mesResumo;
-    const nome = new Date(ano, mes, 1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' });
+    const nome = fmtMes(new Date(ano, mes, 1));
     resumoNomeEl.textContent = nome.charAt(0).toUpperCase() + nome.slice(1);
     const h = new Date();
     resumoProxBtn.disabled = ano > h.getFullYear() || (ano === h.getFullYear() && mes >= h.getMonth());
@@ -2506,7 +2530,7 @@
           r.decididos ? `${r.aprov} de ${r.decididos} ${plural(r.decididos, 'respondido', 'respondidos')}` : 'ninguém respondeu ainda') +
         tile('Faturamento', fmt(r.faturamento), `${r.nAprovados} ${plural(r.nAprovados, 'aprovado', 'aprovados')} no mês`) +
         tile('Lucro real', r.lucro === null ? tracos : fmt(r.lucro), 'preço cobrado − custo', r.lucro === null ? '' : (r.lucro < 0 ? 'neg' : 'pos')) +
-        tile('Margem real', r.margem === null ? tracos : (r.margem * 100).toFixed(1).replace('.', ',') + '%', 'lucro ÷ faturamento') +
+        tile('Margem real', r.margem === null ? tracos : decimalLocal((r.margem * 100).toFixed(1)) + '%', 'lucro ÷ faturamento') +
         tile('Ticket médio', r.ticket === null ? tracos : fmt(r.ticket), 'por orçamento aprovado') +
       '</div>';
     }
@@ -2543,7 +2567,7 @@
         c.total += (Number(i.emissao.precoUnit) || 0) * (Number(i.emissao.qtd) || 0);
       }
     });
-    return [...mapa.values()].sort((a, b) => b.total - a.total || b.ultima - a.ultima || a.nome.localeCompare(b.nome, 'pt-BR'));
+    return [...mapa.values()].sort((a, b) => b.total - a.total || b.ultima - a.ultima || comparar(a.nome, b.nome));
   }
 
   const clientesListaEl = document.getElementById('clientesLista');
@@ -2570,7 +2594,7 @@
       <div class="saved-item">
         <div class="nome">${escapeHtml(c.nome)}</div>
         <div class="info">${c.orcamentos} ${c.orcamentos === 1 ? 'orçamento' : 'orçamentos'} · ${c.aprovados} ${c.aprovados === 1 ? 'aprovado' : 'aprovados'}${c.total > 0 ? ' · ' + fmt(c.total) : ''}</div>
-        <div class="info">último em ${c.ultima.toLocaleDateString('pt-BR')}</div>
+        <div class="info">último em ${fmtData(c.ultima)}</div>
       </div>`).join('');
   }
 
@@ -2586,7 +2610,7 @@
   const arred = n => Math.round(n * 100) / 100;
   const chaveLista = tipo => tipo === 'resina' ? LS_RESINAS : LS_FILS;
   const unidadeDe = tipo => tipo === 'resina' ? 'mL' : 'g';
-  const fmtQtd = n => Number(n).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+  const fmtQtd = n => fmtNumero(n, { maximumFractionDigits: 1 });
   const materialDe = ref => lsGet(chaveLista(ref.tipo), []).find(x => x.id === ref.id);
 
   // O que um orçamento novo guarda sobre o material. Material "Personalizado" (preço digitado, sem cadastro) não tem estoque.
@@ -2761,7 +2785,7 @@
           <select data-status="${item.id}" style="color:${def.cor}; border-color:${def.cor}" aria-label="Status do orçamento">
             ${STATUS_ORC.map(st => `<option value="${st.id}"${st.id === atual ? ' selected' : ''}>${st.nome}</option>`).join('')}
           </select>
-          <span class="desde">desde ${new Date(ult).toLocaleDateString('pt-BR')}</span>
+          <span class="desde">desde ${fmtData(ult)}</span>
         </div>`;
         // fechamento do pedido: só depois de "Em produção". Perda real (se o pedido sabe o material) e custo real de miscelâneos.
         const e = item.emissao;
@@ -2795,7 +2819,7 @@
             partes.push(`<div class="fecha-bloco">
               <div class="perda-linha">
                 <span>Custo real de miscelâneos</span>
-                <span>R$</span>
+                <span>${SIMBOLO}</span>
                 <input type="number" data-moeda placeholder="0" value="${valorMisc}" data-misc-input="${item.id}" aria-label="Custo real de miscelâneos em reais">
                 <button type="button" data-misc="${item.id}">Salvar</button>
               </div>
@@ -2808,7 +2832,7 @@
       return `
       <div class="saved-item" data-id="${item.id}">
         <div class="nome">${escapeHtml(item.nome)}</div>
-        <div class="info">${new Date(item.savedAt).toLocaleDateString('pt-BR')} · ${item.emissao ? `nº ${String(item.emissao.numero).padStart(4,'0')} · ${item.emissao.qtd} × ${fmt(item.emissao.precoUnit)}${item.emissao.frete > 0 ? ' + frete ' + fmt(item.emissao.frete) : ''}${item.emissao.cliente ? ' · ' + escapeHtml(item.emissao.cliente) : ''}` : `total ${item.custoTotal} · sugerido ${item.precoPeca}`}</div>
+        <div class="info">${fmtData(item.savedAt)} · ${item.emissao ? `nº ${String(item.emissao.numero).padStart(4,'0')} · ${item.emissao.qtd} × ${fmt(item.emissao.precoUnit)}${item.emissao.frete > 0 ? ' + frete ' + fmt(item.emissao.frete) : ''}${item.emissao.cliente ? ' · ' + escapeHtml(item.emissao.cliente) : ''}` : `total ${item.custoTotal} · sugerido ${item.precoPeca}`}</div>
         ${linhaStatus}
         ${linhaEstoque}
         <div class="actions">
@@ -2879,7 +2903,7 @@
   });
 
   document.getElementById('salvarOrcamentoBtn').addEventListener('click', () => {
-    const nome = orcamentoNomeInput.value.trim() || `Orçamento ${new Date().toLocaleDateString('pt-BR')}`;
+    const nome = orcamentoNomeInput.value.trim() || `Orçamento ${fmtData(new Date())}`;
     const list = lsGet(LS_ORC, []);
     list.unshift({
       id: Date.now().toString(36),
@@ -3163,7 +3187,7 @@
     d.text('ORÇAMENTO', W - M, y + 6, { align:'right' });
     d.setFont('helvetica','normal'); d.setFontSize(8.5); d.setTextColor(...CINZA);
     d.text(`Nº ${String(e.numero).padStart(4,'0')}`, W - M, y + 11.5, { align:'right' });
-    d.text(`Emitido em ${dataEm.toLocaleDateString('pt-BR')}`, W - M, y + 16, { align:'right' });
+    d.text(`Emitido em ${fmtData(dataEm)}`, W - M, y + 16, { align:'right' });
     y += 23;
     d.setDrawColor(...LARANJA); d.setLineWidth(0.7); d.line(M, y, W - M, y);
     y += 9;
@@ -3255,7 +3279,7 @@
     const condicoes = [
       ['PRAZO DE ENTREGA', e.prazo],
       ['FORMA DE PAGAMENTO', e.pagamento],
-      ['VALIDADE', `${e.validadeDias} dias (até ${validoAte.toLocaleDateString('pt-BR')})`],
+      ['VALIDADE', `${e.validadeDias} dias (até ${fmtData(validoAte)})`],
     ].filter(c => c[1]);
     const larg = L / condicoes.length;
     condicoes.forEach(([k, v], i) => {
@@ -3714,7 +3738,7 @@
     const favs = lsGet(LS_FAVS, []);
     mpLista.innerHTML = list.map(item => {
       const st = statusManutencao(item);
-      const ultima = item.ultimaManutencao ? new Date(item.ultimaManutencao).toLocaleDateString('pt-BR') : 'nunca';
+      const ultima = item.ultimaManutencao ? fmtData(item.ultimaManutencao) : 'nunca';
       const pecas = pecasDoItem(item);
       const pecasRelevantes = pecasParaTipo(item.tipo || 'fdm');
       const favId = 'meu_' + item.id;
@@ -3724,7 +3748,7 @@
         <div class="peca-row">
           <span class="peca-nome">${pm.nome} <a href="#" ${comprarPeca(pm.id, item)} class="buy-link">comprar →</a></span>
           <div class="peca-inputs">
-            <div class="input-box"><span class="unit-mini">R$</span><input type="number" data-moeda class="peca-custo tem-prefixo" data-peca="${pm.id}" value="${pecas[pm.id].custo}" step="5"></div>
+            <div class="input-box"><span class="unit-mini">${SIMBOLO}</span><input type="number" data-moeda class="peca-custo tem-prefixo" data-peca="${pm.id}" value="${pecas[pm.id].custo}" step="5"></div>
             <div class="input-box"><input type="number" class="peca-horas" data-peca="${pm.id}" value="${pecas[pm.id].horas}" step="50"><span class="unit-mini-suffix">h</span></div>
           </div>
         </div>
@@ -3750,7 +3774,7 @@
           </div>
           <div class="mp-edit-field">
             <label>Preço de compra</label>
-            <div class="input-box"><input type="number" data-moeda class="mp-f-preco" value="${item.precoCompra || 0}"><span class="unit-mini-suffix">R$</span></div>
+            <div class="input-box"><input type="number" data-moeda class="mp-f-preco" value="${item.precoCompra || 0}"><span class="unit-mini-suffix">${SIMBOLO}</span></div>
           </div>
           <div class="mp-edit-field">
             <label>Vida útil</label>
@@ -3861,7 +3885,7 @@
 
       // Atualiza só o resumo (não re-renderiza, pra não fechar o accordion).
       const resumo = box.querySelector(`[data-resumo="${item.id}"]`);
-      const ultima = item.ultimaManutencao ? new Date(item.ultimaManutencao).toLocaleDateString('pt-BR') : 'nunca';
+      const ultima = item.ultimaManutencao ? fmtData(item.ultimaManutencao) : 'nunca';
       if (resumo) resumo.innerHTML = `Manutenção: <strong>${fmt(custoManutencaoPorHora(item))}/hora</strong> · última revisão: ${ultima}`;
       // Se essa é a impressora ativa, o resultado principal muda também.
       if (currentPrinterId === 'meu_' + item.id){
